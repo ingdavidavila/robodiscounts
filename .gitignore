@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+config.yaml
+*.db
+.pytest_cache/
