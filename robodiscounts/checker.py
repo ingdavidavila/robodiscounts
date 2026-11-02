@@ -12,6 +12,11 @@ log = logging.getLogger("robodiscounts")
 def evaluate(item: Item, res: PriceResult, last_price: Optional[float]) -> Optional[str]:
     """Return a human-readable reason if the item qualifies as a deal, else None."""
     reasons = []
+    if item.msrp:
+        limit = 100 if item.max_percent_of_msrp is None else item.max_percent_of_msrp
+        pct = res.price / item.msrp * 100
+        if pct <= limit:
+            reasons.append(f"{pct:.0f}% of MSRP ${item.msrp:.2f}")
     if item.target_price is not None and res.price <= item.target_price:
         reasons.append(f"at/below your target of ${item.target_price:.2f}")
     if item.min_discount_percent and res.list_price:

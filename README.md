@@ -80,10 +80,18 @@ template outside Meta's 24-hour window: create a Utility template with the body 
 and set `WHATSAPP_STATUS_TEMPLATE` to its name (without it, plain text is sent and may be dropped).
 
 ## Deal rules (per item)
+The bot has no built-in idea of a "good price": a deal is whatever your rules say. The main rule for
+sealed product is MSRP:
+- `msrp` + `max_percent_of_msrp`: alert when price <= that percentage of the MSRP you set
+  (default 100 = at or below MSRP; 90 = at least 10% off; 130 = up to 30% over). Alerts read like
+  `87% of MSRP $49.99`. You supply the MSRP, since sites don't publish it reliably. Works on every site.
+
+Other rules, combinable with the above (any one matching triggers an alert):
 - `target_price`: alert when price <= value
-- `min_discount_percent`: alert when discount vs the strike-through list price >= value (Amazon)
+- `min_discount_percent`: alert when discount vs the strike-through list price >= value (only Best Buy and Amazon show one)
 - `min_drop_percent`: alert when price falls this much vs the last price seen
 
+Also per item:
 - `alert_on_restock: true`: alert when an item that was sold out is available again. Stock status is
   only known for Best Buy (via the API); other sites report it as unknown. Sold-out items never trigger
   price alerts, and they are not counted as failures.

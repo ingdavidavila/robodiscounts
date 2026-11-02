@@ -290,3 +290,44 @@ def test_dashboard_cli_needs_no_credentials(tmp_path, monkeypatch):
     monkeypatch.setattr("sys.argv", ["robodiscounts", "dashboard", "-c", str(cfgfile), "-o", str(out)])
     cli.main()
     assert "Discount Watch" in out.read_text()
+
+
+def test_msrp_rule_default_and_percentages():
+    res = PriceResult("t", 47.50)
+    assert "95% of MSRP $49.99" in evaluate(Item("a", "u", msrp=49.99), res, None)       # default 100%
+    assert evaluate(Item("a", "u", msrp=49.99), PriceResult("t", 49.99), None)           # exactly MSRP
+    assert not evaluate(Item("a", "u", msrp=49.99), PriceResult("t", 60), None)          # above MSRP
+    assert not evaluate(Item("a", "u", msrp=49.99, max_percent_of_msrp=90), res, None)   # needs 10% off
+    assert evaluate(Item("a", "u", msrp=49.99, max_percent_of_msrp=130), PriceResult("t", 60), None)
+
+
+def test_msrp_alert_end_to_end_and_sold_out_ignored(tmp_path):
+    item = Item("ETB", "https://www.bestbuy.com/site/x/1234567.p", msrp=50)
+    sent, _ = _run(tmp_path, item, [PriceResult("t", 70), PriceResult("t", 48), PriceResult("t", 48)])
+    assert len(sent) == 1 and "96% of MSRP $50.00" in sent[0]
+    sent, _ = _run(tmp_path, item, [PriceResult("t", 30, in_stock=False)])
+    assert sent == []
+
+
+def test_config_msrp_validation(tmp_path):
+    import pytest
+    from robodiscounts.config import load_config
+    def cfg(extra):
+        f = tmp_path / "c.yaml"
+        f.write_text("items:\n  - name: a\n    url: https://www.tcgplayer.com/product/1\n" + extra)
+        return load_config(str(f))
+    assert cfg("    msrp: 49.99\n    max_percent_of_msrp: 90\n").items[0].msrp == 49.99
+    with pytest.raises(ValueError):
+        cfg("    msrp: 0\n")
+    with pytest.raises(ValueError):
+        cfg("    max_percent_of_msrp: 90\n")
+
+
+def test_dashboard_shows_percent_of_msrp(tmp_path):
+    from robodiscounts.dashboard import render
+    item = Item("ETB", "https://www.bestbuy.com/site/x/1234567.p", msrp=50)
+    cfg = Config(items=[item], request_delay_seconds=0, fail_alert_after=0)
+    store = Store(str(tmp_path / "m.db"))
+    run_once(cfg, store, StatusN(), lambda u: PriceResult("t", 45))
+    html = render(cfg, store)
+    assert "90%" in html and "of $50.00" in html

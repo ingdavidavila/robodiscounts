@@ -19,6 +19,11 @@ def load_config(path: str) -> Config:
     with open(path) as f:
         raw = yaml.safe_load(f) or {}
     items = [Item(**i) for i in raw.get("items", [])]
+    for it in items:
+        if it.msrp is not None and it.msrp <= 0:
+            raise ValueError(f"{it.name}: msrp must be greater than 0")
+        if it.max_percent_of_msrp is not None and it.msrp is None:
+            raise ValueError(f"{it.name}: max_percent_of_msrp needs msrp to be set")
     return Config(
         items=items,
         db_path=raw.get("db_path", "robodiscounts.db"),

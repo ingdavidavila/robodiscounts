@@ -84,6 +84,12 @@ def render(config, store, now: Optional[datetime] = None) -> str:
             err = (f'<div class="muted small">{info["fail_streak"]} failed check(s) in a row: '
                    f'{escape(info.get("last_error") or "unknown error")}</div>')
         target = _money(it.target_price) if it.target_price is not None else "—"
+        price = info.get("last_price")
+        if it.msrp and price is not None:
+            vs_msrp = (f'{price / it.msrp * 100:.0f}%'
+                       f'<div class="muted small">of {escape(_money(it.msrp))}</div>')
+        else:
+            vs_msrp = "—"
         body_rows.append(
             "<tr>"
             f'<td><a href="{escape(it.url, quote=True)}" rel="noopener noreferrer">{escape(it.name)}</a>'
@@ -91,6 +97,7 @@ def render(config, store, now: Optional[datetime] = None) -> str:
             f'<td><span class="badge {r["status"].replace(" ", "-")}">{r["status"]}</span></td>'
             f'<td class="num">{_money(info.get("last_price"))}</td>'
             f'<td class="num hs">{_money(r["low"])}</td>'
+            f'<td class="num hs">{vs_msrp}</td>'
             f'<td class="num hs">{target}</td>'
             f'<td>{_sparkline(r["hist"])}</td>'
             f'<td class="small hs">{escape(_when(info.get("last_checked")))}</td>'
@@ -98,7 +105,7 @@ def render(config, store, now: Optional[datetime] = None) -> str:
         )
     table = (
         '<div class="scroll"><table><thead><tr><th>Product</th><th>Status</th>'
-        '<th class="num">Price</th><th class="num hs">Lowest seen</th><th class="num hs">Target</th>'
+        '<th class="num">Price</th><th class="num hs">Lowest seen</th><th class="num hs">vs MSRP</th><th class="num hs">Target</th>'
         '<th>Trend</th><th class="hs">Last checked</th></tr></thead><tbody>'
         + "".join(body_rows) + "</tbody></table></div>"
         if rows else '<p class="muted">No items in the watchlist yet.</p>'
@@ -125,7 +132,7 @@ h1{{font-size:22px;margin:0 0 4px}} a{{color:inherit}}
 .card{{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}}
 .big{{font-size:26px;font-weight:650}}
 .scroll{{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}}
-table{{border-collapse:collapse;width:100%;min-width:680px}}
+table{{border-collapse:collapse;width:100%;min-width:760px}}
 th,td{{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}}
 th{{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}}
 tr:last-child td{{border-bottom:0}} .num{{text-align:right;font-variant-numeric:tabular-nums}}
