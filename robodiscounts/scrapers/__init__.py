@@ -4,10 +4,12 @@ from urllib.parse import urlparse
 
 from .amazon import parse_amazon
 from .bestbuy import fetch_bestbuy, parse_bestbuy
+from .cardkingdom import parse_cardkingdom
 from .tcgplayer import parse_tcgplayer
 from .fetch import fetch_html
 
-PARSERS = {"amazon": parse_amazon, "tcgplayer": parse_tcgplayer, "bestbuy": parse_bestbuy}
+PARSERS = {"amazon": parse_amazon, "tcgplayer": parse_tcgplayer, "bestbuy": parse_bestbuy,
+           "cardkingdom": parse_cardkingdom}
 
 
 def site_for(url: str) -> str:
@@ -18,6 +20,8 @@ def site_for(url: str) -> str:
         return "tcgplayer"
     if "bestbuy.com" in host:
         return "bestbuy"
+    if "cardkingdom.com" in host:
+        return "cardkingdom"
     raise ValueError(f"Unsupported site: {host}")
 
 
