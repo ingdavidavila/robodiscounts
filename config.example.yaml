@@ -14,6 +14,9 @@ items:
     url: https://www.bestbuy.com/site/pokemon-tcg-scarlet-violet-booster-bundle/6578291.p?skuId=6578291
     msrp: 26.94                # placeholder: replace with the real MSRP and product URL
     max_percent_of_msrp: 100
+    below_avg_percent: 10      # also alert when 10%+ below the 30-day average price
+    alert_on_new_low: true     # ...or when it beats the lowest price recorded so far
+    history_days: 30           # window for the average (history rules need 5+ earlier reads)
     alert_on_restock: true     # also alert when it comes back in stock (Best Buy)
 
   - name: Pokemon Elite Trainer Box (TCGplayer)

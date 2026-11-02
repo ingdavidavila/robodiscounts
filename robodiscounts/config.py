@@ -22,6 +22,10 @@ def load_config(path: str) -> Config:
     for it in items:
         if it.msrp is not None and it.msrp <= 0:
             raise ValueError(f"{it.name}: msrp must be greater than 0")
+        if it.below_avg_percent is not None and not 0 < it.below_avg_percent < 100:
+            raise ValueError(f"{it.name}: below_avg_percent must be between 0 and 100")
+        if it.history_days < 1:
+            raise ValueError(f"{it.name}: history_days must be at least 1")
         if it.max_percent_of_msrp is not None and it.msrp is None:
             raise ValueError(f"{it.name}: max_percent_of_msrp needs msrp to be set")
     return Config(

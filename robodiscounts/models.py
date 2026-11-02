@@ -11,6 +11,9 @@ class Item:
     min_drop_percent: Optional[float] = None      # vs. last seen price
     msrp: Optional[float] = None                  # official retail price of the sealed product
     max_percent_of_msrp: Optional[float] = None   # alert when price <= this % of MSRP (default 100)
+    below_avg_percent: Optional[float] = None     # alert when this % below the recent average price
+    alert_on_new_low: bool = False                # alert when price beats the lowest ever recorded
+    history_days: int = 30                        # window for the average
     alert_on_restock: bool = False                # alert when it comes back in stock
 
 

@@ -86,7 +86,14 @@ sealed product is MSRP:
   (default 100 = at or below MSRP; 90 = at least 10% off; 130 = up to 30% over). Alerts read like
   `87% of MSRP $49.99`. You supply the MSRP, since sites don't publish it reliably. Works on every site.
 
-Other rules, combinable with the above (any one matching triggers an alert):
+History rules, based on the prices the bot has recorded for that product (in-stock reads only):
+- `below_avg_percent`: alert when the price is at least this % below the average of the last `history_days`
+  days (default 30). Alert reads like `15% below the 30-day average $94.00`.
+- `alert_on_new_low: true`: alert when the price beats the lowest price ever recorded.
+- Both stay silent until there are at least 5 earlier reads, so they need a few days of hourly checks before
+  they can fire. History starts when you deploy; the bot can't look back at prices from before that.
+
+Other rules, combinable with all of the above (any one matching triggers an alert):
 - `target_price`: alert when price <= value
 - `min_discount_percent`: alert when discount vs the strike-through list price >= value (only Best Buy and Amazon show one)
 - `min_drop_percent`: alert when price falls this much vs the last price seen

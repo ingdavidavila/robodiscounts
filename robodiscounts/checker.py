@@ -9,9 +9,23 @@ from .scrapers import get_price
 log = logging.getLogger("robodiscounts")
 
 
-def evaluate(item: Item, res: PriceResult, last_price: Optional[float]) -> Optional[str]:
-    """Return a human-readable reason if the item qualifies as a deal, else None."""
+# History rules stay quiet until there are at least this many earlier reads to compare with.
+MIN_HISTORY_READS = 5
+
+
+def evaluate(item: Item, res: PriceResult, last_price: Optional[float],
+             stats: Optional[dict] = None) -> Optional[str]:
+    """Return a human-readable reason if the item qualifies as a deal, else None.
+    `stats` is Store.price_stats(): earlier in-stock reads, used by the history rules."""
     reasons = []
+    if stats:
+        if (item.below_avg_percent and stats["avg"] and stats["n_window"] >= MIN_HISTORY_READS
+                and res.price <= stats["avg"] * (1 - item.below_avg_percent / 100)):
+            pct = (stats["avg"] - res.price) / stats["avg"] * 100
+            reasons.append(f"{pct:.0f}% below the {item.history_days}-day average ${stats['avg']:.2f}")
+        if (item.alert_on_new_low and stats["low"] is not None
+                and stats["n_all"] >= MIN_HISTORY_READS and res.price < stats["low"]):
+            reasons.append(f"new low, previous best ${stats['low']:.2f}")
     if item.msrp:
         limit = 100 if item.max_percent_of_msrp is None else item.max_percent_of_msrp
         pct = res.price / item.msrp * 100
@@ -79,7 +93,8 @@ def run_once(config, store, notifier, fetch=get_price) -> RunSummary:
 
         sold_out = res.in_stock is False
         # A sold-out item can't be bought, so its price never counts as a deal.
-        deal = None if sold_out else evaluate(item, res, last)
+        stats = store.price_stats(item.url, item.history_days)  # before this read is logged
+        deal = None if sold_out else evaluate(item, res, last, stats)
         restock = bool(item.alert_on_restock and res.in_stock and was_in_stock is False)
 
         reasons = (["back in stock"] if restock else []) + ([deal] if deal else [])

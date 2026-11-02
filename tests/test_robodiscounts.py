@@ -331,3 +331,78 @@ def test_dashboard_shows_percent_of_msrp(tmp_path):
     run_once(cfg, store, StatusN(), lambda u: PriceResult("t", 45))
     html = render(cfg, store)
     assert "90%" in html and "of $50.00" in html
+
+
+def _history_item(**kw):
+    return Item("ETB", "https://www.bestbuy.com/site/x/1234567.p", **kw)
+
+
+def test_below_average_rule_needs_enough_history(tmp_path):
+    item = _history_item(below_avg_percent=10)
+    # 4 earlier reads is not enough history yet, even though 70 is far below the average
+    sent, store = _run(tmp_path, item, [PriceResult("t", 100)] * 4 + [PriceResult("t", 70)])
+    assert sent == []
+    # 5 earlier reads (average 94): a drop to 80 is 15% below it and alerts once, not twice
+    sent, store = _run(tmp_path, item, [PriceResult("t", 80), PriceResult("t", 80)], store)
+    assert len(sent) == 1 and "15% below the 30-day average $94.00" in sent[0]
+
+
+def test_below_average_threshold_not_met(tmp_path):
+    item = _history_item(below_avg_percent=10)
+    sent, _ = _run(tmp_path, item, [PriceResult("t", 100)] * 6 + [PriceResult("t", 95)])
+    assert sent == []  # only 5% below average
+
+
+def test_new_low_rule(tmp_path):
+    item = _history_item(alert_on_new_low=True)
+    prices = [100, 99, 101, 100, 98, 100, 97, 97, 96]
+    sent, _ = _run(tmp_path, item, [PriceResult("t", p) for p in prices])
+    # 97 (after 5 reads) and 96 are new lows; the repeated 97 is not a new low
+    assert len(sent) == 2 and "new low, previous best $98.00" in sent[0]
+
+
+def test_history_ignores_sold_out_reads_and_old_reads(tmp_path):
+    from datetime import datetime, timedelta, timezone
+    item = _history_item(below_avg_percent=10, alert_on_new_low=True)
+    store = Store(str(tmp_path / "w.db"))
+    # a stale price of 5 recorded while sold out must not become the "all-time low"
+    for _ in range(5):
+        store.add_history(item.url, 5.0, False, ok=True)
+    assert store.price_stats(item.url, 30)["n_all"] == 0
+    # reads older than the window count for the all-time low but not for the average
+    old = (datetime.now(timezone.utc) - timedelta(days=90)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    for _ in range(5):
+        store.db.execute("INSERT INTO history(url,ts,price,in_stock,ok) VALUES(?,?,?,1,1)", (item.url, old, 40.0))
+    store.db.commit()
+    st = store.price_stats(item.url, 30)
+    assert st["n_all"] == 5 and st["low"] == 40.0 and st["n_window"] == 0 and st["avg"] is None
+
+
+def test_history_rules_off_by_default(tmp_path):
+    sent, _ = _run(tmp_path, _history_item(), [PriceResult("t", 100)] * 6 + [PriceResult("t", 1)])
+    assert sent == []
+
+
+def test_history_config_validation(tmp_path):
+    import pytest
+    from robodiscounts.config import load_config
+    def cfg(extra):
+        f = tmp_path / "c.yaml"
+        f.write_text("items:\n  - name: a\n    url: https://www.tcgplayer.com/product/1\n" + extra)
+        return load_config(str(f))
+    it = cfg("    below_avg_percent: 10\n    alert_on_new_low: true\n    history_days: 14\n").items[0]
+    assert (it.below_avg_percent, it.alert_on_new_low, it.history_days) == (10, True, 14)
+    for bad in ("    below_avg_percent: 0\n", "    below_avg_percent: 100\n", "    history_days: 0\n"):
+        with pytest.raises(ValueError):
+            cfg(bad)
+
+
+def test_dashboard_average_column(tmp_path):
+    from robodiscounts.dashboard import render
+    item = _history_item()
+    cfg = Config(items=[item], request_delay_seconds=0, fail_alert_after=0)
+    store = Store(str(tmp_path / "a.db"))
+    for p in (10, 20):
+        run_once(cfg, store, StatusN(), lambda u, p=p: PriceResult("t", p))
+    html = render(cfg, store)
+    assert "Average" in html and "$15.00" in html

@@ -1,10 +1,18 @@
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Tuple
 
 
+def _fmt(dt: datetime) -> str:
+    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def _now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return _fmt(datetime.now(timezone.utc))
+
+
+# Reads taken while an item was sold out can carry a stale price, so history ignores them.
+_USABLE = "ok=1 AND (in_stock IS NULL OR in_stock=1)"
 
 
 class Store:
@@ -89,10 +97,23 @@ class Store:
         """Successful reads, oldest first: [(timestamp, price), ...] (the latest `limit`)."""
         rows = self.db.execute(
             "SELECT ts, price FROM (SELECT rowid AS id, ts, price FROM history "
-            "WHERE url=? AND ok=1 ORDER BY ts DESC, id DESC LIMIT ?) ORDER BY ts, id",
+            f"WHERE url=? AND {_USABLE} ORDER BY ts DESC, id DESC LIMIT ?) ORDER BY ts, id",
             (url, limit),
         ).fetchall()
         return rows
+
+    def price_stats(self, url: str, days: int) -> dict:
+        """Aggregates over earlier in-stock reads: the average over the last `days` days
+        and the all-time low. Call this before recording the current read."""
+        low, n_all = self.db.execute(
+            f"SELECT MIN(price), COUNT(*) FROM history WHERE url=? AND {_USABLE}", (url,)
+        ).fetchone()
+        cutoff = _fmt(datetime.now(timezone.utc) - timedelta(days=days))
+        avg, n_win = self.db.execute(
+            f"SELECT AVG(price), COUNT(*) FROM history WHERE url=? AND {_USABLE} AND ts>=?",
+            (url, cutoff),
+        ).fetchone()
+        return {"low": low, "n_all": n_all, "avg": avg, "n_window": n_win}
 
     def info(self, url: str) -> dict:
         r = self.db.execute(

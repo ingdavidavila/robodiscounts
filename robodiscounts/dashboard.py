@@ -65,7 +65,8 @@ def render(config, store, now: Optional[datetime] = None) -> str:
         prices = [p for _, p in hist]
         rows.append({
             "item": item, "info": info, "status": _status(info), "hist": hist,
-            "low": min(prices) if prices else None, "high": max(prices) if prices else None,
+            "low": min(prices) if prices else None,
+            "avg": sum(prices) / len(prices) if prices else None,
         })
     rows.sort(key=lambda r: (STATUS_ORDER[r["status"]], r["item"].name.lower()))
 
@@ -97,6 +98,7 @@ def render(config, store, now: Optional[datetime] = None) -> str:
             f'<td><span class="badge {r["status"].replace(" ", "-")}">{r["status"]}</span></td>'
             f'<td class="num">{_money(info.get("last_price"))}</td>'
             f'<td class="num hs">{_money(r["low"])}</td>'
+            f'<td class="num hs">{_money(r["avg"])}</td>'
             f'<td class="num hs">{vs_msrp}</td>'
             f'<td class="num hs">{target}</td>'
             f'<td>{_sparkline(r["hist"])}</td>'
@@ -105,7 +107,7 @@ def render(config, store, now: Optional[datetime] = None) -> str:
         )
     table = (
         '<div class="scroll"><table><thead><tr><th>Product</th><th>Status</th>'
-        '<th class="num">Price</th><th class="num hs">Lowest seen</th><th class="num hs">vs MSRP</th><th class="num hs">Target</th>'
+        '<th class="num">Price</th><th class="num hs">Lowest seen</th><th class="num hs">Average</th><th class="num hs">vs MSRP</th><th class="num hs">Target</th>'
         '<th>Trend</th><th class="hs">Last checked</th></tr></thead><tbody>'
         + "".join(body_rows) + "</tbody></table></div>"
         if rows else '<p class="muted">No items in the watchlist yet.</p>'
@@ -132,7 +134,7 @@ h1{{font-size:22px;margin:0 0 4px}} a{{color:inherit}}
 .card{{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}}
 .big{{font-size:26px;font-weight:650}}
 .scroll{{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}}
-table{{border-collapse:collapse;width:100%;min-width:760px}}
+table{{border-collapse:collapse;width:100%;min-width:840px}}
 th,td{{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}}
 th{{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}}
 tr:last-child td{{border-bottom:0}} .num{{text-align:right;font-variant-numeric:tabular-nums}}
