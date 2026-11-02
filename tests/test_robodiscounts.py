@@ -55,3 +55,68 @@ def test_meta_payloads(monkeypatch):
     WhatsAppNotifier("tok", "123", "+5211", "deal").send("hi", params=["a", "b", "c", "d"])
     assert calls[-1][1]["template"]["name"] == "deal"
     assert len(calls[-1][1]["template"]["components"][0]["parameters"]) == 4
+
+
+def test_all_failed_summary(tmp_path):
+    class N:
+        def send(self, b, params=None): pass
+    def boom(url): raise ValueError("blocked")
+    cfg = Config(items=[Item("a", "u1"), Item("b", "u2")], request_delay_seconds=0)
+    summary = run_once(cfg, Store(str(tmp_path / "t.db")), N(), boom)
+    assert summary.all_failed and summary.failed == 2
+
+    def half(url):
+        if url == "u1": raise ValueError("blocked")
+        return PriceResult("t", 5)
+    summary = run_once(cfg, Store(str(tmp_path / "t2.db")), N(), half)
+    assert summary.failed == 1 and not summary.all_failed
+
+
+def test_debug_capture_on_parse_failure(tmp_path, monkeypatch):
+    import pytest
+    monkeypatch.setenv("ROBODISCOUNTS_DEBUG_DIR", str(tmp_path / "dbg"))
+    with pytest.raises(ValueError):
+        get_price("https://www.amazon.com/dp/X", html="<html>captcha</html>")
+    files = list((tmp_path / "dbg").glob("*.html"))
+    assert len(files) == 1 and "captcha" in files[0].read_text()
+
+
+def test_cli_exits_nonzero_when_all_fail(tmp_path, monkeypatch):
+    import pytest
+    from robodiscounts import cli
+    cfgfile = tmp_path / "c.yaml"
+    cfgfile.write_text(f"db_path: {tmp_path}/x.db\nrequest_delay_seconds: 0\nitems:\n  - name: a\n    url: https://www.amazon.com/dp/1\n")
+    monkeypatch.setattr("robodiscounts.checker.get_price", lambda u: (_ for _ in ()).throw(ValueError("x")))
+    monkeypatch.setattr("robodiscounts.cli.run_once", lambda c, s, n: run_once(c, s, n, lambda u: (_ for _ in ()).throw(ValueError("x"))))
+    monkeypatch.setattr("sys.argv", ["robodiscounts", "check", "-c", str(cfgfile), "--dry-run"])
+    with pytest.raises(SystemExit) as e:
+        cli.main()
+    assert e.value.code == 1
+
+
+BESTBUY = '{"sku": 6578291, "name": "Pokemon Booster Bundle", "salePrice": 17.99, "regularPrice": 26.94, "onSale": true}'
+
+
+def test_bestbuy_parse():
+    r = get_price("https://www.bestbuy.com/site/x/6578291.p?skuId=6578291", html=BESTBUY)
+    assert (r.title, r.price, r.list_price) == ("Pokemon Booster Bundle", 17.99, 26.94)
+    no_sale = '{"name": "n", "salePrice": 10, "regularPrice": 10}'
+    assert get_price("https://www.bestbuy.com/site/x/1234567.p", html=no_sale).list_price is None
+
+
+def test_bestbuy_sku_and_fetch(monkeypatch):
+    import pytest
+    from robodiscounts.scrapers.bestbuy import fetch_bestbuy, sku_from_url
+    assert sku_from_url("https://www.bestbuy.com/site/x/6578291.p?skuId=6578291") == "6578291"
+    assert sku_from_url("https://www.bestbuy.com/site/some-name/6578291.p") == "6578291"
+    with pytest.raises(ValueError):
+        sku_from_url("https://www.bestbuy.com/site/searchpage.jsp")
+    monkeypatch.setenv("BESTBUY_API_KEY", "k")
+    seen = {}
+    class R:
+        ok = True; text = BESTBUY
+    def fake_get(url, params, timeout):
+        seen.update(url=url, params=params); return R()
+    monkeypatch.setattr("requests.get", fake_get)
+    assert get_price("https://www.bestbuy.com/site/x/6578291.p").price == 17.99
+    assert seen["url"].endswith("/6578291.json") and seen["params"]["apiKey"] == "k"

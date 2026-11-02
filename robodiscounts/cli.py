@@ -1,5 +1,6 @@
 import argparse
 import logging
+import sys
 import time
 
 from .checker import run_once
@@ -36,7 +37,10 @@ def main():
     cfg = load_config(args.config)
     store = Store(cfg.db_path)
     if args.command == "check":
-        run_once(cfg, store, notifier)
+        summary = run_once(cfg, store, notifier)
+        if summary.all_failed:
+            logging.error("All %d items failed to load; exiting with error", summary.checked)
+            sys.exit(1)
     else:
         while True:
             run_once(cfg, store, notifier)

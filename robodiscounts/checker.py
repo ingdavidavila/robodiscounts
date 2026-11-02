@@ -1,5 +1,6 @@
 import logging
 import time
+from dataclasses import dataclass
 from typing import Optional
 
 from .models import Item, PriceResult
@@ -33,13 +34,25 @@ def format_message(item: Item, res: PriceResult, reason: str) -> str:
     )
 
 
-def run_once(config, store, notifier, fetch=get_price) -> int:
-    sent = 0
+@dataclass
+class RunSummary:
+    checked: int = 0
+    failed: int = 0
+    sent: int = 0
+
+    @property
+    def all_failed(self) -> bool:
+        return self.checked > 0 and self.failed == self.checked
+
+
+def run_once(config, store, notifier, fetch=get_price) -> RunSummary:
+    summary = RunSummary(checked=len(config.items))
     for item in config.items:
         try:
             res = fetch(item.url)
         except Exception as e:  # keep going if one page fails
             log.warning("Failed %s: %s", item.url, e)
+            summary.failed += 1
             continue
         last = store.last_price(item.url)
         reason = evaluate(item, res, last)
@@ -49,8 +62,8 @@ def run_once(config, store, notifier, fetch=get_price) -> int:
                 format_message(item, res, reason),
                 params=[item.name, f"${res.price:.2f}", reason, item.url],
             )
-            sent += 1
+            summary.sent += 1
         log.info("%s: $%.2f %s", item.name, res.price, "-> notified" if notify else "")
         store.save(item.url, res.price, notify)
         time.sleep(config.request_delay_seconds)
-    return sent
+    return summary
