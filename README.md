@@ -31,6 +31,17 @@ python -m robodiscounts.cli check             # one pass, send alerts (use with 
 python -m robodiscounts.cli watch             # loop every check_interval_minutes
 ```
 
+## Run hourly on GitHub Actions
+`.github/workflows/check-discounts.yml` runs `check` every hour (and on demand via **Actions → Check discounts → Run workflow**).
+In the repo go to **Settings → Secrets and variables → Actions** and add these secrets:
+- `CONFIG_YAML`: the full contents of your `config.yaml` (keeps your watchlist out of the repo)
+- `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TO`, and optionally `WHATSAPP_TEMPLATE`
+
+Last-seen prices are kept between runs with the Actions cache, so you only get one alert per price.
+Caveats: GitHub may pause scheduled workflows after 60 days without repo activity, runs can be delayed
+by several minutes, and Amazon often blocks datacenter IPs like GitHub's runners (a self-hosted runner
+or a small VPS with cron is more reliable).
+
 ## Deal rules (per item)
 - `target_price`: alert when price <= value
 - `min_discount_percent`: alert when discount vs the strike-through list price >= value (Amazon)
