@@ -2,6 +2,7 @@
 db_path: robodiscounts.db
 check_interval_minutes: 60     # used by `watch` mode
 request_delay_seconds: 5       # pause between pages (be polite, avoid bans)
+fail_alert_after: 3            # WhatsApp warning after N failed checks in a row (0 = off)
 
 items:
   - name: Pokemon TCG booster bundle (Best Buy)

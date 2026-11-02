@@ -46,7 +46,7 @@ python -m robodiscounts.cli watch             # loop every check_interval_minute
 `.github/workflows/check-discounts.yml` runs `check` every hour (and on demand via **Actions → Check discounts → Run workflow**).
 In the repo go to **Settings → Secrets and variables → Actions** and add these secrets:
 - `CONFIG_YAML`: the full contents of your `config.yaml` (keeps your watchlist out of the repo)
-- `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TO`, `BESTBUY_API_KEY`, and optionally `WHATSAPP_TEMPLATE`
+- `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TO`, `BESTBUY_API_KEY`, and optionally `WHATSAPP_TEMPLATE` / `WHATSAPP_STATUS_TEMPLATE`
 
 If every item fails to load, the run fails (red) so you notice. When a page can't be parsed, the workflow uploads
 its HTML and a screenshot as the `debug-pages` artifact on the run page (kept 3 days); locally, set
@@ -56,6 +56,28 @@ Last-seen prices are kept between runs with the Actions cache, so you only get o
 Caveats: GitHub may pause scheduled workflows after 60 days without repo activity, runs can be delayed
 by several minutes, and Amazon often blocks datacenter IPs like GitHub's runners (a self-hosted runner
 or a small VPS with cron is more reliable).
+
+## Dashboard
+`python -m robodiscounts.cli dashboard` writes `site/index.html`: one row per product with status
+(deal / failing / sold out / watching), current price, lowest price seen, target, a price-trend sparkline
+and the last check time. It is a static file with no JavaScript, so you can open it in any browser.
+
+On GitHub Actions it is rebuilt every run and attached to the run as the `dashboard` artifact (kept 7 days).
+For a permanent web page:
+1. **Settings → Pages → Build and deployment → Source: GitHub Actions**
+2. **Settings → Secrets and variables → Actions → Variables**: add `ENABLE_PAGES` = `true`
+
+Heads-up: a Pages site is normally readable by anyone who has the URL, so it exposes your product list and
+target prices. If you don't want that, skip Pages and use the artifact.
+
+Price history lives in the same Actions cache as the rest of the state, so it resets if the cache is
+ever evicted (after 7 days with no runs).
+
+## Bot-health messages
+If a product can't be read for `fail_alert_after` checks in a row (default 3), you get one WhatsApp message
+naming it and the reason, and another when it starts working again. Like deal alerts, these need an approved
+template outside Meta's 24-hour window: create a Utility template with the body `robodiscounts: {{1}}`
+and set `WHATSAPP_STATUS_TEMPLATE` to its name (without it, plain text is sent and may be dropped).
 
 ## Deal rules (per item)
 - `target_price`: alert when price <= value

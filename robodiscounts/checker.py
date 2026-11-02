@@ -46,18 +46,31 @@ class RunSummary:
         return self.checked > 0 and self.failed == self.checked
 
 
+def _short(err: Exception, n: int = 80) -> str:
+    return " ".join(str(err).split())[:n] or err.__class__.__name__
+
+
 def run_once(config, store, notifier, fetch=get_price) -> RunSummary:
     summary = RunSummary(checked=len(config.items))
+    threshold = getattr(config, "fail_alert_after", 3)
+    newly_broken, recovered = [], []
     for item in config.items:
         try:
             res = fetch(item.url)
         except Exception as e:  # keep going if one page fails
             log.warning("Failed %s: %s", item.url, e)
             summary.failed += 1
+            reason_txt = _short(e)
+            store.add_history(item.url, None, None, ok=False, error=reason_txt)
+            streak = store.record_failure(item.url, reason_txt)
+            if threshold and streak == threshold:
+                newly_broken.append(f"{item.name} ({reason_txt})")
             continue
         last = store.last_price(item.url)
         prev_notified = store.last_notified(item.url)
         was_in_stock = store.was_in_stock(item.url)
+        if threshold and store.fail_streak(item.url) >= threshold:
+            recovered.append(item.name)
 
         sold_out = res.in_stock is False
         # A sold-out item can't be bought, so its price never counts as a deal.
@@ -83,8 +96,21 @@ def run_once(config, store, notifier, fetch=get_price) -> RunSummary:
         else:
             new_notified = prev_notified
         store.save(item.url, res.price, new_notified, res.in_stock)
+        store.add_history(item.url, res.price, res.in_stock, ok=True)
 
         state = " (sold out)" if sold_out else ""
         log.info("%s: $%.2f%s %s", item.name, res.price, state, "-> notified" if notify else "")
         time.sleep(config.request_delay_seconds)
+
+    # Bot-health messages: one per run, only when something just broke or recovered.
+    send_status = getattr(notifier, "send_status", notifier.send)
+    if newly_broken:
+        send_status(
+            f"⚠️ robodiscounts can't read {len(newly_broken)} item(s) after {threshold} checks "
+            f"in a row: " + "; ".join(newly_broken) + ". Check the dashboard or Actions log."
+        )
+        summary.sent += 1
+    if recovered:
+        send_status("✅ robodiscounts is reading these items again: " + ", ".join(recovered) + ".")
+        summary.sent += 1
     return summary

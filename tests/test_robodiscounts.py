@@ -192,3 +192,101 @@ def test_store_migrates_old_schema(tmp_path):
 def test_bestbuy_stock_flag():
     sold = '{"name": "n", "salePrice": 10, "regularPrice": 10, "onlineAvailability": false}'
     assert get_price("https://www.bestbuy.com/site/x/1234567.p", html=sold).in_stock is False
+
+
+class StatusN:
+    def __init__(self): self.sent, self.status = [], []
+    def send(self, b, params=None): self.sent.append(b)
+    def send_status(self, t): self.status.append(t)
+
+
+def test_failure_alert_once_at_threshold_then_recovery(tmp_path):
+    item = Item("Box", "https://www.bestbuy.com/site/x/1234567.p")
+    cfg = Config(items=[item], request_delay_seconds=0, fail_alert_after=3)
+    store, n = Store(str(tmp_path / "f.db")), StatusN()
+    def boom(url): raise ValueError("Could not find price")
+    for _ in range(5):
+        run_once(cfg, store, n, boom)
+    assert len(n.status) == 1 and "Box" in n.status[0] and "3 checks" in n.status[0]
+    assert store.fail_streak(item.url) == 5
+    run_once(cfg, store, n, lambda u: PriceResult("t", 10))
+    assert len(n.status) == 2 and "reading these items again" in n.status[1]
+    assert store.fail_streak(item.url) == 0
+    run_once(cfg, store, n, lambda u: PriceResult("t", 10))
+    assert len(n.status) == 2  # no repeat recovery message
+
+
+def test_failure_alert_can_be_disabled(tmp_path):
+    cfg = Config(items=[Item("a", "u")], request_delay_seconds=0, fail_alert_after=0)
+    n = StatusN()
+    for _ in range(4):
+        run_once(cfg, Store(str(tmp_path / "d.db")), n, lambda u: (_ for _ in ()).throw(ValueError("x")))
+    assert n.status == []
+
+
+def test_history_records_reads_and_failures(tmp_path):
+    item = Item("a", "https://www.bestbuy.com/site/x/1234567.p")
+    cfg = Config(items=[item], request_delay_seconds=0)
+    store = Store(str(tmp_path / "h.db"))
+    for p in (10, 9, 11):
+        run_once(cfg, store, StatusN(), lambda u, p=p: PriceResult("t", p))
+    run_once(cfg, store, StatusN(), lambda u: (_ for _ in ()).throw(ValueError("blocked")))
+    assert [p for _, p in store.price_history(item.url)] == [10, 9, 11]
+    assert store.info(item.url)["last_error"] == "blocked"
+
+
+def test_notifier_status_template_is_single_line(monkeypatch):
+    from robodiscounts.notifier import WhatsAppNotifier
+    calls = []
+    class R: ok = True
+    monkeypatch.setattr("requests.post", lambda url, **kw: calls.append(kw["json"]) or R())
+    monkeypatch.setenv("WHATSAPP_STATUS_TEMPLATE", "health")
+    WhatsAppNotifier("t", "1", "+52", None).send_status("a\n\nb\t  c")
+    param = calls[-1]["template"]["components"][0]["parameters"][0]["text"]
+    assert calls[-1]["template"]["name"] == "health" and param == "a b c"
+    monkeypatch.delenv("WHATSAPP_STATUS_TEMPLATE")
+    WhatsAppNotifier("t", "1", "+52", None).send_status("plain")
+    assert calls[-1]["type"] == "text"
+
+
+def _populated(tmp_path):
+    items = [
+        Item('Evil <script>alert(1)</script> Box', "https://www.bestbuy.com/site/x/1111111.p", target_price=90),
+        Item("Broken one", "https://www.cardkingdom.com/catalog/item/1"),
+        Item("Gone", "https://www.bestbuy.com/site/x/2222222.p"),
+        Item("Quiet", "https://www.tcgplayer.com/product/5", target_price=1),
+    ]
+    cfg = Config(items=items, request_delay_seconds=0, fail_alert_after=0)
+    store = Store(str(tmp_path / "dash.db"))
+    def fetch(url):
+        if "cardkingdom" in url: raise ValueError("Could not find price <b>")
+        if "2222222" in url: return PriceResult("t", 30, in_stock=False)
+        if "1111111" in url: return PriceResult("t", 80, in_stock=True)
+        return PriceResult("t", 25)
+    for _ in range(3):
+        run_once(cfg, store, StatusN(), fetch)
+    return cfg, store
+
+
+def test_dashboard_statuses_and_escaping(tmp_path):
+    from robodiscounts.dashboard import render
+    cfg, store = _populated(tmp_path)
+    html = render(cfg, store)
+    assert "<script>alert(1)</script>" not in html and "&lt;script&gt;" in html
+    assert "Could not find price &lt;b&gt;" in html
+    for label in ("deal", "failing", "sold out", "watching"):
+        assert f'badge {label.replace(" ", "-")}">{label}<' in html
+    assert html.index("Evil") < html.index("Broken one") < html.index("Gone") < html.index("Quiet")
+    assert "$80.00" in html and "viewport" in html
+
+
+def test_dashboard_cli_needs_no_credentials(tmp_path, monkeypatch):
+    from robodiscounts import cli
+    for k in ("WHATSAPP_TOKEN", "WHATSAPP_PHONE_NUMBER_ID", "WHATSAPP_TO"):
+        monkeypatch.delenv(k, raising=False)
+    cfgfile = tmp_path / "c.yaml"
+    cfgfile.write_text(f"db_path: {tmp_path}/x.db\nitems:\n  - name: a\n    url: https://www.tcgplayer.com/product/1\n")
+    out = tmp_path / "site" / "index.html"
+    monkeypatch.setattr("sys.argv", ["robodiscounts", "dashboard", "-c", str(cfgfile), "-o", str(out)])
+    cli.main()
+    assert "Discount Watch" in out.read_text()

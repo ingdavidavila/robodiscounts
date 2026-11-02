@@ -55,9 +55,31 @@ jobs:
           WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
           WHATSAPP_TEMPLATE: ${{ secrets.WHATSAPP_TEMPLATE }}
           BESTBUY_API_KEY: ${{ secrets.BESTBUY_API_KEY }}
+          WHATSAPP_STATUS_TEMPLATE: ${{ secrets.WHATSAPP_STATUS_TEMPLATE }}
           WHATSAPP_TEMPLATE_LANG: ${{ vars.WHATSAPP_TEMPLATE_LANG || 'en_US' }}
           ROBODISCOUNTS_DEBUG_DIR: debug
         run: python -m robodiscounts.cli check
+
+      # Static dashboard from the price history. Always built, even if the check failed.
+      - name: Build dashboard
+        if: always()
+        run: python -m robodiscounts.cli dashboard
+
+      - name: Upload dashboard (download from the run page)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard
+          path: site/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      # Optional public web page: set repo variable ENABLE_PAGES=true (see README).
+      - name: Package dashboard for GitHub Pages
+        if: always() && vars.ENABLE_PAGES == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
 
       - name: Save price database
         if: always()
@@ -75,3 +97,17 @@ jobs:
           path: debug/
           if-no-files-found: ignore
           retention-days: 3
+
+  deploy-dashboard:
+    needs: check
+    if: ${{ always() && vars.ENABLE_PAGES == 'true' && needs.check.result != 'cancelled' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
