@@ -143,3 +143,52 @@ def test_cardkingdom_out_of_stock():
     with pytest.raises(ValueError):
         get_price("https://www.cardkingdom.com/catalog/item/1", html="<h1>Sold out</h1>")
     assert site_for("https://www.cardkingdom.com/mtg/x/y") == "cardkingdom"
+
+
+def _run(tmp_path, item, results, store=None):
+    class N:
+        def __init__(self): self.sent = []
+        def send(self, b, params=None): self.sent.append(b)
+    n, store = N(), store or Store(str(tmp_path / "s.db"))
+    cfg = Config(items=[item], request_delay_seconds=0)
+    for res in results:
+        run_once(cfg, store, n, lambda url, r=res: r)
+    return n.sent, store
+
+
+def test_realert_after_price_leaves_and_returns(tmp_path):
+    item = Item("a", "https://www.bestbuy.com/site/x/1234567.p", target_price=90)
+    sent, _ = _run(tmp_path, item, [PriceResult("t", 80), PriceResult("t", 80),
+                                    PriceResult("t", 100), PriceResult("t", 80)])
+    assert len(sent) == 2  # first deal, then again after it ended and returned
+
+
+def test_restock_alert_and_sold_out_not_a_deal(tmp_path):
+    item = Item("a", "https://www.bestbuy.com/site/x/1234567.p", target_price=90, alert_on_restock=True)
+    sold = PriceResult("t", 50, in_stock=False)
+    sent, store = _run(tmp_path, item, [PriceResult("t", 100, in_stock=True), sold, sold])
+    assert sent == []  # sold-out price of 50 is not a deal
+    sent, _ = _run(tmp_path, item, [PriceResult("t", 50, in_stock=True)], store)
+    assert len(sent) == 1 and "Back in stock" in sent[0]
+
+
+def test_no_restock_alert_when_not_enabled_or_first_seen(tmp_path):
+    item = Item("a", "https://www.bestbuy.com/site/x/1234567.p", alert_on_restock=True)
+    sent, _ = _run(tmp_path, item, [PriceResult("t", 100, in_stock=True)])
+    assert sent == []  # never seen sold out, so not a restock
+
+
+def test_store_migrates_old_schema(tmp_path):
+    import sqlite3
+    path = str(tmp_path / "old.db")
+    db = sqlite3.connect(path)
+    db.execute("CREATE TABLE prices (url TEXT PRIMARY KEY, last_price REAL, last_notified_price REAL)")
+    db.execute("INSERT INTO prices VALUES ('u', 5.0, NULL)")
+    db.commit(); db.close()
+    st = Store(path)
+    assert st.last_price("u") == 5.0 and st.was_in_stock("u") is None
+
+
+def test_bestbuy_stock_flag():
+    sold = '{"name": "n", "salePrice": 10, "regularPrice": 10, "onlineAvailability": false}'
+    assert get_price("https://www.bestbuy.com/site/x/1234567.p", html=sold).in_stock is False

@@ -8,7 +8,7 @@ import requests
 from ..models import PriceResult
 
 API = "https://api.bestbuy.com/v1/products/{sku}.json"
-FIELDS = "sku,name,salePrice,regularPrice,onSale"
+FIELDS = "sku,name,salePrice,regularPrice,onSale,onlineAvailability"
 
 
 def sku_from_url(url: str) -> str:
@@ -45,4 +45,10 @@ def parse_bestbuy(text: str) -> PriceResult:
         raise ValueError("Best Buy API returned no salePrice")
     regular = data.get("regularPrice")
     list_price = float(regular) if regular and float(regular) > float(price) else None
-    return PriceResult(title=data.get("name") or "Best Buy item", price=float(price), list_price=list_price)
+    in_stock = data.get("onlineAvailability")
+    return PriceResult(
+        title=data.get("name") or "Best Buy item",
+        price=float(price),
+        list_price=list_price,
+        in_stock=bool(in_stock) if in_stock is not None else None,
+    )

@@ -62,7 +62,11 @@ or a small VPS with cron is more reliable).
 - `min_discount_percent`: alert when discount vs the strike-through list price >= value (Amazon)
 - `min_drop_percent`: alert when price falls this much vs the last price seen
 
-An alert is sent once per price, so you won't get repeats until the price changes.
+- `alert_on_restock: true`: alert when an item that was sold out is available again. Stock status is
+  only known for Best Buy (via the API); other sites report it as unknown. Sold-out items never trigger
+  price alerts, and they are not counted as failures.
+
+An alert is sent once per price, so you won't get repeats until the price changes. If a price stops qualifying and later returns to the same level, it alerts again.
 
 ## Notes
 - Scraping can break when sites change layout, and Amazon may show CAPTCHAs; keep intervals sane (hourly+).

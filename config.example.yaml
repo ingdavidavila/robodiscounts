@@ -8,6 +8,7 @@ items:
     url: https://www.bestbuy.com/site/pokemon-tcg-scarlet-violet-booster-bundle/6578291.p?skuId=6578291
     target_price: 20           # alert when price <= this
     min_discount_percent: 15   # ...or when discount vs regular price >= this
+    alert_on_restock: true     # also alert when it comes back in stock (Best Buy)
 
   - name: Pokemon Prismatic Evolutions ETB
     url: https://www.tcgplayer.com/product/593355
