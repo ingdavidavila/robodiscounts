@@ -92,3 +92,31 @@ def test_cli_exits_nonzero_when_all_fail(tmp_path, monkeypatch):
     with pytest.raises(SystemExit) as e:
         cli.main()
     assert e.value.code == 1
+
+
+BESTBUY = '{"sku": 6578291, "name": "Pokemon Booster Bundle", "salePrice": 17.99, "regularPrice": 26.94, "onSale": true}'
+
+
+def test_bestbuy_parse():
+    r = get_price("https://www.bestbuy.com/site/x/6578291.p?skuId=6578291", html=BESTBUY)
+    assert (r.title, r.price, r.list_price) == ("Pokemon Booster Bundle", 17.99, 26.94)
+    no_sale = '{"name": "n", "salePrice": 10, "regularPrice": 10}'
+    assert get_price("https://www.bestbuy.com/site/x/1234567.p", html=no_sale).list_price is None
+
+
+def test_bestbuy_sku_and_fetch(monkeypatch):
+    import pytest
+    from robodiscounts.scrapers.bestbuy import fetch_bestbuy, sku_from_url
+    assert sku_from_url("https://www.bestbuy.com/site/x/6578291.p?skuId=6578291") == "6578291"
+    assert sku_from_url("https://www.bestbuy.com/site/some-name/6578291.p") == "6578291"
+    with pytest.raises(ValueError):
+        sku_from_url("https://www.bestbuy.com/site/searchpage.jsp")
+    monkeypatch.setenv("BESTBUY_API_KEY", "k")
+    seen = {}
+    class R:
+        ok = True; text = BESTBUY
+    def fake_get(url, params, timeout):
+        seen.update(url=url, params=params); return R()
+    monkeypatch.setattr("requests.get", fake_get)
+    assert get_price("https://www.bestbuy.com/site/x/6578291.p").price == 17.99
+    assert seen["url"].endswith("/6578291.json") and seen["params"]["apiKey"] == "k"

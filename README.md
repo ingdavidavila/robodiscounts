@@ -1,6 +1,6 @@
 # robodiscounts
 
-Watches Amazon and TCGplayer product pages and sends a WhatsApp message (Meta Cloud API) when an item hits your deal rules.
+Watches Best Buy (official API), TCGplayer and Amazon product pages and sends a WhatsApp message (Meta Cloud API) when an item hits your deal rules.
 
 ## Setup
 ```bash
@@ -23,6 +23,11 @@ cp .env.example .env                 # add Twilio credentials
    `Deal alert: {{1}} is now {{2}} ({{3}}). {{4}}`
    Without a template, send any message to the business number first, then alerts work for 24h.
 
+### Best Buy
+Get a free key at https://developer.bestbuy.com and set `BESTBUY_API_KEY` (in `.env`, and as a repo secret
+for GitHub Actions). Use any product URL containing the SKU, e.g. `.../6578291.p?skuId=6578291`.
+This uses Best Buy's official API, so no browser is needed and it isn't blocked on GitHub runners.
+
 ## Usage
 ```bash
 python -m robodiscounts.cli test-message      # verify WhatsApp works
@@ -35,7 +40,7 @@ python -m robodiscounts.cli watch             # loop every check_interval_minute
 `.github/workflows/check-discounts.yml` runs `check` every hour (and on demand via **Actions → Check discounts → Run workflow**).
 In the repo go to **Settings → Secrets and variables → Actions** and add these secrets:
 - `CONFIG_YAML`: the full contents of your `config.yaml` (keeps your watchlist out of the repo)
-- `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TO`, and optionally `WHATSAPP_TEMPLATE`
+- `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TO`, `BESTBUY_API_KEY`, and optionally `WHATSAPP_TEMPLATE`
 
 If every item fails to load, the run fails (red) so you notice. When a page can't be parsed, the workflow uploads
 its HTML and a screenshot as the `debug-pages` artifact on the run page (kept 3 days); locally, set

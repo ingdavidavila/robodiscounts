@@ -3,10 +3,11 @@ import re
 from urllib.parse import urlparse
 
 from .amazon import parse_amazon
+from .bestbuy import fetch_bestbuy, parse_bestbuy
 from .tcgplayer import parse_tcgplayer
 from .fetch import fetch_html
 
-PARSERS = {"amazon": parse_amazon, "tcgplayer": parse_tcgplayer}
+PARSERS = {"amazon": parse_amazon, "tcgplayer": parse_tcgplayer, "bestbuy": parse_bestbuy}
 
 
 def site_for(url: str) -> str:
@@ -15,6 +16,8 @@ def site_for(url: str) -> str:
         return "amazon"
     if "tcgplayer.com" in host:
         return "tcgplayer"
+    if "bestbuy.com" in host:
+        return "bestbuy"
     raise ValueError(f"Unsupported site: {host}")
 
 
@@ -28,10 +31,13 @@ def get_price(url: str, html: str = None):
     If ROBODISCOUNTS_DEBUG_DIR is set, a failed parse leaves <slug>.html and
     <slug>.png there so you can see what the site actually returned.
     """
-    parser = PARSERS[site_for(url)]
+    site = site_for(url)
+    parser = PARSERS[site]
     debug_dir = os.environ.get("ROBODISCOUNTS_DEBUG_DIR")
     png = None
-    if html is None:
+    if html is None and site == "bestbuy":
+        html = fetch_bestbuy(url)  # official API: JSON, no browser needed
+    elif html is None:
         if debug_dir:
             os.makedirs(debug_dir, exist_ok=True)
             png = os.path.join(debug_dir, _slug(url) + ".png")

@@ -54,6 +54,7 @@ jobs:
           WHATSAPP_PHONE_NUMBER_ID: ${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
           WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
           WHATSAPP_TEMPLATE: ${{ secrets.WHATSAPP_TEMPLATE }}
+          BESTBUY_API_KEY: ${{ secrets.BESTBUY_API_KEY }}
           WHATSAPP_TEMPLATE_LANG: ${{ vars.WHATSAPP_TEMPLATE_LANG || 'en_US' }}
           ROBODISCOUNTS_DEBUG_DIR: debug
         run: python -m robodiscounts.cli check
