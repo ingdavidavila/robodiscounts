@@ -120,3 +120,26 @@ def test_bestbuy_sku_and_fetch(monkeypatch):
     monkeypatch.setattr("requests.get", fake_get)
     assert get_price("https://www.bestbuy.com/site/x/6578291.p").price == 17.99
     assert seen["url"].endswith("/6578291.json") and seen["params"]["apiKey"] == "k"
+
+
+CK_MICRODATA = (
+    '<h1>Modern Horizons 3 Draft Booster Box</h1>'
+    '<span itemprop="price" content="249.99">$249.99</span>'
+)
+CK_CLASS = '<h1>Lightning Bolt</h1><div class="stylePrice">$1,234.50</div><div class="stylePrice">$9.00</div>'
+CK_LD = '<h1>X</h1><script type="application/ld+json">{"@type":"Product","offers":{"price":"42.10"}}</script>'
+
+
+def test_cardkingdom_parse_variants():
+    u = "https://www.cardkingdom.com/catalog/item/1"
+    assert get_price(u, html=CK_MICRODATA).price == 249.99
+    r = get_price(u, html=CK_CLASS)
+    assert r.price == 1234.50 and r.title == "Lightning Bolt"
+    assert get_price(u, html=CK_LD).price == 42.10
+
+
+def test_cardkingdom_out_of_stock():
+    import pytest
+    with pytest.raises(ValueError):
+        get_price("https://www.cardkingdom.com/catalog/item/1", html="<h1>Sold out</h1>")
+    assert site_for("https://www.cardkingdom.com/mtg/x/y") == "cardkingdom"

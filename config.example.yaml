@@ -13,3 +13,8 @@ items:
     url: https://www.tcgplayer.com/product/593355
     target_price: 50
     min_drop_percent: 10       # ...or when price drops >= 10% vs last seen
+
+  - name: MTG booster box (Card Kingdom)
+    url: https://www.cardkingdom.com/catalog/item/REPLACE_WITH_REAL_ITEM_PAGE
+    target_price: 90
+    min_drop_percent: 10

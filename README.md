@@ -1,6 +1,6 @@
 # robodiscounts
 
-Watches Best Buy (official API), TCGplayer and Amazon product pages and sends a WhatsApp message (Meta Cloud API) when an item hits your deal rules.
+Watches Best Buy (official API), Card Kingdom, TCGplayer and Amazon product pages and sends a WhatsApp message (Meta Cloud API) when an item hits your deal rules.
 
 ## Setup
 ```bash
@@ -27,6 +27,12 @@ cp .env.example .env                 # add Twilio credentials
 Get a free key at https://developer.bestbuy.com and set `BESTBUY_API_KEY` (in `.env`, and as a repo secret
 for GitHub Actions). Use any product URL containing the SKU, e.g. `.../6578291.p?skuId=6578291`.
 This uses Best Buy's official API, so no browser is needed and it isn't blocked on GitHub runners.
+
+### Card Kingdom
+Paste any Card Kingdom item page URL (sealed product or a single). No key needed. It reads the first listed
+price (near mint for singles). Card Kingdom has no strike-through list price in the parser, so use
+`target_price` or `min_drop_percent` rather than `min_discount_percent`. Out-of-stock items have no
+price and are logged as failures.
 
 ## Usage
 ```bash
