@@ -1,4 +1,4 @@
-def fetch_html(url: str, timeout_ms: int = 45000) -> str:
+def fetch_html(url: str, timeout_ms: int = 45000, screenshot_path: str = None) -> str:
     """Load a page in headless Chromium (handles JS rendering and basic bot checks)."""
     from playwright.sync_api import sync_playwright
 
@@ -15,5 +15,7 @@ def fetch_html(url: str, timeout_ms: int = 45000) -> str:
         page.goto(url, timeout=timeout_ms, wait_until="domcontentloaded")
         page.wait_for_timeout(2500)  # let price widgets render
         html = page.content()
+        if screenshot_path:
+            page.screenshot(path=screenshot_path, full_page=True)
         browser.close()
         return html

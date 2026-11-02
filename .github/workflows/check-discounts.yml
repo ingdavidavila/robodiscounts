@@ -55,6 +55,7 @@ jobs:
           WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
           WHATSAPP_TEMPLATE: ${{ secrets.WHATSAPP_TEMPLATE }}
           WHATSAPP_TEMPLATE_LANG: ${{ vars.WHATSAPP_TEMPLATE_LANG || 'en_US' }}
+          ROBODISCOUNTS_DEBUG_DIR: debug
         run: python -m robodiscounts.cli check
 
       - name: Save price database
@@ -63,3 +64,13 @@ jobs:
         with:
           path: robodiscounts.db
           key: prices-${{ github.run_id }}
+
+      # On failures, the page HTML and a screenshot of what the site returned.
+      - name: Upload debug files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-pages
+          path: debug/
+          if-no-files-found: ignore
+          retention-days: 3

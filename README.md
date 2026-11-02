@@ -37,6 +37,10 @@ In the repo go to **Settings → Secrets and variables → Actions** and add the
 - `CONFIG_YAML`: the full contents of your `config.yaml` (keeps your watchlist out of the repo)
 - `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TO`, and optionally `WHATSAPP_TEMPLATE`
 
+If every item fails to load, the run fails (red) so you notice. When a page can't be parsed, the workflow uploads
+its HTML and a screenshot as the `debug-pages` artifact on the run page (kept 3 days); locally, set
+`ROBODISCOUNTS_DEBUG_DIR=debug` to get the same files.
+
 Last-seen prices are kept between runs with the Actions cache, so you only get one alert per price.
 Caveats: GitHub may pause scheduled workflows after 60 days without repo activity, runs can be delayed
 by several minutes, and Amazon often blocks datacenter IPs like GitHub's runners (a self-hosted runner
