@@ -45,7 +45,10 @@ def run_once(config, store, notifier, fetch=get_price) -> int:
         reason = evaluate(item, res, last)
         notify = bool(reason) and store.last_notified(item.url) != res.price
         if notify:
-            notifier.send(format_message(item, res, reason))
+            notifier.send(
+                format_message(item, res, reason),
+                params=[item.name, f"${res.price:.2f}", reason, item.url],
+            )
             sent += 1
         log.info("%s: $%.2f %s", item.name, res.price, "-> notified" if notify else "")
         store.save(item.url, res.price, notify)

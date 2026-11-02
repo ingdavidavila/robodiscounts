@@ -1,6 +1,6 @@
 # robodiscounts
 
-Watches Amazon and TCGplayer product pages and sends a WhatsApp message when an item hits your deal rules.
+Watches Amazon and TCGplayer product pages and sends a WhatsApp message (Meta Cloud API) when an item hits your deal rules.
 
 ## Setup
 ```bash
@@ -10,11 +10,18 @@ cp config.example.yaml config.yaml   # add your products
 cp .env.example .env                 # add Twilio credentials
 ```
 
-### WhatsApp (Twilio)
-1. Create a Twilio account and open **Messaging → Try it out → Send a WhatsApp message**.
-2. Join the sandbox by sending the join code from your phone to the sandbox number.
-3. Put the SID, auth token, sandbox number and your number in `.env`.
-   (For production use, register a WhatsApp sender with Twilio.)
+### WhatsApp (Meta Cloud API)
+1. At developers.facebook.com create an app (type *Business*) and add the **WhatsApp** product.
+2. In **WhatsApp → API Setup** copy the **Phone number ID**; add your own phone as a recipient
+   and verify it. The free test number works for this.
+3. Token: the temporary token expires in 24h. For permanent use create a **System User** in
+   Business Settings, give it the app, and generate a token with `whatsapp_business_messaging`.
+4. Put `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID` and `WHATSAPP_TO` in `.env`.
+5. **Template (recommended):** Meta only allows free-text messages within 24h of the
+   recipient messaging your number. For alerts any time, create a Utility template in
+   WhatsApp Manager with this body, wait for approval, and set `WHATSAPP_TEMPLATE` to its name:
+   `Deal alert: {{1}} is now {{2}} ({{3}}). {{4}}`
+   Without a template, send any message to the business number first, then alerts work for 24h.
 
 ## Usage
 ```bash

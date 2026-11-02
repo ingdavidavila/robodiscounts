@@ -35,7 +35,7 @@ def test_evaluate():
 def test_dedupe(tmp_path):
     class N:
         sent = []
-        def send(self, b): self.sent.append(b)
+        def send(self, b, params=None): self.sent.append(b)
     item = Item("a", "https://www.amazon.com/dp/1", target_price=90)
     cfg = Config(items=[item], request_delay_seconds=0)
     store, n = Store(str(tmp_path / "t.db")), N()
@@ -43,3 +43,15 @@ def test_dedupe(tmp_path):
     run_once(cfg, store, n, fetch)
     run_once(cfg, store, n, fetch)
     assert len(n.sent) == 1
+
+
+def test_meta_payloads(monkeypatch):
+    from robodiscounts.notifier import WhatsAppNotifier
+    calls = []
+    class R: ok = True
+    monkeypatch.setattr("requests.post", lambda url, **kw: calls.append((url, kw["json"])) or R())
+    WhatsAppNotifier("tok", "123", "+5211", None).send("hi")
+    assert calls[-1][1]["type"] == "text" and calls[-1][1]["to"] == "5211"
+    WhatsAppNotifier("tok", "123", "+5211", "deal").send("hi", params=["a", "b", "c", "d"])
+    assert calls[-1][1]["template"]["name"] == "deal"
+    assert len(calls[-1][1]["template"]["components"][0]["parameters"]) == 4
