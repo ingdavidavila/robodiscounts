@@ -1,0 +1,15 @@
+# Copy to config.yaml and edit.
+db_path: robodiscounts.db
+check_interval_minutes: 60     # used by `watch` mode
+request_delay_seconds: 5       # pause between pages (be polite, avoid bans)
+
+items:
+  - name: Sony WH-1000XM5
+    url: https://www.amazon.com/dp/B09XS7JWHH
+    target_price: 250          # alert when price <= this
+    min_discount_percent: 20   # ...or when discount vs list price >= this
+
+  - name: Pokemon Prismatic Evolutions ETB
+    url: https://www.tcgplayer.com/product/593355
+    target_price: 50
+    min_drop_percent: 10       # ...or when price drops >= 10% vs last seen

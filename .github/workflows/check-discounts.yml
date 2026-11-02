@@ -1,0 +1,65 @@
+name: Check discounts
+
+on:
+  schedule:
+    - cron: "17 * * * *"   # hourly (minute 17 avoids the top-of-hour rush)
+  workflow_dispatch:        # manual run from the Actions tab
+
+concurrency:
+  group: check-discounts
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Install Chromium
+        run: playwright install --with-deps chromium
+
+      # Restore last-seen prices so we don't re-alert on the same price.
+      - name: Restore price database
+        uses: actions/cache/restore@v4
+        with:
+          path: robodiscounts.db
+          key: prices-${{ github.run_id }}
+          restore-keys: prices-
+
+      - name: Write config
+        env:
+          CONFIG_YAML: ${{ secrets.CONFIG_YAML }}
+        run: |
+          if [ -n "$CONFIG_YAML" ]; then
+            printf '%s\n' "$CONFIG_YAML" > config.yaml
+          else
+            echo "Secret CONFIG_YAML not set; falling back to config.example.yaml"
+            cp config.example.yaml config.yaml
+          fi
+
+      - name: Check prices and send WhatsApp alerts
+        env:
+          WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
+          WHATSAPP_PHONE_NUMBER_ID: ${{ secrets.WHATSAPP_PHONE_NUMBER_ID }}
+          WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
+          WHATSAPP_TEMPLATE: ${{ secrets.WHATSAPP_TEMPLATE }}
+          WHATSAPP_TEMPLATE_LANG: ${{ vars.WHATSAPP_TEMPLATE_LANG || 'en_US' }}
+        run: python -m robodiscounts.cli check
+
+      - name: Save price database
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: robodiscounts.db
+          key: prices-${{ github.run_id }}
