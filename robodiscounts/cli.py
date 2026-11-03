@@ -8,8 +8,19 @@ from pathlib import Path
 from .checker import run_once
 from .config import load_config
 from .dashboard import render
-from .notifier import ConsoleNotifier, WhatsAppNotifier
+from .notifier import (ConfigError, ConsoleNotifier, NotificationError,
+                       UnconfiguredNotifier, WhatsAppNotifier)
 from .store import Store
+
+
+def build_notifier(dry_run: bool):
+    if dry_run:
+        return ConsoleNotifier()
+    try:
+        return WhatsAppNotifier()
+    except ConfigError as e:
+        logging.warning("%s. Prices are still tracked, but alerts cannot be sent.", e)
+        return UnconfiguredNotifier(str(e))
 
 
 def main():
@@ -39,10 +50,17 @@ def main():
         print(f"Dashboard written to {out}")
         return
 
-    notifier = ConsoleNotifier() if args.dry_run else WhatsAppNotifier()
     if args.command == "test-message":
-        notifier.send("✅ robodiscounts is connected.")
+        try:
+            notifier = ConsoleNotifier() if args.dry_run else WhatsAppNotifier()
+            notifier.send("✅ robodiscounts is connected.")
+        except (ConfigError, NotificationError) as e:
+            print(f"Test message failed: {e}", file=sys.stderr)
+            sys.exit(1)
+        print("Test message sent.")
         return
+
+    notifier = build_notifier(args.dry_run)
 
     cfg = load_config(args.config)
     store = Store(cfg.db_path)
@@ -50,6 +68,10 @@ def main():
         summary = run_once(cfg, store, notifier)
         if summary.all_failed:
             logging.error("All %d items failed to load; exiting with error", summary.checked)
+        if summary.send_failed:
+            logging.error("%d alert(s) could not be delivered; they will be retried next run",
+                          summary.send_failed)
+        if summary.all_failed or summary.send_failed:
             sys.exit(1)
     else:
         while True:

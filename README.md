@@ -57,6 +57,29 @@ Caveats: GitHub may pause scheduled workflows after 60 days without repo activit
 by several minutes, and Amazon often blocks datacenter IPs like GitHub's runners (a self-hosted runner
 or a small VPS with cron is more reliable).
 
+## Run on a Raspberry Pi (recommended)
+GitHub's hourly schedule is best effort and can run hours late. A Pi with cron checks on an exact schedule,
+keeps price history on its own disk, and a home connection is less likely to be blocked by stores.
+
+Needs: Raspberry Pi 3B+/4/5 (1 GB RAM or more) on **64-bit Raspberry Pi OS** (`uname -m` must print `aarch64`),
+always on and online.
+```bash
+git clone --branch main https://github.com/ingdavidavila/robodiscounts.git
+cd robodiscounts
+./deploy/pi/setup.sh                 # one time: Python env, Chromium, config files
+nano config.yaml                     # your products, URLs, MSRPs
+nano .env                            # WhatsApp and Best Buy credentials
+.venv/bin/python -m robodiscounts.cli test-message   # a WhatsApp message should arrive
+./deploy/pi/run-check.sh             # one real check; read logs/check.log
+./deploy/pi/cron.sh --every 20       # start the schedule (5, 10, 15, 20, 30 or 60 minutes)
+```
+- Logs: `tail -f logs/check.log` (rotated at ~2 MB). Stop the schedule with `./deploy/pi/cron.sh --remove`.
+- Dashboard: rebuilt after every check at `site/index.html`. To view it from another device on your home network:
+  `cd site && python3 -m http.server 8080`, then open `http://<pi-name>.local:8080`. Don't expose it to the internet.
+- Update later with `./deploy/pi/update.sh`. Your `config.yaml`, `.env` and price history are left alone.
+- **Turn off the GitHub schedule** once the Pi works (Actions → Check discounts → ⋯ → Disable workflow), otherwise
+  both would send alerts, each with its own separate history.
+
 ## Dashboard
 `python -m robodiscounts.cli dashboard` writes `site/index.html`: one row per product with status
 (deal / failing / sold out / watching), current price, lowest price seen, target, a price-trend sparkline
@@ -78,6 +101,11 @@ If a product can't be read for `fail_alert_after` checks in a row (default 3), y
 naming it and the reason, and another when it starts working again. Like deal alerts, these need an approved
 template outside Meta's 24-hour window: create a Utility template with the body `robodiscounts: {{1}}`
 and set `WHATSAPP_STATUS_TEMPLATE` to its name (without it, plain text is sent and may be dropped).
+
+## If WhatsApp isn't working
+Sending problems never stop price tracking. Missing credentials, a bad token or a network error are logged, the run
+exits with an error, and the alert is **not** marked as delivered, so it is retried on the next run. Prices, history
+and the dashboard keep updating meanwhile.
 
 ## Deal rules (per item)
 The bot has no built-in idea of a "good price": a deal is whatever your rules say. The main rule for

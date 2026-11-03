@@ -59,6 +59,7 @@ class RunSummary:
     checked: int = 0
     failed: int = 0
     sent: int = 0
+    send_failed: int = 0   # alerts that could not be delivered (will be retried next run)
 
     @property
     def all_failed(self) -> bool:
@@ -100,37 +101,54 @@ def run_once(config, store, notifier, fetch=get_price) -> RunSummary:
         reasons = (["back in stock"] if restock else []) + ([deal] if deal else [])
         reason = "; ".join(reasons)
         notify = restock or (bool(deal) and prev_notified != res.price)
+        delivered = False
         if notify:
-            notifier.send(
-                format_message(item, res, reason, restock),
-                params=[item.name, f"${res.price:.2f}", reason, item.url],
-            )
-            summary.sent += 1
+            try:
+                notifier.send(
+                    format_message(item, res, reason, restock),
+                    params=[item.name, f"${res.price:.2f}", reason, item.url],
+                )
+                delivered = True
+                summary.sent += 1
+            except Exception as e:  # a broken notifier must never stop price tracking
+                summary.send_failed += 1
+                log.error("Could not send alert for %s: %s", item.name, e)
 
         # Remember the alerted price only while it still qualifies, so the same deal
-        # price can alert again after the price has gone back up in between.
+        # price can alert again after the price has gone back up in between. An alert
+        # that failed to send is not remembered, so the next run tries again.
         if not deal:
             new_notified = None
-        elif notify:
+        elif delivered:
             new_notified = res.price
         else:
             new_notified = prev_notified
-        store.save(item.url, res.price, new_notified, res.in_stock)
+        # Likewise keep the old stock state if a restock alert failed, so it is retried.
+        saved_in_stock = was_in_stock if (restock and not delivered) else res.in_stock
+        store.save(item.url, res.price, new_notified, saved_in_stock)
         store.add_history(item.url, res.price, res.in_stock, ok=True)
 
         state = " (sold out)" if sold_out else ""
-        log.info("%s: $%.2f%s %s", item.name, res.price, state, "-> notified" if notify else "")
+        outcome = "-> notified" if delivered else ("-> SEND FAILED" if notify else "")
+        log.info("%s: $%.2f%s %s", item.name, res.price, state, outcome)
         time.sleep(config.request_delay_seconds)
 
     # Bot-health messages: one per run, only when something just broke or recovered.
     send_status = getattr(notifier, "send_status", notifier.send)
+
+    def status(text: str):
+        try:
+            send_status(text)
+            summary.sent += 1
+        except Exception as e:
+            summary.send_failed += 1
+            log.error("Could not send status message: %s", e)
+
     if newly_broken:
-        send_status(
+        status(
             f"⚠️ robodiscounts can't read {len(newly_broken)} item(s) after {threshold} checks "
-            f"in a row: " + "; ".join(newly_broken) + ". Check the dashboard or Actions log."
+            f"in a row: " + "; ".join(newly_broken) + ". Check the dashboard or logs."
         )
-        summary.sent += 1
     if recovered:
-        send_status("✅ robodiscounts is reading these items again: " + ", ".join(recovered) + ".")
-        summary.sent += 1
+        status("✅ robodiscounts is reading these items again: " + ", ".join(recovered) + ".")
     return summary

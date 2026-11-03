@@ -406,3 +406,111 @@ def test_dashboard_average_column(tmp_path):
         run_once(cfg, store, StatusN(), lambda u, p=p: PriceResult("t", p))
     html = render(cfg, store)
     assert "Average" in html and "$15.00" in html
+
+
+class FlakyN:
+    """Notifier that fails until `working` is switched on."""
+    def __init__(self): self.working, self.sent, self.status = False, [], []
+    def send(self, b, params=None):
+        from robodiscounts.notifier import NotificationError
+        if not self.working: raise NotificationError("boom")
+        self.sent.append(b)
+    def send_status(self, t):
+        from robodiscounts.notifier import NotificationError
+        if not self.working: raise NotificationError("boom")
+        self.status.append(t)
+
+
+def test_failed_send_keeps_tracking_and_retries(tmp_path):
+    item = Item("ETB", "https://www.bestbuy.com/site/x/1234567.p", msrp=50)
+    cfg = Config(items=[item, Item("Other", "https://www.tcgplayer.com/product/9")], request_delay_seconds=0)
+    store, n = Store(str(tmp_path / "r.db")), FlakyN()
+    fetch = lambda url: PriceResult("t", 45 if "bestbuy" in url else 500)
+    s1 = run_once(cfg, store, n, fetch)
+    # the send failed, but the run carried on: both items were read and recorded
+    assert s1.send_failed == 1 and s1.sent == 0
+    assert store.last_price(item.url) == 45 and store.last_price("https://www.tcgplayer.com/product/9") == 500
+    assert store.last_notified(item.url) is None          # not marked as delivered
+    n.working = True
+    s2 = run_once(cfg, store, n, fetch)                    # next run retries and delivers
+    assert s2.sent == 1 and s2.send_failed == 0 and len(n.sent) == 1
+    run_once(cfg, store, n, fetch)
+    assert len(n.sent) == 1                                # and doesn't repeat afterwards
+
+
+def test_failed_restock_alert_is_retried(tmp_path):
+    item = Item("ETB", "https://www.bestbuy.com/site/x/1234567.p", alert_on_restock=True)
+    cfg = Config(items=[item], request_delay_seconds=0)
+    store, n = Store(str(tmp_path / "rs.db")), FlakyN()
+    run_once(cfg, store, n, lambda u: PriceResult("t", 20, in_stock=False))
+    s = run_once(cfg, store, n, lambda u: PriceResult("t", 20, in_stock=True))
+    assert s.send_failed == 1 and store.was_in_stock(item.url) is False   # still "sold out" in memory
+    n.working = True
+    run_once(cfg, store, n, lambda u: PriceResult("t", 20, in_stock=True))
+    assert len(n.sent) == 1 and "Back in stock" in n.sent[0]
+
+
+def test_failed_status_message_does_not_crash(tmp_path):
+    cfg = Config(items=[Item("a", "u")], request_delay_seconds=0, fail_alert_after=1)
+    s = run_once(cfg, Store(str(tmp_path / "st.db")), FlakyN(), lambda u: (_ for _ in ()).throw(ValueError("x")))
+    assert s.failed == 1 and s.send_failed == 1
+
+
+def test_missing_whatsapp_credentials_is_a_clear_error(monkeypatch):
+    import pytest
+    from robodiscounts.notifier import ConfigError, WhatsAppNotifier
+    monkeypatch.setenv("WHATSAPP_TOKEN", "")          # empty counts as missing (unset CI secrets)
+    monkeypatch.delenv("WHATSAPP_PHONE_NUMBER_ID", raising=False)
+    monkeypatch.setenv("WHATSAPP_TO", "+521")
+    with pytest.raises(ConfigError) as e:
+        WhatsAppNotifier()
+    assert "WHATSAPP_TOKEN" in str(e.value) and "WHATSAPP_PHONE_NUMBER_ID" in str(e.value)
+    msg = str(e.value)
+    assert "WHATSAPP_TO (" not in msg and ", WHATSAPP_TO," not in msg   # WHATSAPP_TO is set, so not listed
+
+
+def test_network_errors_become_notification_errors(monkeypatch):
+    import pytest, requests
+    from robodiscounts.notifier import NotificationError, WhatsAppNotifier
+    def boom(*a, **k): raise requests.ConnectionError("down")
+    monkeypatch.setattr("requests.post", boom)
+    with pytest.raises(NotificationError):
+        WhatsAppNotifier("t", "1", "+52", None).send("hi")
+
+
+def _cli(monkeypatch, tmp_path, argv, price=None):
+    from robodiscounts import cli
+    for k in ("WHATSAPP_TOKEN", "WHATSAPP_PHONE_NUMBER_ID", "WHATSAPP_TO"):
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.chdir(tmp_path)                       # no .env here
+    f = tmp_path / "c.yaml"
+    f.write_text(f"db_path: {tmp_path}/x.db\nrequest_delay_seconds: 0\nitems:\n"
+                 "  - name: a\n    url: https://www.bestbuy.com/site/x/1234567.p\n    msrp: 50\n")
+    if price is not None:
+        orig = cli.run_once
+        monkeypatch.setattr("robodiscounts.cli.run_once",
+                            lambda c, s, n: orig(c, s, n, lambda u: PriceResult("t", price)))
+    monkeypatch.setattr("sys.argv", ["robodiscounts", *argv, "-c", str(f)])
+    return cli
+
+
+def test_cli_without_credentials_tracks_prices_but_exits_nonzero_on_lost_alert(monkeypatch, tmp_path):
+    import pytest
+    cli = _cli(monkeypatch, tmp_path, ["check"], price=45)       # deal, but nowhere to send it
+    with pytest.raises(SystemExit) as e:
+        cli.main()
+    assert e.value.code == 1
+    assert Store(str(tmp_path / "x.db")).last_price("https://www.bestbuy.com/site/x/1234567.p") == 45
+
+
+def test_cli_without_credentials_and_no_deal_exits_zero(monkeypatch, tmp_path):
+    cli = _cli(monkeypatch, tmp_path, ["check"], price=90)       # no deal: nothing to send
+    cli.main()                                                    # must not raise
+
+
+def test_cli_test_message_without_credentials_fails_clearly(monkeypatch, tmp_path, capsys):
+    import pytest
+    cli = _cli(monkeypatch, tmp_path, ["test-message"])
+    with pytest.raises(SystemExit) as e:
+        cli.main()
+    assert e.value.code == 1 and "WhatsApp is not configured" in capsys.readouterr().err
