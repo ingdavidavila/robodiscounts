@@ -40,7 +40,7 @@ class WhatsAppNotifier:
         self.to = to.lstrip("+")
         self.template = template or os.environ.get("WHATSAPP_TEMPLATE")
         self.lang = lang or os.environ.get("WHATSAPP_TEMPLATE_LANG", "en_US")
-        # Optional 1-variable template for bot-health messages: "robodiscounts: {{1}}"
+        # Optional 1-variable template for bot-health messages: "Bot status: {{1}} Check the Pi logs if this looks wrong."
         self.status_template = os.environ.get("WHATSAPP_STATUS_TEMPLATE")
 
     def _post(self, payload: dict):

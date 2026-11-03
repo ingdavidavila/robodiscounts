@@ -20,7 +20,8 @@ cp .env.example .env                 # add Twilio credentials
 5. **Template (recommended):** Meta only allows free-text messages within 24h of the
    recipient messaging your number. For alerts any time, create a Utility template in
    WhatsApp Manager with this body, wait for approval, and set `WHATSAPP_TEMPLATE` to its name:
-   `Deal alert: {{1}} is now {{2}} ({{3}}). {{4}}`
+   `Deal alert: {{1}} is now {{2}} ({{3}}). Link: {{4}} Happy hunting!`
+   (Meta rejects templates that start or end with a variable, hence the closing words; give each variable a sample value when you submit it)
    Without a template, send any message to the business number first, then alerts work for 24h.
 
 ### Best Buy
@@ -99,7 +100,7 @@ ever evicted (after 7 days with no runs).
 ## Bot-health messages
 If a product can't be read for `fail_alert_after` checks in a row (default 3), you get one WhatsApp message
 naming it and the reason, and another when it starts working again. Like deal alerts, these need an approved
-template outside Meta's 24-hour window: create a Utility template with the body `robodiscounts: {{1}}`
+template outside Meta's 24-hour window: create a Utility template with the body `Bot status: {{1}} Check the Pi logs if this looks wrong.`
 and set `WHATSAPP_STATUS_TEMPLATE` to its name (without it, plain text is sent and may be dropped).
 
 ## If WhatsApp isn't working
