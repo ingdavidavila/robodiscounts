@@ -514,3 +514,26 @@ def test_cli_test_message_without_credentials_fails_clearly(monkeypatch, tmp_pat
     with pytest.raises(SystemExit) as e:
         cli.main()
     assert e.value.code == 1 and "WhatsApp is not configured" in capsys.readouterr().err
+
+
+def test_dashboard_shows_deal_even_when_alert_cannot_be_sent(tmp_path):
+    from robodiscounts.dashboard import render
+    item = Item("ETB <b>", "https://www.bestbuy.com/site/x/1234567.p", msrp=50)
+    cfg = Config(items=[item], request_delay_seconds=0, fail_alert_after=0)
+    store = Store(str(tmp_path / "dd.db"))
+    run_once(cfg, store, FlakyN(), lambda u: PriceResult("t", 45))     # WhatsApp "down"
+    assert store.last_notified(item.url) is None                       # not marked delivered
+    html = render(cfg, store)
+    assert 'badge deal">deal<' in html and "90% of MSRP $50.00" in html
+    # once the price is no longer a deal, the flag clears
+    run_once(cfg, store, FlakyN(), lambda u: PriceResult("t", 80))
+    assert 'badge watching">watching<' in render(cfg, store)
+
+
+def test_sold_out_item_is_not_shown_as_deal(tmp_path):
+    from robodiscounts.dashboard import render
+    item = Item("ETB", "https://www.bestbuy.com/site/x/1234567.p", msrp=50)
+    cfg = Config(items=[item], request_delay_seconds=0, fail_alert_after=0)
+    store = Store(str(tmp_path / "so.db"))
+    run_once(cfg, store, FlakyN(), lambda u: PriceResult("t", 30, in_stock=False))
+    assert 'badge sold-out">sold out<' in render(cfg, store)

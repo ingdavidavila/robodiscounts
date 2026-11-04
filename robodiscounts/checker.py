@@ -125,7 +125,7 @@ def run_once(config, store, notifier, fetch=get_price) -> RunSummary:
             new_notified = prev_notified
         # Likewise keep the old stock state if a restock alert failed, so it is retried.
         saved_in_stock = was_in_stock if (restock and not delivered) else res.in_stock
-        store.save(item.url, res.price, new_notified, saved_in_stock)
+        store.save(item.url, res.price, new_notified, saved_in_stock, deal_reason=deal)
         store.add_history(item.url, res.price, res.in_stock, ok=True)
 
         state = " (sold out)" if sold_out else ""

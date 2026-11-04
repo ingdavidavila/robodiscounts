@@ -49,7 +49,7 @@ def _status(info: dict) -> str:
         return "failing"
     if info.get("in_stock") is False:
         return "sold out"
-    if info.get("last_notified") is not None:  # only set while the price still qualifies
+    if info.get("deal_reason"):  # set whenever the price qualifies, even if no alert could be sent
         return "deal"
     if info.get("last_price") is None:
         return "no data"
@@ -84,6 +84,8 @@ def render(config, store, now: Optional[datetime] = None) -> str:
         if r["status"] == "failing":
             err = (f'<div class="muted small">{info["fail_streak"]} failed check(s) in a row: '
                    f'{escape(info.get("last_error") or "unknown error")}</div>')
+        why = (f'<div class="muted small">{escape(info["deal_reason"])}</div>'
+               if r["status"] == "deal" else "")
         target = _money(it.target_price) if it.target_price is not None else "—"
         price = info.get("last_price")
         if it.msrp and price is not None:
@@ -95,7 +97,7 @@ def render(config, store, now: Optional[datetime] = None) -> str:
             "<tr>"
             f'<td><a href="{escape(it.url, quote=True)}" rel="noopener noreferrer">{escape(it.name)}</a>'
             f'<div class="muted small">{escape(_site(it.url))}</div>{err}</td>'
-            f'<td><span class="badge {r["status"].replace(" ", "-")}">{r["status"]}</span></td>'
+            f'<td><span class="badge {r["status"].replace(" ", "-")}">{r["status"]}</span>{why}</td>'
             f'<td class="num">{_money(info.get("last_price"))}</td>'
             f'<td class="num hs">{_money(r["low"])}</td>'
             f'<td class="num hs">{_money(r["avg"])}</td>'
