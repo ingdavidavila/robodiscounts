@@ -24,6 +24,7 @@ class Store:
         "fail_streak": "INTEGER DEFAULT 0",
         "last_error": "TEXT",
         "last_checked": "TEXT",
+        "deal_reason": "TEXT",   # why it qualifies right now (independent of alert delivery)
     }
 
     def __init__(self, path: str):
@@ -61,16 +62,20 @@ class Store:
     def fail_streak(self, url: str) -> int:
         return self._get("fail_streak", url) or 0
 
-    def save(self, url: str, price: float, notified_price: Optional[float], in_stock: Optional[bool]):
+    def save(self, url: str, price: float, notified_price: Optional[float], in_stock: Optional[bool],
+             deal_reason: Optional[str] = None):
         """notified_price: the price we last alerted at, or None once it no longer qualifies.
+        deal_reason: why the item qualifies as a deal right now (None if it doesn't); the
+        dashboard shows this whether or not an alert could be delivered.
         A successful read also clears the failure streak."""
         self.db.execute(
-            "INSERT INTO prices(url,last_price,last_notified_price,in_stock,fail_streak,last_error,last_checked) "
-            "VALUES(?,?,?,?,0,NULL,?) "
+            "INSERT INTO prices(url,last_price,last_notified_price,in_stock,fail_streak,last_error,"
+            "last_checked,deal_reason) VALUES(?,?,?,?,0,NULL,?,?) "
             "ON CONFLICT(url) DO UPDATE SET last_price=excluded.last_price, "
             "last_notified_price=excluded.last_notified_price, in_stock=excluded.in_stock, "
-            "fail_streak=0, last_error=NULL, last_checked=excluded.last_checked",
-            (url, price, notified_price, None if in_stock is None else int(in_stock), _now()),
+            "fail_streak=0, last_error=NULL, last_checked=excluded.last_checked, "
+            "deal_reason=excluded.deal_reason",
+            (url, price, notified_price, None if in_stock is None else int(in_stock), _now(), deal_reason),
         )
         self.db.commit()
 
@@ -117,7 +122,7 @@ class Store:
 
     def info(self, url: str) -> dict:
         r = self.db.execute(
-            "SELECT last_price,last_notified_price,in_stock,fail_streak,last_error,last_checked "
+            "SELECT last_price,last_notified_price,in_stock,fail_streak,last_error,last_checked,deal_reason "
             "FROM prices WHERE url=?",
             (url,),
         ).fetchone()
@@ -126,5 +131,5 @@ class Store:
         return {
             "last_price": r[0], "last_notified": r[1],
             "in_stock": None if r[2] is None else bool(r[2]),
-            "fail_streak": r[3] or 0, "last_error": r[4], "last_checked": r[5],
+            "fail_streak": r[3] or 0, "last_error": r[4], "last_checked": r[5], "deal_reason": r[6],
         }

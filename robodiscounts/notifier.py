@@ -6,6 +6,14 @@ import requests
 GRAPH_VERSION = "v21.0"
 
 
+class NotificationError(RuntimeError):
+    """A message could not be delivered (bad credentials, network, API refusal)."""
+
+
+class ConfigError(RuntimeError):
+    """WhatsApp credentials are missing."""
+
+
 class WhatsAppNotifier:
     """Sends WhatsApp messages through Meta's WhatsApp Cloud API.
 
@@ -17,23 +25,36 @@ class WhatsAppNotifier:
     """
 
     def __init__(self, token=None, phone_number_id=None, to=None, template=None, lang=None):
-        self.token = token or os.environ["WHATSAPP_TOKEN"]
-        self.phone_number_id = phone_number_id or os.environ["WHATSAPP_PHONE_NUMBER_ID"]
-        self.to = (to or os.environ["WHATSAPP_TO"]).lstrip("+")
+        token = token or os.environ.get("WHATSAPP_TOKEN")
+        phone_number_id = phone_number_id or os.environ.get("WHATSAPP_PHONE_NUMBER_ID")
+        to = to or os.environ.get("WHATSAPP_TO")
+        missing = [n for n, v in (("WHATSAPP_TOKEN", token),
+                                  ("WHATSAPP_PHONE_NUMBER_ID", phone_number_id),
+                                  ("WHATSAPP_TO", to)) if not v]
+        if missing:
+            raise ConfigError(
+                "WhatsApp is not configured: set " + ", ".join(missing) + " (in .env or as secrets)"
+            )
+        self.token = token
+        self.phone_number_id = phone_number_id
+        self.to = to.lstrip("+")
         self.template = template or os.environ.get("WHATSAPP_TEMPLATE")
         self.lang = lang or os.environ.get("WHATSAPP_TEMPLATE_LANG", "en_US")
-        # Optional 1-variable template for bot-health messages: "robodiscounts: {{1}}"
+        # Optional 1-variable template for bot-health messages: "Bot status: {{1}} Check the Pi logs if this looks wrong."
         self.status_template = os.environ.get("WHATSAPP_STATUS_TEMPLATE")
 
     def _post(self, payload: dict):
-        r = requests.post(
-            f"https://graph.facebook.com/{GRAPH_VERSION}/{self.phone_number_id}/messages",
-            headers={"Authorization": f"Bearer {self.token}"},
-            json={"messaging_product": "whatsapp", "to": self.to, **payload},
-            timeout=30,
-        )
+        try:
+            r = requests.post(
+                f"https://graph.facebook.com/{GRAPH_VERSION}/{self.phone_number_id}/messages",
+                headers={"Authorization": f"Bearer {self.token}"},
+                json={"messaging_product": "whatsapp", "to": self.to, **payload},
+                timeout=30,
+            )
+        except requests.RequestException as e:
+            raise NotificationError(f"WhatsApp request failed: {e}") from e
         if not r.ok:
-            raise RuntimeError(f"WhatsApp API error {r.status_code}: {r.text}")
+            raise NotificationError(f"WhatsApp API error {r.status_code}: {r.text}")
 
     def send(self, body: str, params: Optional[Sequence[str]] = None):
         if self.template and params:
@@ -70,6 +91,20 @@ class WhatsAppNotifier:
             })
         else:
             self._post({"type": "text", "text": {"body": text}})
+
+
+class UnconfiguredNotifier:
+    """Stands in when WhatsApp credentials are missing: prices are still tracked,
+    and every alert fails loudly (and is retried once credentials exist)."""
+
+    def __init__(self, reason: str):
+        self.reason = reason
+
+    def send(self, body: str, params: Optional[Sequence[str]] = None):
+        raise NotificationError(self.reason)
+
+    def send_status(self, text: str):
+        raise NotificationError(self.reason)
 
 
 class ConsoleNotifier:

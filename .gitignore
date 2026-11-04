@@ -4,3 +4,7 @@ __pycache__/
 config.yaml
 *.db
 .pytest_cache/
+.venv/
+logs/
+site/
+debug/
