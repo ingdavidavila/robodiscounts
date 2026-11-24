@@ -95,6 +95,7 @@ def run_scan(req: dict) -> dict:
             "platforms": [n for n, on in (("android", project.has_android), ("ios", project.has_ios)) if on],
             "frameworks": sorted(project.frameworks),
             "notes": project.notes,
+            "passed": [{"rule_id": i, "title": t} for i, t in getattr(project, "passed", [])],
             "findings": [asdict(f) for f in findings],
             "privacy": draft,
             "privacy_markdown": privacy.to_markdown(draft),

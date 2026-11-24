@@ -48,7 +48,7 @@ class T(unittest.TestCase):
         self.w("app/src/main/AndroidManifest.xml",
                f'<manifest {NS}><uses-permission android:name="android.permission.READ_SMS"/>'
                '<application android:debuggable="true" android:usesCleartextTraffic="true"/></manifest>')
-        self.w("app/build.gradle", "android { defaultConfig { targetSdk 35 } }")
+        self.w("app/build.gradle", 'android { defaultConfig { applicationId "x"\n targetSdk 33 } }')
         _, f = scan(str(self.root))
         self.assertTrue({"play.debuggable", "play.sensitive_permissions", "play.cleartext",
                          "play.target_sdk"} <= ids(f))
@@ -199,3 +199,103 @@ class PrivacyTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         keys = {r["key"] for r in json.loads(buf.getvalue())["rows"]}
         self.assertTrue({"crash_logs", "diagnostics"} <= keys)
+
+
+class RealWorldRegressions(unittest.TestCase):
+    """Each case comes from a false positive or silent miss seen when scanning real open-source apps."""
+
+    def setUp(self):
+        self.d = tempfile.TemporaryDirectory()
+        self.root = Path(self.d.name)
+
+    def tearDown(self):
+        self.d.cleanup()
+
+    def w(self, rel, text):
+        p = self.root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text)
+
+    def test_signals_in_test_mocks_docs_and_lockfiles_are_ignored(self):
+        self.w("App/Info.plist", plist())
+        self.w("AppUnitTests/MockCLLocationManager.swift", "class MockCLLocationManager: CLLocationManager {}")
+        self.w("Sources/FooTests.swift", "let m = CLLocationManager()")
+        self.w("README.md", "sign_up flow, createUser( here, AVCaptureDevice")
+        self.w("pubspec.lock", "  image_picker:\n    dependency: transitive\n")
+        _, f = scan(str(self.root), "apple")
+        self.assertNotIn("apple.usage_strings", ids(f))
+        self.assertNotIn("apple.account_deletion", ids(f))
+
+    def test_pubspec_yaml_is_not_a_test_file(self):
+        self.w("App/Info.plist", plist())
+        self.w("pubspec.yaml", "dependencies:\n  google_sign_in: 1\n")
+        _, f = scan(str(self.root), "apple")
+        self.assertIn("apple.sign_in_with_apple", ids(f))
+
+    def test_framework_and_test_bundle_plists_are_not_apps(self):
+        self.w("Fw/Info.plist", plist("<key>CFBundlePackageType</key><string>FMWK</string>"))
+        self.w("Bundle/Info.plist", plist("<key>CFBundlePackageType</key><string>BNDL</string>"))
+        project, f = scan(str(self.root), "apple")
+        self.assertFalse(project.has_ios)
+        self.assertEqual(ids(f), set())
+
+    def test_image_picker_alone_is_not_camera_use(self):
+        self.w("App/Info.plist", plist())
+        self.w("pubspec.yaml", "dependencies:\n  image_picker: 1\n")
+        _, f = scan(str(self.root), "apple")
+        self.assertNotIn("apple.usage_strings", ids(f))
+        self.w("lib/a.dart", "picker.pickImage(source: ImageSource.camera);")
+        _, f = scan(str(self.root), "apple")
+        self.assertIn("apple.usage_strings", ids(f))
+
+    def test_target_sdk_found_in_variables_gradle_and_kotlin_build_logic(self):
+        self.w("android/AndroidManifest.xml", f'<manifest {NS}><application/></manifest>')
+        self.w("android/variables.gradle", "ext { targetSdkVersion = 33 }")
+        _, f = scan(str(self.root), "google")
+        self.assertIn("play.target_sdk", ids(f))
+        self.assertNotIn("play.target_sdk_unknown", ids(f))
+        self.w("android/variables.gradle", "ext { targetSdkVersion = 36 }")
+        self.w("build-logic/convention/src/main/kotlin/P.kt", "defaultConfig.targetSdk = 30")
+        _, f = scan(str(self.root), "google")
+        self.assertIn("play.target_sdk", ids(f))
+
+    def test_library_module_and_fallback_default_do_not_trigger(self):
+        self.w("android/AndroidManifest.xml", f'<manifest {NS}><application/></manifest>')
+        self.w("android/app/build.gradle", 'apply plugin: "com.android.application"\nandroid { defaultConfig { targetSdk 36 } }')
+        self.w("libs/mod/android/build.gradle", "apply plugin: 'com.android.library'\ntargetSdkVersion safeExtGet('targetSdkVersion', 34)\ntargetSdk 30")
+        _, f = scan(str(self.root), "google")
+        self.assertNotIn("play.target_sdk", ids(f))
+
+    def test_target_sdk_unknown_is_reported_and_passed_list_exists(self):
+        self.w("android/app/build.gradle", "targetSdkVersion flutter.targetSdkVersion")
+        project, f = scan(str(self.root), "google")
+        self.assertIn("play.target_sdk_unknown", ids(f))
+        self.w("android/variables.gradle", "ext { targetSdkVersion = 36 }")
+        project, f = scan(str(self.root), "google")
+        self.assertIn("play.target_sdk", {i for i, _ in project.passed})
+
+    def test_root_build_gradle_ext_and_agp_block_syntax(self):
+        self.w("android/AndroidManifest.xml", f'<manifest {NS}><application/></manifest>')
+        self.w("android/build.gradle", "buildscript { ext { targetSdkVersion = 33 } }")
+        _, f = scan(str(self.root), "google")
+        self.assertIn("play.target_sdk", ids(f))
+        self.w("android/build.gradle", "buildscript { ext { targetSdkVersion = 36 } }")
+        self.w("app/build.gradle.kts", "defaultConfig {\n targetSdk {\n version = release(MY_TARGET)\n }\n}")
+        self.w("gradle.properties", "MY_TARGET=34\n")
+        _, f = scan(str(self.root), "google")
+        self.assertIn("play.target_sdk", ids(f))
+        self.w("gradle.properties", "MY_TARGET=36\n")
+        _, f = scan(str(self.root), "google")
+        self.assertNotIn("play.target_sdk", ids(f))
+
+    def test_signup_word_in_a_reserved_list_is_not_account_creation(self):
+        self.w("App/Info.plist", plist())
+        self.w("app/links.ts", "const reservedWords = ['login', 'signup', 'admin_console'];")
+        _, f = scan(str(self.root), "apple")
+        self.assertNotIn("apple.account_deletion", ids(f))
+        self.w("app/routes.ts", "{ path: 'signup', component: SignupPage }")
+        _, f = scan(str(self.root), "apple")
+        self.assertNotIn("apple.account_deletion", ids(f))  # a route name is not a call
+        self.w("app/auth.ts", "await auth.signUp(email, pw);")
+        _, f = scan(str(self.root), "apple")
+        self.assertIn("apple.account_deletion", ids(f))

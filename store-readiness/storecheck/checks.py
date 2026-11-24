@@ -45,22 +45,54 @@ def android_attr(p: Project, a: dict):
     return out
 
 
-_TARGET_RX = re.compile(r"targetSdk(?:Version)?\s*[=( ]\s*(\d+)")
+_TARGET_RX = re.compile(r"\btargetSdk(?:Version)?\s*(?:=|\s)\s*(\d+)\b")
+# newer AGP DSL:  targetSdk { version = release(36) }  or  release(SOME_CONSTANT)
+_TARGET_BLOCK_RX = re.compile(r"\btargetSdk\s*\{\s*version\s*=\s*(?:release\(\s*)?(\w+)\s*\)?")
 
 
-def android_target_sdk(p: Project, a: dict):
-    out = []
-    for g in p.gradle_files:
-        for m in _TARGET_RX.finditer(g.read_text(errors="ignore")):
-            if int(m.group(1)) < a["min_target_sdk"]:
-                out.append((str(g.relative_to(p.root)),
-                            f"targetSdk {m.group(1)} < {a['min_target_sdk']}"))
+def _resolve_constant(p: Project, name: str):
+    rx = re.compile(r"\b" + re.escape(name) + r"\s*[=:]\s*(\d+)\b")
+    for _, text in p.sdk_sources:
+        m = rx.search(text)
+        if m:
+            return int(m.group(1))
+    return None
+
+
+def _target_sdk_values(p: Project):
+    """(location, value) for targetSdk assignments in app modules and shared build config."""
+    vals = []
+    for rel, text in p.sdk_sources:
+        name = rel.replace("\\", "/").rsplit("/", 1)[-1]
+        if name in ("build.gradle", "build.gradle.kts") and (
+                "com.android.library" in text or "android-library" in text):
+            continue  # library module, not the app
+        vals += [(rel, int(m.group(1))) for m in _TARGET_RX.finditer(text)]
+        for m in _TARGET_BLOCK_RX.finditer(text):
+            tok = m.group(1)
+            v = int(tok) if tok.isdigit() else _resolve_constant(p, tok)
+            if v is not None:
+                vals.append((rel, v))
     for mf, root in _manifest_roots(p):
         sdk = root.find("uses-sdk")
         v = sdk.get(ANDROID + "targetSdkVersion") if sdk is not None else None
-        if v and v.isdigit() and int(v) < a["min_target_sdk"]:
-            out.append((str(mf.relative_to(p.root)), f"targetSdkVersion {v} < {a['min_target_sdk']}"))
-    return out
+        if v and v.isdigit():
+            vals.append((str(mf.relative_to(p.root)), int(v)))
+    return vals
+
+
+def android_target_sdk(p: Project, a: dict):
+    return [(loc, f"targetSdk {v} < {a['min_target_sdk']}")
+            for loc, v in _target_sdk_values(p) if v < a["min_target_sdk"]]
+
+
+def android_target_sdk_unknown(p: Project, a: dict):
+    if _target_sdk_values(p):
+        return []
+    if not (p.gradle_files or p.android_manifests):
+        return []
+    return [("(project)", "no numeric targetSdk found; it may be inherited from Flutter, React Native, "
+                          "Expo or a version catalog")]
 
 
 def plist_value(p: Project, a: dict):
@@ -137,6 +169,6 @@ def elf_alignment(p: Project, a: dict):
 
 
 CHECKS = {f.__name__: f for f in (
-    android_permission, android_attr, android_target_sdk, plist_value, plist_key_missing,
+    android_permission, android_attr, android_target_sdk, android_target_sdk_unknown, plist_value, plist_key_missing,
     privacy_manifest_missing, signal_requires_plist_key, signal_without, apk_without_aab,
     elf_alignment)}

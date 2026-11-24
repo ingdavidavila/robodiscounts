@@ -12,7 +12,7 @@
      {
       "what": "Camera use",
       "key": "NSCameraUsageDescription",
-      "pattern": "AVCaptureDevice|AVCaptureSession|UIImagePickerController|image_picker|react-native-camera|expo-camera|@capacitor/camera|vision-camera|package:camera"
+      "pattern": "AVCaptureDevice|AVCaptureSession|ImageSource\\.camera|sourceType\\s*=\\s*\\.camera|react-native-camera|expo-camera|vision-camera|@capacitor/camera|package:camera/|mobile_scanner|barcode_scan"
      },
      {
       "what": "Microphone use",
@@ -27,7 +27,7 @@
      {
       "what": "Photo library use",
       "key": "NSPhotoLibraryUsageDescription",
-      "pattern": "PHPhotoLibrary|expo-media-library|photo_manager|image_picker"
+      "pattern": "PHPhotoLibrary|expo-media-library|photo_manager|PHAsset"
      },
      {
       "what": "Contacts use",
@@ -51,7 +51,7 @@
      }
     ]
    },
-   "fix": "Add the key to Info.plist with a clear, specific purpose string. Detection is a text heuristic: confirm the feature is really used, and the dependency isn't just listed.",
+   "fix": "Add the key to Info.plist with a clear, specific purpose string. Detection is a text heuristic: confirm the feature is really used, and the dependency isn't just listed. Test files, docs and lockfiles are ignored. Note: image pickers using the system photo picker (PHPicker) need no photo permission.",
    "source": "https://developer.apple.com/documentation/bundleresources/information_property_list/protected_resources",
    "verified": ""
   },
@@ -143,7 +143,7 @@
    "title": "Account creation without an apparent account-deletion path",
    "check": {
     "type": "signal_without",
-    "signal": "createUserWithEmailAndPassword|\\.signUp\\(|createUser\\(|sign_?up",
+    "signal": "createUserWithEmailAndPassword|\\b[Ss]ign_?[Uu]p\\s*\\(|\\bcreateUser\\(|\\bregisterUser\\(|signUpWith",
     "unless": "deleteAccount|delete_account|account/delete|deleteUser|delete-account|account_deletion",
     "what": "Sign-up code found, no account deletion code found (heuristic)"
    },

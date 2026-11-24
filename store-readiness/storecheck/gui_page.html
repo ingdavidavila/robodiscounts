@@ -136,6 +136,7 @@ function render(d){
     var s=el("p","k");s.appendChild(document.createTextNode(f.rule_id+" · "+(f.verified?"rule verified "+f.verified:"rule NOT yet verified")+" · "));
     if(/^https:\/\//.test(f.source)){var a=el("a","","source");a.href=f.source;a.target="_blank";a.rel="noopener noreferrer";s.appendChild(a)}
     b.appendChild(s);p.appendChild(b)});
+  if(d.passed&&d.passed.length){var ps=el("p","k","Checked, no problems: "+d.passed.map(function(x){return x.title}).join("; "));p.appendChild(ps)}
   renderPrivacy(d.privacy);
   var hasAi=d.ai_findings!==undefined;$("t-ai").classList.toggle("hidden",!hasAi);
   if(hasAi){var a=$("p-ai");a.textContent="";a.appendChild(el("p","k","Advisory only, written by a local model. It can be wrong."));

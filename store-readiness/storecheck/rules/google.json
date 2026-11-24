@@ -30,6 +30,19 @@
    "verified": "2026-11-24"
   },
   {
+   "id": "play.target_sdk_unknown",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "advisory",
+   "title": "targetSdk could not be determined",
+   "check": {
+    "type": "android_target_sdk_unknown"
+   },
+   "fix": "Confirm your app targets API 36 or higher. Flutter, React Native and Expo apps inherit it from the framework or SDK version; check the generated android/ project or upgrade the framework.",
+   "source": "https://developer.android.com/google/play/requirements/target-sdk",
+   "verified": "2026-11-24"
+  },
+  {
    "id": "play.sensitive_permissions",
    "store": "google",
    "applies_to": "android",
@@ -103,7 +116,7 @@
    "title": "Account creation without an apparent account-deletion path",
    "check": {
     "type": "signal_without",
-    "signal": "createUserWithEmailAndPassword|\\.signUp\\(|createUser\\(|sign_?up",
+    "signal": "createUserWithEmailAndPassword|\\b[Ss]ign_?[Uu]p\\s*\\(|\\bcreateUser\\(|\\bregisterUser\\(|signUpWith",
     "unless": "deleteAccount|delete_account|account/delete|deleteUser|delete-account|account_deletion",
     "what": "Sign-up code found, no account deletion code found (heuristic)"
    },

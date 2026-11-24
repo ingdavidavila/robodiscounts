@@ -30,9 +30,10 @@ class Project:
         self.has_ios_project = False
         self.artifacts: list[Path] = []
         self.native_libs: list[tuple[str, bytes]] = []  # (label, first bytes of .so)
-        self.texts: list[tuple[str, str]] = []
+        self.texts: list[tuple[str, str, bool]] = []  # (path, text, is_lockfile)
+        self.sdk_sources: list[tuple[str, str]] = []  # files that may define targetSdk
         self.notes: list[str] = []
-        self._search_cache: dict[str, str | None] = {}
+        self._search_cache: dict[tuple, str | None] = {}
 
     # --- platform footprint -------------------------------------------------
     @property
@@ -45,10 +46,12 @@ class Project:
         return self.has_ios_project or bool(self.plists) or \
             any(a.suffix == ".ipa" for a in self.artifacts)
 
-    def find_signals(self, pattern: str, limit: int = 3) -> list[str]:
+    def find_signals(self, pattern: str, limit: int = 3, locks: bool = True) -> list[str]:
         rx = re.compile(pattern)
         out = []
-        for name, text in self.texts:
+        for name, text, is_lock in self.texts:
+            if is_lock and not locks:
+                continue
             if rx.search(text):
                 out.append(name)
                 if len(out) >= limit:
@@ -56,19 +59,35 @@ class Project:
         return out
 
     # --- text signal search (any language) ---------------------------------
-    def find_signal(self, pattern: str) -> str | None:
-        """Return the first file whose text matches `pattern`, else None."""
-        if pattern not in self._search_cache:
+    def find_signal(self, pattern: str, locks: bool = False) -> str | None:
+        """First file whose text matches `pattern` (lockfiles only if locks=True), else None."""
+        key = (pattern, locks)
+        if key not in self._search_cache:
             rx = re.compile(pattern)
-            self._search_cache[pattern] = next(
-                (name for name, text in self.texts if rx.search(text)), None)
-        return self._search_cache[pattern]
+            self._search_cache[key] = next(
+                (name for name, text, is_lock in self.texts
+                 if (locks or not is_lock) and rx.search(text)), None)
+        return self._search_cache[key]
+
+
+_TEST_DIR_RX = re.compile(r"(?i)(^|/)(tests?|__tests__|__mocks__|mocks?|androidtest|unittests?|uitests?|e2e|fixtures)(/|$)"
+                          r"|[^/]*tests?(/|$)|(^|/)(mock|fake)[^/]*$")
+_TEST_FILE_RX = re.compile(r"[a-z]Tests?\.[A-Za-z]+$|[._-](test|tests|spec)\.[A-Za-z]+$")
+_DOC_SUFFIXES = {".md", ".markdown", ".txt", ".rst", ".adoc"}
+_LOCK_NAMES = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "pubspec.lock", "podfile.lock",
+               "cargo.lock", "gemfile.lock", "package.resolved", "composer.lock", "bun.lockb"}
+_SDK_NAMES = {"build.gradle", "build.gradle.kts", "variables.gradle", "gradle.properties", "libs.versions.toml"}
 
 
 def _is_test_path(p: Path) -> bool:
     parts = {x.lower() for x in p.parts}
     return bool(parts & {"test", "tests", "androidtest", "debug", "uitests"}) or \
         any(x.endswith("tests") for x in parts)
+
+
+def _is_test_rel(rel: str) -> bool:
+    rel = rel.replace("\\", "/")
+    return bool(_TEST_DIR_RX.search(rel) or _TEST_FILE_RX.search(rel))
 
 
 def _load_plist(data: bytes) -> dict | None:
@@ -80,7 +99,9 @@ def _load_plist(data: bytes) -> dict | None:
 
 
 def _is_app_plist(d: dict) -> bool:
-    return "CFBundleIdentifier" in d and "NSExtension" not in d
+    """An app's Info.plist, not a framework, test bundle or app extension."""
+    return ("CFBundleIdentifier" in d and "NSExtension" not in d
+            and d.get("CFBundlePackageType") not in ("FMWK", "BNDL"))
 
 
 def discover(path: str | Path) -> Project:
@@ -134,6 +155,9 @@ def _walk(root: Path):
 
 
 def _maybe_read_text(proj: Project, f: Path, rel: str) -> None:
+    low = f.name.lower()
+    if f.suffix.lower() in _DOC_SUFFIXES or _is_test_rel(rel):
+        return
     if len(proj.texts) >= MAX_TEXT_FILES:
         return
     try:
@@ -144,7 +168,11 @@ def _maybe_read_text(proj: Project, f: Path, rel: str) -> None:
         return
     if b"\0" in raw[:1024]:
         return
-    proj.texts.append((rel, raw.decode("utf-8", errors="ignore")))
+    text = raw.decode("utf-8", errors="ignore")
+    proj.texts.append((rel, text, low in _LOCK_NAMES or low.endswith(".lock")))
+    in_build_logic = any(x in ("build-logic", "buildSrc") for x in Path(rel).parts)
+    if low in _SDK_NAMES or (in_build_logic and f.suffix in (".kt", ".kts", ".gradle")):
+        proj.sdk_sources.append((rel, text))
 
 
 def _scan_archive(proj: Project, f: Path) -> None:

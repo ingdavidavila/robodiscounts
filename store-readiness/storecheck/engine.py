@@ -34,6 +34,7 @@ def load_rules(extra_dir: Path | None = None) -> list[dict]:
 
 def run(project: Project, rules: list[dict], store: str = "both") -> list[Finding]:
     findings: list[Finding] = []
+    project.passed = []
     for r in rules:
         if store != "both" and r["store"] != store:
             continue
@@ -43,7 +44,10 @@ def run(project: Project, rules: list[dict], store: str = "both") -> list[Findin
             continue
         check = CHECKS[r["check"]["type"]]
         params = {k: v for k, v in r["check"].items() if k != "type"}
-        for loc, detail in check(project, params):
+        hits = check(project, params)
+        if not hits:
+            project.passed.append((r["id"], r["title"]))
+        for loc, detail in hits:
             findings.append(Finding(r["id"], r["store"], r["severity"], r["title"], loc,
                                     detail, r["fix"], r["source"], r.get("verified") or ""))
     findings.sort(key=lambda f: (SEVERITY_ORDER[f.severity], f.rule_id, f.location))
@@ -60,5 +64,6 @@ def to_json(project: Project, findings: list[Finding]) -> str:
         "frameworks": sorted(project.frameworks),
         "platforms": [n for n, on in (("android", project.has_android), ("ios", project.has_ios)) if on],
         "notes": project.notes,
+        "passed": [{"rule_id": i, "title": t} for i, t in getattr(project, "passed", [])],
         "findings": [asdict(f) for f in findings],
     }, indent=2)
