@@ -1,6 +1,6 @@
 {
  "verified": false,
- "note": "Apple category/type names and purposes verified 2026-11-24 against apple.com/app-store/app-privacy-details. Google Data safety names and all SDK-to-data mappings are NOT verified; check vendor disclosure guides.",
+ "note": "Apple privacy type names/purposes and Google Data safety category/type/purpose names verified 2026-11-24 against the official pages. The SDK-to-data-type mappings are NOT verified; check each vendor's disclosure guide.",
  "data_types": {
   "precise_location": {
    "google_category": "Location",
@@ -281,7 +281,8 @@
     "device_id"
    ],
    "purposes": [
-    "App functionality"
+    "App functionality",
+    "Developer communications"
    ],
    "tracking": false,
    "hint": "Push token counts as a device identifier."

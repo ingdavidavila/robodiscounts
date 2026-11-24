@@ -17,7 +17,7 @@ python -m storecheck path --privacy-draft              # Markdown draft
 python -m storecheck path --privacy-draft --format json
 python -m storecheck path --privacy-draft --explain    # + local-LLM 'Data we collect' wording ([CONFIRM] on guesses)
 ```
-Maps evidence (known SDKs in dependency files, Android permissions, iOS usage-description keys, sensitive API names) to Google Data safety categories and Apple App Privacy types, flags likely tracking, and lists the questions only you can answer (purposes, sharing, linked to identity, encryption, deletion). SDK-sent data is "likely collected"; permission/API-only evidence is "possible" because the stores only count data that leaves the device. Mappings live in `storecheck/privacy_data.json` and are verified for Apple's names only; Google names and SDK mappings are not.
+Maps evidence (known SDKs in dependency files, Android permissions, iOS usage-description keys, sensitive API names) to Google Data safety categories and Apple App Privacy types, flags likely tracking, and lists the questions only you can answer (purposes, sharing, linked to identity, encryption, deletion). SDK-sent data is "likely collected"; permission/API-only evidence is "possible" because the stores only count data that leaves the device. Mappings live in `storecheck/privacy_data.json` and use verified Apple and Google category/type names; the SDK-to-data mappings are not verified.
 
 ## Severity
 - **blocker**: the store will reject the build
@@ -25,7 +25,7 @@ Maps evidence (known SDKs in dependency files, Android permissions, iOS usage-de
 - **advisory**: heuristic; confirm by hand
 
 ## Rules are data
-`storecheck/rules/*.json`. Each rule has a check type and parameters, a fix, a source URL and a `verified` flag. Store thresholds change often (for example the minimum targetSdk), so each rule carries a `verified` date (empty = not verified) and the report shows it. Verified 2026-11-24: Play target API (36), 16 KB page sizes, AAB requirement, Apple privacy-manifest/required-reason enforcement, Apple privacy type names. Not yet verified: Play restricted-permission list, account deletion, Data safety names (support.google.com was unreachable), and Apple ATS and export-compliance pages (returned no content), plus the full text of guidelines 4.8/5.1.1 (only a summary was readable). Add your own rules with `--rules-dir`.
+`storecheck/rules/*.json`. Each rule has a check type and parameters, a fix, a source URL and a `verified` flag. Store thresholds change often (for example the minimum targetSdk), so each rule carries a `verified` date (empty = not verified) and the report shows it. Verified 2026-11-24: Play target API (36), 16 KB page sizes, AAB requirement, Apple privacy-manifest/required-reason enforcement, Apple privacy type names. Also verified: Play account-deletion rule and Data safety names/purposes. Not yet verified: most of the Play restricted-permission list (only SMS and Call Log confirmed), and Apple ATS and export-compliance pages (returned no content), plus the full text of guidelines 4.8/5.1.1 (only a summary was readable). Add your own rules with `--rules-dir`.
 
 ## Local LLM
 `--explain` sends the findings (not your source code) to any OpenAI-compatible endpoint (default Ollama at `localhost:11434`) for plain-language explanations. It is advisory and never changes findings.

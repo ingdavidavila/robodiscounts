@@ -50,7 +50,7 @@
      "REQUEST_INSTALL_PACKAGES"
     ]
    },
-   "fix": "Remove the permission, or prepare the Permissions Declaration Form with a core-feature justification.",
+   "fix": "Remove the permission, or prepare the Permissions Declaration Form with a core-feature justification. (Only SMS and Call Log are confirmed as high-risk examples on the Play help page; the rest of this list is from memory and unverified.)",
    "source": "https://support.google.com/googleplay/android-developer/answer/9214102",
    "verified": ""
   },
@@ -107,9 +107,9 @@
     "unless": "deleteAccount|delete_account|account/delete|deleteUser|delete-account|account_deletion",
     "what": "Sign-up code found, no account deletion code found (heuristic)"
    },
-   "fix": "Provide in-app account deletion plus a web deletion link, and declare it in the Data safety form.",
+   "fix": "If users can create an account in the app, Play requires BOTH an in-app path to delete the account and associated data AND a web link where users can request deletion. Answer the Data deletion questions in the Data safety form.",
    "source": "https://support.google.com/googleplay/android-developer/answer/13327111",
-   "verified": ""
+   "verified": "2026-11-24"
   }
  ]
 }
