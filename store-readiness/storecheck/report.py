@@ -16,7 +16,7 @@ def to_text(project: Project, findings: list[Finding]) -> str:
     for f in findings:
         lines += ["", f"[{LABEL[f.severity]}] {f.title}  ({f.rule_id}, {f.store})",
                   f"  where: {f.location}", f"  what:  {f.detail}", f"  fix:   {f.fix}",
-                  f"  source: {f.source}" + ("" if f.verified else "  (rule not yet verified against current docs)")]
+                  f"  source: {f.source}" + (f"  (verified {f.verified})" if f.verified else "  (rule NOT yet verified against current docs)")]
     n = {s: sum(f.severity == s for f in findings) for s in LABEL}
     lines += ["", f"{n['blocker']} blocker(s), {n['likely']} likely, {n['advisory']} advisory"]
     return "\n".join(lines)

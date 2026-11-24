@@ -48,7 +48,7 @@ class T(unittest.TestCase):
         self.w("app/src/main/AndroidManifest.xml",
                f'<manifest {NS}><uses-permission android:name="android.permission.READ_SMS"/>'
                '<application android:debuggable="true" android:usesCleartextTraffic="true"/></manifest>')
-        self.w("app/build.gradle", "android { defaultConfig { targetSdk 31 } }")
+        self.w("app/build.gradle", "android { defaultConfig { targetSdk 35 } }")
         _, f = scan(str(self.root))
         self.assertTrue({"play.debuggable", "play.sensitive_permissions", "play.cleartext",
                          "play.target_sdk"} <= ids(f))

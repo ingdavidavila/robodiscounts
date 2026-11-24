@@ -1,6 +1,6 @@
 {
  "verified": false,
- "note": "Category names and SDK data mappings come from memory of store docs and vendor disclosure guides; verify before submitting.",
+ "note": "Apple category/type names and purposes verified 2026-11-24 against apple.com/app-store/app-privacy-details. Google Data safety names and all SDK-to-data mappings are NOT verified; check vendor disclosure guides.",
  "data_types": {
   "precise_location": {
    "google_category": "Location",

@@ -1,59 +1,155 @@
-{"rules": [
- {"id": "apple.usage_strings", "store": "apple", "applies_to": "ios", "severity": "blocker",
-  "title": "Protected-resource use detected without a usage description",
-  "check": {"type": "signal_requires_plist_key", "signals": [
-   {"what": "Camera use", "key": "NSCameraUsageDescription",
-    "pattern": "AVCaptureDevice|AVCaptureSession|UIImagePickerController|image_picker|react-native-camera|expo-camera|@capacitor/camera|vision-camera|package:camera"},
-   {"what": "Microphone use", "key": "NSMicrophoneUsageDescription",
-    "pattern": "AVAudioRecorder|requestRecordPermission|flutter_sound|expo-av|react-native-audio"},
-   {"what": "Location use", "key": "NSLocationWhenInUseUsageDescription",
-    "pattern": "CLLocationManager|geolocator|react-native-geolocation|expo-location|@capacitor/geolocation"},
-   {"what": "Photo library use", "key": "NSPhotoLibraryUsageDescription",
-    "pattern": "PHPhotoLibrary|expo-media-library|photo_manager|image_picker"},
-   {"what": "Contacts use", "key": "NSContactsUsageDescription",
-    "pattern": "CNContactStore|contacts_service|expo-contacts|flutter_contacts"},
-   {"what": "Bluetooth use", "key": "NSBluetoothAlwaysUsageDescription",
-    "pattern": "CBCentralManager|flutter_blue|react-native-ble|flutter_reactive_ble"},
-   {"what": "Face ID use", "key": "NSFaceIDUsageDescription",
-    "pattern": "LAContext|local_auth|expo-local-authentication"},
-   {"what": "App Tracking use", "key": "NSUserTrackingUsageDescription",
-    "pattern": "ATTrackingManager|AppTrackingTransparency"}]},
-  "fix": "Add the key to Info.plist with a clear, specific purpose string. Detection is a text heuristic: confirm the feature is really used, and the dependency isn't just listed.",
-  "source": "https://developer.apple.com/documentation/bundleresources/information_property_list/protected_resources", "verified": false},
- {"id": "apple.privacy_manifest", "store": "apple", "applies_to": "ios", "severity": "likely",
-  "title": "No privacy manifest (PrivacyInfo.xcprivacy)",
-  "check": {"type": "privacy_manifest_missing"},
-  "fix": "Add PrivacyInfo.xcprivacy declaring collected data types and required-reason API use, and make sure bundled third-party SDKs ship theirs.",
-  "source": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files", "verified": false},
- {"id": "apple.ats", "store": "apple", "applies_to": "ios", "severity": "likely",
-  "title": "App Transport Security disabled globally",
-  "check": {"type": "plist_value", "path": ["NSAppTransportSecurity", "NSAllowsArbitraryLoads"], "bad_value": true},
-  "fix": "Use HTTPS, or scope exceptions to specific domains; global opt-outs need a justification in App Store Connect.",
-  "source": "https://developer.apple.com/documentation/bundleresources/information_property_list/nsapptransportsecurity", "verified": false},
- {"id": "apple.version_keys", "store": "apple", "applies_to": "ios", "severity": "likely",
-  "title": "Missing version keys",
-  "check": {"type": "plist_key_missing", "keys": ["CFBundleShortVersionString", "CFBundleVersion"]},
-  "fix": "Set marketing version and build number; every upload needs a higher build number.",
-  "source": "https://developer.apple.com/documentation/bundleresources/information_property_list", "verified": false},
- {"id": "apple.export_compliance", "store": "apple", "applies_to": "ios", "severity": "advisory",
-  "title": "Export compliance key not set",
-  "check": {"type": "plist_key_missing", "keys": ["ITSAppUsesNonExemptEncryption"]},
-  "fix": "Set ITSAppUsesNonExemptEncryption (false if you only use standard HTTPS) to skip the per-build prompt.",
-  "source": "https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations", "verified": false},
- {"id": "apple.sign_in_with_apple", "store": "apple", "applies_to": "ios", "severity": "advisory",
-  "title": "Third-party login without Sign in with Apple or an equivalent",
-  "check": {"type": "signal_without",
-            "signal": "GoogleSignIn|GIDSignIn|FBSDKLoginKit|FacebookLogin|google_sign_in|react-native-fbsdk|@react-native-google-signin|flutter_facebook_auth",
-            "unless": "ASAuthorizationAppleIDProvider|AuthenticationServices|sign_in_with_apple|apple-authentication|SignInWithApple",
-            "what": "Third-party login code found, no Sign in with Apple code found (heuristic)"},
-  "fix": "Review guideline 4.8: offer Sign in with Apple or another login option meeting its privacy requirements.",
-  "source": "https://developer.apple.com/app-store/review/guidelines/#sign-in-with-apple", "verified": false},
- {"id": "apple.account_deletion", "store": "apple", "applies_to": "ios", "severity": "advisory",
-  "title": "Account creation without an apparent account-deletion path",
-  "check": {"type": "signal_without",
-            "signal": "createUserWithEmailAndPassword|\\.signUp\\(|createUser\\(|sign_?up",
-            "unless": "deleteAccount|delete_account|account/delete|deleteUser|delete-account|account_deletion",
-            "what": "Sign-up code found, no account deletion code found (heuristic)"},
-  "fix": "Guideline 5.1.1(v): apps that support account creation must let users initiate deletion in-app.",
-  "source": "https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage", "verified": false}
-]}
+{
+ "rules": [
+  {
+   "id": "apple.usage_strings",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "blocker",
+   "title": "Protected-resource use detected without a usage description",
+   "check": {
+    "type": "signal_requires_plist_key",
+    "signals": [
+     {
+      "what": "Camera use",
+      "key": "NSCameraUsageDescription",
+      "pattern": "AVCaptureDevice|AVCaptureSession|UIImagePickerController|image_picker|react-native-camera|expo-camera|@capacitor/camera|vision-camera|package:camera"
+     },
+     {
+      "what": "Microphone use",
+      "key": "NSMicrophoneUsageDescription",
+      "pattern": "AVAudioRecorder|requestRecordPermission|flutter_sound|expo-av|react-native-audio"
+     },
+     {
+      "what": "Location use",
+      "key": "NSLocationWhenInUseUsageDescription",
+      "pattern": "CLLocationManager|geolocator|react-native-geolocation|expo-location|@capacitor/geolocation"
+     },
+     {
+      "what": "Photo library use",
+      "key": "NSPhotoLibraryUsageDescription",
+      "pattern": "PHPhotoLibrary|expo-media-library|photo_manager|image_picker"
+     },
+     {
+      "what": "Contacts use",
+      "key": "NSContactsUsageDescription",
+      "pattern": "CNContactStore|contacts_service|expo-contacts|flutter_contacts"
+     },
+     {
+      "what": "Bluetooth use",
+      "key": "NSBluetoothAlwaysUsageDescription",
+      "pattern": "CBCentralManager|flutter_blue|react-native-ble|flutter_reactive_ble"
+     },
+     {
+      "what": "Face ID use",
+      "key": "NSFaceIDUsageDescription",
+      "pattern": "LAContext|local_auth|expo-local-authentication"
+     },
+     {
+      "what": "App Tracking use",
+      "key": "NSUserTrackingUsageDescription",
+      "pattern": "ATTrackingManager|AppTrackingTransparency"
+     }
+    ]
+   },
+   "fix": "Add the key to Info.plist with a clear, specific purpose string. Detection is a text heuristic: confirm the feature is really used, and the dependency isn't just listed.",
+   "source": "https://developer.apple.com/documentation/bundleresources/information_property_list/protected_resources",
+   "verified": ""
+  },
+  {
+   "id": "apple.privacy_manifest",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "likely",
+   "title": "No privacy manifest (PrivacyInfo.xcprivacy)",
+   "check": {
+    "type": "privacy_manifest_missing"
+   },
+   "fix": "Since May 1, 2024, uploads using required-reason APIs (including via third-party SDKs) need approved reasons declared. Add PrivacyInfo.xcprivacy and make sure bundled SDKs ship theirs.",
+   "source": "https://developer.apple.com/news/upcoming-requirements/",
+   "verified": "2026-11-24"
+  },
+  {
+   "id": "apple.ats",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "likely",
+   "title": "App Transport Security disabled globally",
+   "check": {
+    "type": "plist_value",
+    "path": [
+     "NSAppTransportSecurity",
+     "NSAllowsArbitraryLoads"
+    ],
+    "bad_value": true
+   },
+   "fix": "Use HTTPS, or scope exceptions to specific domains; global opt-outs need a justification in App Store Connect.",
+   "source": "https://developer.apple.com/documentation/bundleresources/information_property_list/nsapptransportsecurity",
+   "verified": ""
+  },
+  {
+   "id": "apple.version_keys",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "likely",
+   "title": "Missing version keys",
+   "check": {
+    "type": "plist_key_missing",
+    "keys": [
+     "CFBundleShortVersionString",
+     "CFBundleVersion"
+    ]
+   },
+   "fix": "Set marketing version and build number; every upload needs a higher build number.",
+   "source": "https://developer.apple.com/documentation/bundleresources/information_property_list",
+   "verified": ""
+  },
+  {
+   "id": "apple.export_compliance",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "Export compliance key not set",
+   "check": {
+    "type": "plist_key_missing",
+    "keys": [
+     "ITSAppUsesNonExemptEncryption"
+    ]
+   },
+   "fix": "Set ITSAppUsesNonExemptEncryption (false if you only use standard HTTPS) to skip the per-build prompt.",
+   "source": "https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations",
+   "verified": ""
+  },
+  {
+   "id": "apple.sign_in_with_apple",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "Third-party login without Sign in with Apple or an equivalent",
+   "check": {
+    "type": "signal_without",
+    "signal": "GoogleSignIn|GIDSignIn|FBSDKLoginKit|FacebookLogin|google_sign_in|react-native-fbsdk|@react-native-google-signin|flutter_facebook_auth",
+    "unless": "ASAuthorizationAppleIDProvider|AuthenticationServices|sign_in_with_apple|apple-authentication|SignInWithApple",
+    "what": "Third-party login code found, no Sign in with Apple code found (heuristic)"
+   },
+   "fix": "Guideline 4.8: if you offer third-party login, also offer a login service that limits collection to name and email, lets users keep email private, and doesn't track for ads without consent (Sign in with Apple qualifies). Exceptions exist, e.g. company-only sign-in.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#sign-in-with-apple",
+   "verified": ""
+  },
+  {
+   "id": "apple.account_deletion",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "Account creation without an apparent account-deletion path",
+   "check": {
+    "type": "signal_without",
+    "signal": "createUserWithEmailAndPassword|\\.signUp\\(|createUser\\(|sign_?up",
+    "unless": "deleteAccount|delete_account|account/delete|deleteUser|delete-account|account_deletion",
+    "what": "Sign-up code found, no account deletion code found (heuristic)"
+   },
+   "fix": "Guideline 5.1.1(v): if your app supports account creation, you must also offer account deletion within the app.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage",
+   "verified": ""
+  }
+ ]
+}

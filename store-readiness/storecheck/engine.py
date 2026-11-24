@@ -21,7 +21,7 @@ class Finding:
     detail: str
     fix: str
     source: str
-    verified: bool
+    verified: str
 
 
 def load_rules(extra_dir: Path | None = None) -> list[dict]:
@@ -45,7 +45,7 @@ def run(project: Project, rules: list[dict], store: str = "both") -> list[Findin
         params = {k: v for k, v in r["check"].items() if k != "type"}
         for loc, detail in check(project, params):
             findings.append(Finding(r["id"], r["store"], r["severity"], r["title"], loc,
-                                    detail, r["fix"], r["source"], bool(r.get("verified", False))))
+                                    detail, r["fix"], r["source"], r.get("verified") or ""))
     findings.sort(key=lambda f: (SEVERITY_ORDER[f.severity], f.rule_id, f.location))
     return findings
 
