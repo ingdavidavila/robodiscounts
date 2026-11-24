@@ -75,7 +75,12 @@ def plist_value(p: Project, a: dict):
 
 
 def plist_key_missing(p: Project, a: dict):
-    return [(label, f"missing {k}") for label, d in p.plists for k in a["keys"] if k not in d]
+    out = []
+    for label, d in p.plists:
+        missing = [k for k in a["keys"] if k not in d]
+        if missing:
+            out.append((label, "missing " + ", ".join(missing)))
+    return out
 
 
 def privacy_manifest_missing(p: Project, a: dict):

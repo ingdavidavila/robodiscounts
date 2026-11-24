@@ -11,6 +11,15 @@ python -m storecheck path --explain             # advisory notes from a local LL
 ```
 Exit code is 1 when any blocker is found (usable in CI).
 
+## GUI
+```bash
+python -m storecheck.gui            # opens a browser page; --port N, --no-browser
+```
+Paste a **GitHub link** (`https://github.com/owner/repo`, optionally `/tree/branch`) or a **local folder path** (or built `.apk`/`.aab`/`.ipa`) and press Check. Results show findings, the privacy draft, optional local-AI notes, and JSON / Markdown downloads.
+- GitHub repos are shallow-cloned with your machine's `git` into a temp folder that is deleted afterwards (private repos work if git credentials are set up). Only `https://github.com/...` links are accepted.
+- The server listens on 127.0.0.1 only, requires a random token in the URL it prints, and checks the Host header. The page never inserts repo text as HTML.
+- No blockers is not a guarantee of approval.
+
 ## Privacy label draft
 ```bash
 python -m storecheck path --privacy-draft              # Markdown draft

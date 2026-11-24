@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store Check</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#16181d;--muted:#5d6572;--line:#dfe3e8;--accent:#2457d6;--accent-t:#fff;
+--bad:#b42318;--bad-bg:#fdecea;--warn:#a15c00;--warn-bg:#fff4e0;--info:#35568a;--info-bg:#e9f0fb;--ok:#146c3a;--ok-bg:#e5f5ec;--code:#eef0f3}
+@media (prefers-color-scheme:dark){:root{--bg:#101215;--card:#181b20;--text:#e8eaee;--muted:#9aa3b0;--line:#2b3037;--accent:#6b93ff;--accent-t:#0b0d10;
+--bad:#ff8a80;--bad-bg:#3a1b19;--warn:#ffc266;--warn-bg:#392a10;--info:#9db8ec;--info-bg:#1b2639;--ok:#76d6a0;--ok-bg:#12301f;--code:#22262c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--muted);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.seg button{border:0;background:transparent;color:var(--text);padding:8px 14px;cursor:pointer;font:inherit}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-t)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=text],select{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+#target{flex:1 1 320px;min-width:0}
+button.primary{background:var(--accent);color:var(--accent-t);border:0;border-radius:8px;padding:9px 18px;font:inherit;font-weight:600;cursor:pointer}
+button.primary:disabled{opacity:.6;cursor:wait}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:7px 12px;font:inherit;cursor:pointer}
+details{margin-top:12px;color:var(--muted)}summary{cursor:pointer}
+.hint{color:var(--muted);font-size:13px;margin:8px 0 0}
+.err{background:var(--bad-bg);color:var(--bad);border-radius:8px;padding:10px 12px;margin-top:12px}
+.verdict{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.info{background:var(--info-bg);color:var(--info)}.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:16px 0 12px;flex-wrap:wrap}
+.tabs button{border:0;background:transparent;color:var(--muted);padding:8px 12px;cursor:pointer;font:inherit;border-bottom:2px solid transparent}
+.tabs button[aria-selected=true]{color:var(--text);border-bottom-color:var(--accent);font-weight:600}
+.finding{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.finding h3{margin:6px 0 4px;font-size:15px}.finding p{margin:4px 0}
+.k{color:var(--muted)}code,pre{background:var(--code);border-radius:6px;font:13px ui-monospace,Menlo,Consolas,monospace}
+code{padding:1px 5px;word-break:break-all}pre{padding:12px;overflow:auto;white-space:pre-wrap}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;border-bottom:1px solid var(--line);padding:8px;vertical-align:top}
+th{color:var(--muted);font-weight:600}.scroll{overflow-x:auto}
+a{color:var(--accent)}.hidden{display:none}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Store Check</h1>
+  <p class="sub">Check an app against Google Play and App Store requirements. Runs on this machine only.</p>
+
+  <section class="card">
+    <div class="seg" role="group" aria-label="Source">
+      <button id="src-github" aria-pressed="true">GitHub link</button>
+      <button id="src-local" aria-pressed="false">Local folder</button>
+    </div>
+    <div class="row">
+      <input id="target" type="text" autocomplete="off" spellcheck="false" aria-label="Target"
+             placeholder="https://github.com/owner/repo">
+      <select id="store" aria-label="Store">
+        <option value="both">Both stores</option><option value="google">Google Play</option><option value="apple">App Store</option>
+      </select>
+      <button id="go" class="primary">Check</button>
+    </div>
+    <p class="hint" id="srchint"></p>
+    <details>
+      <summary>Local AI notes (optional)</summary>
+      <div class="row" style="margin-top:8px">
+        <label><input type="checkbox" id="explain"> Add advisory notes from a local model</label>
+        <input id="llm" type="text" value="http://localhost:11434/v1" aria-label="LLM URL" style="flex:1 1 220px">
+        <input id="model" type="text" value="qwen2.5-coder:14b" aria-label="Model" style="flex:0 1 180px">
+      </div>
+      <p class="hint">Sends findings only (not your source code) to the server above. Nothing is sent unless this is checked.</p>
+    </details>
+    <div id="err" class="err hidden" role="alert"></div>
+  </section>
+
+  <section id="result" class="hidden">
+    <div class="card">
+      <div class="verdict" id="verdict"></div>
+      <p class="hint" id="meta"></p>
+      <div class="tabs" role="tablist">
+        <button role="tab" id="t-find" aria-selected="true">Findings</button>
+        <button role="tab" id="t-priv" aria-selected="false">Privacy draft</button>
+        <button role="tab" id="t-ai" aria-selected="false" class="hidden">AI notes</button>
+      </div>
+      <div id="p-find"></div>
+      <div id="p-priv" class="hidden"></div>
+      <div id="p-ai" class="hidden"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="ghost" id="dl-json">Download JSON</button>
+        <button class="ghost" id="dl-md">Download privacy draft (.md)</button>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+(function(){
+"use strict";
+var TOKEN="__TOKEN__", source="github", last=null;
+function $(id){return document.getElementById(id)}
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
+var hints={github:"Public repos work directly. Private repos need git credentials set up on this machine. Large repos can take a minute.",
+           local:"Full path to the project folder (or a built .apk/.aab/.ipa) on the machine running this tool, e.g. /home/me/app or C:\\Users\\me\\app."};
+var ph={github:"https://github.com/owner/repo",local:"/path/to/project"};
+function setSource(s){source=s;
+  $("src-github").setAttribute("aria-pressed",s==="github");$("src-local").setAttribute("aria-pressed",s==="local");
+  $("target").placeholder=ph[s];$("srchint").textContent=hints[s]}
+$("src-github").onclick=function(){setSource("github")};$("src-local").onclick=function(){setSource("local")};
+setSource("github");
+
+function tab(name){["find","priv","ai"].forEach(function(n){
+  $("t-"+n).setAttribute("aria-selected",n===name);$("p-"+n).classList.toggle("hidden",n!==name)})}
+$("t-find").onclick=function(){tab("find")};$("t-priv").onclick=function(){tab("priv")};$("t-ai").onclick=function(){tab("ai")};
+
+function showError(m){var e=$("err");e.textContent=m;e.classList.toggle("hidden",!m)}
+var LABEL={blocker:["bad","Blocker"],likely:["warn","Likely issue"],advisory:["info","Advisory"]};
+
+function render(d){
+  var c={blocker:0,likely:0,advisory:0};d.findings.forEach(function(f){c[f.severity]++});
+  var v=$("verdict");v.textContent="";
+  var ok=c.blocker===0;
+  v.appendChild(el("span","pill "+(ok?"ok":"bad"),ok?"No blockers found":"Not ready: "+c.blocker+" blocker"+(c.blocker>1?"s":"")));
+  v.appendChild(el("span","pill warn",c.likely+" likely"));v.appendChild(el("span","pill info",c.advisory+" advisory"));
+  $("meta").textContent="Platforms: "+(d.platforms.join(", ")||"none detected")+" · Frameworks: "+(d.frameworks.join(", ")||"unknown")+
+    (ok?" · No blockers is not a guarantee of approval.":"")+(d.notes.length?" · "+d.notes.join(" "):"");
+  var p=$("p-find");p.textContent="";
+  if(!d.findings.length)p.appendChild(el("p","k","No findings."));
+  d.findings.forEach(function(f){
+    var b=el("div","finding"),l=LABEL[f.severity];
+    b.appendChild(el("span","pill "+l[0],l[1]));
+    b.appendChild(el("h3","",f.title));
+    var w=el("p");w.appendChild(el("span","k","Where: "));w.appendChild(el("code","",f.location));b.appendChild(w);
+    var t=el("p");t.appendChild(el("span","k","What: "));t.appendChild(document.createTextNode(f.detail));b.appendChild(t);
+    var x=el("p");x.appendChild(el("span","k","Fix: "));x.appendChild(document.createTextNode(f.fix));b.appendChild(x);
+    var s=el("p","k");s.appendChild(document.createTextNode(f.rule_id+" · "+(f.verified?"rule verified "+f.verified:"rule NOT yet verified")+" · "));
+    if(/^https:\/\//.test(f.source)){var a=el("a","","source");a.href=f.source;a.target="_blank";a.rel="noopener noreferrer";s.appendChild(a)}
+    b.appendChild(s);p.appendChild(b)});
+  renderPrivacy(d.privacy);
+  var hasAi=d.ai_findings!==undefined;$("t-ai").classList.toggle("hidden",!hasAi);
+  if(hasAi){var a=$("p-ai");a.textContent="";a.appendChild(el("p","k","Advisory only, written by a local model. It can be wrong."));
+    a.appendChild(el("h3","","About the findings"));a.appendChild(el("pre","",d.ai_findings||"(nothing to explain)"));
+    a.appendChild(el("h3","","Draft privacy policy wording"));a.appendChild(el("pre","",d.ai_privacy||"(no data types detected)"))}
+  tab("find");$("result").classList.remove("hidden");
+}
+
+function renderPrivacy(pr){
+  var p=$("p-priv");p.textContent="";
+  p.appendChild(el("p","k","Draft only. "+pr.mapping_note));
+  if(!pr.rows.length){p.appendChild(el("p","","No data-collection evidence found. Check anything you send to your own servers."))}
+  else{var w=el("div","scroll"),t=el("table"),h=el("tr");
+    ["Data","Google Data safety","Apple privacy label","Status","Evidence"].forEach(function(x){h.appendChild(el("th","",x))});
+    t.appendChild(h);
+    pr.rows.forEach(function(r){var tr=el("tr");
+      tr.appendChild(el("td","",r.key));
+      tr.appendChild(el("td","",r.google_category?r.google_category+" › "+r.google_type:"(no direct equivalent)"));
+      tr.appendChild(el("td","",r.apple_category+" › "+r.apple_type));
+      tr.appendChild(el("td","",r.strength));
+      tr.appendChild(el("td","",r.evidence.slice(0,3).map(function(e){return e.what+" ("+e.where+")"}).join("; ")));
+      t.appendChild(tr)});
+    w.appendChild(t);p.appendChild(w)}
+  if(pr.tracking_signals.length)p.appendChild(el("p","","Possible tracking (Apple ATT prompt needed): "+pr.tracking_signals.join(", ")));
+  pr.notes.forEach(function(n){p.appendChild(el("p","k","Note: "+n))});
+  p.appendChild(el("p","k","The store forms also ask things only you can answer (purposes, sharing, linked to identity, encryption, deletion, privacy policy URL). Download the draft for the full checklist."));
+}
+
+function download(name,text,type){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+$("dl-json").onclick=function(){if(last)download("storecheck-report.json",JSON.stringify(last,null,2),"application/json")};
+$("dl-md").onclick=function(){if(last)download("privacy-draft.md",last.privacy_markdown,"text/markdown")};
+
+function go(){
+  var b=$("go");showError("");b.disabled=true;b.textContent="";b.appendChild(el("span","spin"));b.appendChild(document.createTextNode("Checking…"));
+  fetch("/api/scan",{method:"POST",headers:{"Content-Type":"application/json","X-Token":TOKEN},
+    body:JSON.stringify({source:source,target:$("target").value,store:$("store").value,
+      explain:$("explain").checked,llm_url:$("llm").value,model:$("model").value})})
+  .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})})
+  .then(function(x){if(!x.ok)throw new Error(x.j.error||"Request failed");last=x.j;render(x.j)})
+  .catch(function(e){showError(e.message)})
+  .then(function(){b.disabled=false;b.textContent="Check"});
+}
+$("go").onclick=go;$("target").addEventListener("keydown",function(e){if(e.key==="Enter")go()});
+})();
+</script>
+</body>
+</html>
