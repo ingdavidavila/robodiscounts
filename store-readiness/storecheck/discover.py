@@ -45,6 +45,16 @@ class Project:
         return self.has_ios_project or bool(self.plists) or \
             any(a.suffix == ".ipa" for a in self.artifacts)
 
+    def find_signals(self, pattern: str, limit: int = 3) -> list[str]:
+        rx = re.compile(pattern)
+        out = []
+        for name, text in self.texts:
+            if rx.search(text):
+                out.append(name)
+                if len(out) >= limit:
+                    break
+        return out
+
     # --- text signal search (any language) ---------------------------------
     def find_signal(self, pattern: str) -> str | None:
         """Return the first file whose text matches `pattern`, else None."""

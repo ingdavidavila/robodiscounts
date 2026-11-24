@@ -142,3 +142,60 @@ class T(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PrivacyTests(unittest.TestCase):
+    def setUp(self):
+        self.d = tempfile.TemporaryDirectory()
+        self.root = Path(self.d.name)
+
+    def tearDown(self):
+        self.d.cleanup()
+
+    def w(self, rel, text):
+        p = self.root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text)
+
+    def test_draft_from_sdks_permissions_and_plist(self):
+        from storecheck import privacy
+        from storecheck.discover import discover
+        self.w("pubspec.yaml", "dependencies:\n  firebase_analytics: 1\n  google_mobile_ads: 2\n")
+        self.w("android/app/src/main/AndroidManifest.xml",
+               f'<manifest {NS}><uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>'
+               '<uses-permission android:name="android.permission.CAMERA"/><application/></manifest>')
+        self.w("ios/Runner/Info.plist", plist("<key>NSContactsUsageDescription</key><string>x</string>"
+                                                "<key>NSUserTrackingUsageDescription</key><string>x</string>"))
+        d = privacy.build_draft(discover(self.root))
+        rows = {r["key"]: r for r in d["rows"]}
+        self.assertIn("likely", rows["app_interactions"]["strength"])
+        self.assertIn("possible", rows["approx_location"]["strength"] + rows["contacts"]["strength"])
+        self.assertEqual(rows["contacts"]["apple_category"], "Contacts")
+        self.assertIn("Google AdMob / Mobile Ads", d["tracking_signals"])
+        self.assertTrue(d["tracking_signals"])
+        md = privacy.to_markdown(d)
+        self.assertIn("What only you can answer", md)
+        self.assertIn("NOT verified", md)
+
+    def test_empty_and_removed_permission(self):
+        from storecheck import privacy
+        from storecheck.discover import discover
+        self.w("android/AndroidManifest.xml",
+               f'<manifest {NS} xmlns:tools="http://schemas.android.com/tools">'
+               '<uses-permission android:name="android.permission.CAMERA" tools:node="remove"/>'
+               '<application/></manifest>')
+        d = privacy.build_draft(discover(self.root))
+        self.assertEqual(d["rows"], [])
+        self.assertIn("No data-collection evidence", privacy.to_markdown(d))
+
+    def test_cli_privacy_draft(self):
+        import contextlib
+        import io
+        from storecheck.__main__ import main
+        self.w("package.json", '{"dependencies": {"@sentry/react-native": "1"}}')
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = main([str(self.root), "--privacy-draft", "--format", "json"])
+        self.assertEqual(rc, 0)
+        keys = {r["key"] for r in json.loads(buf.getvalue())["rows"]}
+        self.assertTrue({"crash_logs", "diagnostics"} <= keys)

@@ -11,6 +11,14 @@ python -m storecheck path --explain             # advisory notes from a local LL
 ```
 Exit code is 1 when any blocker is found (usable in CI).
 
+## Privacy label draft
+```bash
+python -m storecheck path --privacy-draft              # Markdown draft
+python -m storecheck path --privacy-draft --format json
+python -m storecheck path --privacy-draft --explain    # + local-LLM 'Data we collect' wording ([CONFIRM] on guesses)
+```
+Maps evidence (known SDKs in dependency files, Android permissions, iOS usage-description keys, sensitive API names) to Google Data safety categories and Apple App Privacy types, flags likely tracking, and lists the questions only you can answer (purposes, sharing, linked to identity, encryption, deletion). SDK-sent data is "likely collected"; permission/API-only evidence is "possible" because the stores only count data that leaves the device. Mappings live in `storecheck/privacy_data.json` and are **not yet verified** against current store docs and vendor disclosure guides.
+
 ## Severity
 - **blocker**: the store will reject the build
 - **likely**: commonly rejected or flagged
