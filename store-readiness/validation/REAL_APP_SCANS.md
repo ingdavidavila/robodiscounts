@@ -31,8 +31,45 @@ reading of the code, not a store decision: none of these apps were submitted, an
 
 Each fix has a regression test (`tests/test_storecheck.py`, `RealWorldRegressions`).
 
+## Correction to round one
+Wikipedia iOS showed "clean" in round one. That was an accidental silent pass: its app plist is named
+`Wikipedia-Info.plist`, which discovery never looked at, so every plist rule was skipped. NewPipe's iOS plist
+rules were skipped the same way (its real plist has only one non-standard key). Both are fixed in round two.
+
+## Round two: generated and framework-managed config (2026-11-24)
+
+Stacks the first round had not touched: Xcode-generated plists, Expo, Unity, Cordova. Same method: every finding and
+every silence checked against the source.
+
+| App | Stack | Commit | Final result |
+|---|---|---|---|
+| Dimillian/IceCubesApp | SwiftUI, generated plists | 98098b9c4b | no privacy manifest (true) |
+| mastodon/mastodon-ios | Swift, localized usage strings | f3dc8d37ad | no privacy manifest (true) |
+| bluesky-social/social-app | Expo (`app.config.js`) | b4a2740871 | clean: targetSdk 36, privacy manifests, usage strings all found in config |
+| obytes/react-native-template-obytes | Expo template (`app.config.ts`) | fd9b358ed1 | privacy manifest not configured, targetSdk undeterminable (both true) |
+| Unity-Technologies/arfoundation-samples | Unity | 16489599d1 | export key missing, no privacy manifest, `AndroidTargetSdkVersion: 0` reported as undeterminable (all true) |
+| phonegap/phonegap-app-developer | Cordova | 0ae5e3daf3 | export key missing, no privacy manifest, targetSdk undeterminable (all true) |
+| apache/cordova-app-harness, cordova-app-hello-world | Cordova templates | 3b3c7d3359, 257a2e6b32 | no platforms configured in the repo, so nothing to check |
+
+| # | Problem | Kind | Fix |
+|---|---|---|---|
+| 10 | Mastodon: "photo library use, no `NSPhotoLibraryUsageDescription`" for code that only *saves* photos | false positive | add-only access needs `NSPhotoLibraryAddUsageDescription`; either key satisfies the check |
+| 11 | Mastodon: camera key exists only in localized `InfoPlist.strings` | false positive | keys in `InfoPlist.strings` (UTF-16 or UTF-8) count |
+| 12 | IceCubes: real `Info.plist` has no `CFBundleIdentifier` (build setting supplies it), so it was discarded | silent miss | any non-extension, non-framework, non-test plist counts; Firebase config files excluded |
+| 13 | Wikipedia: `Wikipedia-Info.plist`-style names never discovered | silent miss | match `*Info*.plist` names |
+| 14 | Wikipedia: ATS finding from `Local-Info.plist`, a local dev variant | false positive | Local/Debug/Dev plists ignored when a release plist exists, with a note |
+| 15 | Unity `AndroidTargetSdkVersion: 0` (automatic) passed silently | silent miss | reported as undeterminable |
+| 16 | No Info.plist at all in an iOS project made every plist rule skip without saying so | silent miss | note: "checks were skipped" |
+
+New support, each with tests: Xcode `INFOPLIST_KEY_*` and `MARKETING_VERSION` (project.pbxproj/xcconfig), Expo
+`app.json` / `app.config.*` (read as text, never executed), Unity `ProjectSettings.asset`, Cordova `config.xml`.
+Findings that rely on a plist inferred from config are reported as "likely", not "blocker".
+
 ## Known gaps this did not cover
-- Only one native-iOS app, no Unity, Expo-managed or Cordova app, and no app using Xcode-generated Info.plists
-  (`INFOPLIST_KEY_*` in `project.pbxproj`), which the checker does not read yet and could report as missing keys.
+- 14 apps in total, but still only a handful per stack; no Godot, Kotlin/Native-only, NativeScript or MAUI app.
+- Expo plugin option names, Unity field names and Cordova plugin variable names are from memory of those tools'
+  docs and are not verified. Expo plugin-added Android permissions are not modeled.
+- `INFOPLIST_KEY_*` and `MARKETING_VERSION` from all targets are merged, so an extension's keys can hide a missing
+  key in the main app.
 - No app was checked against an actual store review outcome.
 - macOS `Info.plist` files in cross-platform projects are checked with the same iOS rules.

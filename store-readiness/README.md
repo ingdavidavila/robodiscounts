@@ -20,6 +20,13 @@ Paste a **GitHub link** (`https://github.com/owner/repo`, optionally `/tree/bran
 - The server listens on 127.0.0.1 only, requires a random token in the URL it prints, and checks the Host header. The page never inserts repo text as HTML.
 - No blockers is not a guarantee of approval.
 
+## Supported project styles
+Reads real files (`AndroidManifest.xml`, `Info.plist` including renamed variants, Gradle, privacy manifests) and,
+when the repo has no such files, the config that generates them: Xcode build settings (`INFOPLIST_KEY_*`),
+Expo (`app.json`, `app.config.*`, read as text), Unity (`ProjectSettings.asset`) and Cordova (`config.xml`).
+Plists inferred from config are reported with lower certainty. Run it on a repo and see `notes` in the report for
+anything it skipped.
+
 ## Privacy label draft
 ```bash
 python -m storecheck path --privacy-draft              # Markdown draft

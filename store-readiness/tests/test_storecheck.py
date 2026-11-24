@@ -1,4 +1,5 @@
 import json
+import shutil
 import struct
 import tempfile
 import threading
@@ -299,3 +300,184 @@ class RealWorldRegressions(unittest.TestCase):
         self.w("app/auth.ts", "await auth.signUp(email, pw);")
         _, f = scan(str(self.root), "apple")
         self.assertIn("apple.account_deletion", ids(f))
+
+
+class FrameworkConfigTests(unittest.TestCase):
+    """Config-driven projects: Xcode-generated plists, Expo, Unity, Cordova (patterns seen in real apps)."""
+
+    def setUp(self):
+        self.d = tempfile.TemporaryDirectory()
+        self.root = Path(self.d.name)
+
+    def tearDown(self):
+        self.d.cleanup()
+
+    def w(self, rel, text, enc="utf-8"):
+        p = self.root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes(text.encode(enc))
+
+    def sev(self, f, rid):
+        return [x.severity for x in f if x.rule_id == rid]
+
+    PBX = ("GENERATE_INFOPLIST_FILE = YES;\nMARKETING_VERSION = 1.0;\nCURRENT_PROJECT_VERSION = 1;\n"
+           "PRODUCT_BUNDLE_IDENTIFIER = com.x.app;\n%s")
+
+    def test_xcode_generated_plist_keys(self):
+        self.w("A.xcodeproj/project.pbxproj", self.PBX % 'INFOPLIST_KEY_NSCameraUsageDescription = "Take photos";\n')
+        self.w("src/c.swift", "let d = AVCaptureDevice.default(for: .video)")
+        project, f = scan(str(self.root), "apple")
+        self.assertTrue(project.has_ios)
+        self.assertNotIn("apple.usage_strings", ids(f))
+        self.assertNotIn("apple.version_keys", ids(f))
+
+    def test_generated_plist_missing_key_is_reported_as_likely_not_blocker(self):
+        self.w("A.xcodeproj/project.pbxproj", self.PBX % "")
+        self.w("src/c.swift", "let d = AVCaptureDevice.default(for: .video)")
+        _, f = scan(str(self.root), "apple")
+        self.assertEqual(self.sev(f, "apple.usage_strings"), ["likely"])
+
+    def test_partial_real_plist_without_bundle_id_still_counts(self):
+        self.w("A.xcodeproj/project.pbxproj", self.PBX % 'INFOPLIST_KEY_NSCameraUsageDescription = "x";\n')
+        self.w("App/Info.plist", '<?xml version="1.0"?><plist version="1.0"><dict><key>UIBackgroundModes</key>'
+                                 '<array/></dict></plist>')
+        self.w("src/c.swift", "AVCaptureSession()")
+        project, f = scan(str(self.root), "apple")
+        self.assertEqual([l for l, _ in project.plists], ["App/Info.plist"])
+        self.assertNotIn("apple.usage_strings", ids(f))
+
+    def test_localized_infoplist_strings_satisfy_usage_keys(self):
+        self.w("App/Info.plist", plist())
+        self.w("App/en.lproj/InfoPlist.strings", '"NSCameraUsageDescription" = "Take photos";\n', "utf-16")
+        self.w("src/c.swift", "UIImagePickerController(); picker.sourceType = .camera")
+        _, f = scan(str(self.root), "apple")
+        self.assertNotIn("apple.usage_strings", ids(f))
+
+    def test_photo_add_only_key_satisfies_photo_library_use(self):
+        self.w("App/Info.plist", plist("<key>NSPhotoLibraryAddUsageDescription</key><string>Save</string>"))
+        self.w("src/p.swift", "PHPhotoLibrary.authorizationStatus(for: .addOnly)")
+        _, f = scan(str(self.root), "apple")
+        self.assertNotIn("apple.usage_strings", ids(f))
+
+    def test_expo_app_json(self):
+        self.w("package.json", '{"dependencies": {"expo": "~52", "expo-contacts": "1"}}')
+        self.w("app.json", json.dumps({"expo": {
+            "version": "1.0.0", "ios": {"bundleIdentifier": "com.x.app"},
+            "android": {"permissions": ["ACCESS_BACKGROUND_LOCATION", "CAMERA"]},
+            "plugins": [["expo-camera", {"cameraPermission": "Scan"}],
+                        ["expo-build-properties", {"android": {"targetSdkVersion": 33}}]]}}))
+        project, f = scan(str(self.root))
+        self.assertIn("expo", project.frameworks)
+        self.assertTrue(project.has_ios and project.has_android)
+        self.assertIn("play.sensitive_permissions", ids(f))
+        self.assertIn("play.target_sdk", ids(f))
+        # expo-contacts is installed but no contacts permission is configured
+        us = [x for x in f if x.rule_id == "apple.usage_strings"]
+        self.assertEqual([x.severity for x in us], ["likely"])
+        self.assertIn("NSContactsUsageDescription", us[0].detail)
+        self.assertNotIn("NSCameraUsageDescription", " ".join(x.detail for x in us))
+
+    def test_expo_js_config_is_read_as_text_and_privacy_manifest_config_counts(self):
+        self.w("package.json", '{"dependencies": {"expo": "~52"}}')
+        self.w("app.config.js", "export default { expo: { ios: { bundleIdentifier: 'a.b', privacyManifests: {} },"
+                                " android: {} } };")
+        project, f = scan(str(self.root), "apple")
+        self.assertTrue(any("not executed" in n for n in project.notes))
+        self.assertNotIn("apple.privacy_manifest", ids(f))
+
+    def test_plain_react_native_app_json_is_not_expo(self):
+        self.w("app.json", '{"name": "x", "displayName": "X"}')
+        project, _ = scan(str(self.root))
+        self.assertNotIn("expo", project.frameworks)
+        self.assertFalse(project.has_ios)
+
+    UNITY = ("  applicationIdentifier:\n    Android: %s\n    iPhone: %s\n  AndroidTargetSdkVersion: %s\n"
+             "  cameraUsageDescription: Camera needed\n  locationUsageDescription: \n  bundleVersion: 0.1\n")
+
+    def test_unity_project_settings(self):
+        self.w("ProjectSettings/ProjectSettings.asset", self.UNITY % ("com.me.game", "com.me.game", 33))
+        self.w("Assets/Cam.cs", "var t = new WebCamTexture(); Input.location.Start();")
+        project, f = scan(str(self.root))
+        self.assertIn("unity", project.frameworks)
+        self.assertIn("play.target_sdk", ids(f))
+        us = " ".join(x.detail for x in f if x.rule_id == "apple.usage_strings")
+        self.assertIn("NSLocationWhenInUseUsageDescription", us)     # location string empty
+        self.assertNotIn("NSCameraUsageDescription", us)             # camera string set
+
+    def test_unity_automatic_target_sdk_is_unknown_not_silent(self):
+        self.w("ProjectSettings/ProjectSettings.asset", self.UNITY % ("com.me.game", "com.me.game", 0))
+        _, f = scan(str(self.root), "google")
+        self.assertIn("play.target_sdk_unknown", ids(f))
+
+    def test_unity_default_company_ids_are_not_treated_as_mobile(self):
+        self.w("ProjectSettings/ProjectSettings.asset",
+               self.UNITY % ("com.DefaultCompany.G", "com.DefaultCompany.G", 0))
+        project, f = scan(str(self.root))
+        self.assertFalse(project.has_android or project.has_ios)
+        self.assertTrue(any("default bundle ids" in n for n in project.notes))
+
+    def test_cordova_config_xml(self):
+        self.w("config.xml", '<widget id="com.x.app" version="1.0" xmlns="http://www.w3.org/ns/widgets">\n'
+               '<platform name="android"><preference name="android-targetSdkVersion" value="33"/>'
+               '<config-file target="AndroidManifest.xml"><uses-permission android:name="android.permission.READ_SMS"/>'
+               '</config-file></platform>\n<platform name="ios"/>\n'
+               '<plugin name="cordova-plugin-camera"><variable name="CAMERA_USAGE_DESCRIPTION" value="Photos"/></plugin>\n'
+               '</widget>')
+        self.w("www/js/app.js", "navigator.geolocation.getCurrentPosition(ok);")
+        project, f = scan(str(self.root))
+        self.assertIn("cordova", project.frameworks)
+        self.assertTrue({"play.target_sdk", "play.sensitive_permissions"} <= ids(f))
+        us = " ".join(x.detail for x in f if x.rule_id == "apple.usage_strings")
+        self.assertIn("NSLocationWhenInUseUsageDescription", us)
+        self.assertNotIn("NSCameraUsageDescription", us)
+
+    def test_real_manifest_and_plist_win_over_config(self):
+        self.w("package.json", '{"dependencies": {"expo": "~52"}}')
+        self.w("app.json", '{"expo": {"ios": {"bundleIdentifier": "a.b"}}}')
+        self.w("ios/App/Info.plist", plist())
+        project, _ = scan(str(self.root))
+        self.assertEqual([l for l, _ in project.plists], ["ios/App/Info.plist"])
+
+
+class PlistDiscovery(unittest.TestCase):
+    def setUp(self):
+        self.d = tempfile.TemporaryDirectory()
+        self.root = Path(self.d.name)
+
+    def tearDown(self):
+        self.d.cleanup()
+
+    def w(self, rel, text):
+        p = self.root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text)
+
+    def test_renamed_info_plists_are_found_and_firebase_config_is_not(self):
+        self.w("App/Wikipedia-Info.plist", plist("<key>NSLocationWhenInUseUsageDescription</key><string>x</string>"))
+        self.w("App/Info-iOS.plist", plist())
+        self.w("App/GoogleService-Info.plist",
+               '<?xml version="1.0"?><plist version="1.0"><dict><key>BUNDLE_ID</key><string>a</string></dict></plist>')
+        self.w("src/l.swift", "let m = CLLocationManager()")
+        project, f = scan(str(self.root), "apple")
+        self.assertEqual(sorted(l for l, _ in project.plists), ["App/Info-iOS.plist", "App/Wikipedia-Info.plist"])
+        # one variant has the key; the usage check passes when any app plist has it
+        self.assertNotIn("apple.usage_strings", ids(f))
+
+    def test_ios_project_without_any_plist_says_checks_were_skipped(self):
+        self.w("A.xcodeproj/project.pbxproj", "// nothing generated here\n")
+        project, f = scan(str(self.root), "apple")
+        self.assertTrue(any("checks were skipped" in n for n in project.notes))
+
+    def test_dev_variant_plists_are_ignored_only_when_a_release_plist_exists(self):
+        ats = ("<key>NSAppTransportSecurity</key><dict><key>NSAllowsArbitraryLoads</key><true/></dict>")
+        self.w("App/Wikipedia-Info.plist", plist())
+        self.w("App/Local-Info.plist", plist(ats))
+        self.w("App/Info-Debug.plist", plist(ats))
+        project, f = scan(str(self.root), "apple")
+        self.assertEqual([l for l, _ in project.plists], ["App/Wikipedia-Info.plist"])
+        self.assertNotIn("apple.ats", ids(f))
+        self.assertTrue(any("development-variant" in n for n in project.notes))
+        shutil.rmtree(self.root / "App")
+        self.w("App/Local-Info.plist", plist(ats))
+        _, f = scan(str(self.root), "apple")
+        self.assertIn("apple.ats", ids(f))      # only variant: still checked

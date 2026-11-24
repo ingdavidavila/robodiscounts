@@ -47,8 +47,10 @@ def run(project: Project, rules: list[dict], store: str = "both") -> list[Findin
         hits = check(project, params)
         if not hits:
             project.passed.append((r["id"], r["title"]))
-        for loc, detail in hits:
-            findings.append(Finding(r["id"], r["store"], r["severity"], r["title"], loc,
+        for hit in hits:
+            loc, detail = hit[0], hit[1]
+            sev = hit[2] if len(hit) > 2 else r["severity"]
+            findings.append(Finding(r["id"], r["store"], sev, r["title"], loc,
                                     detail, r["fix"], r["source"], r.get("verified") or ""))
     findings.sort(key=lambda f: (SEVERITY_ORDER[f.severity], f.rule_id, f.location))
     return findings

@@ -12,22 +12,26 @@
      {
       "what": "Camera use",
       "key": "NSCameraUsageDescription",
-      "pattern": "AVCaptureDevice|AVCaptureSession|ImageSource\\.camera|sourceType\\s*=\\s*\\.camera|react-native-camera|expo-camera|vision-camera|@capacitor/camera|package:camera/|mobile_scanner|barcode_scan"
+      "pattern": "AVCaptureDevice|AVCaptureSession|ImageSource\\.camera|sourceType\\s*=\\s*\\.camera|react-native-camera|expo-camera|vision-camera|@capacitor/camera|package:camera/|mobile_scanner|barcode_scan|WebCamTexture|ARCameraManager|com\\.unity\\.xr\\.arfoundation|cordova-plugin-camera|cordova-plugin-media-capture|barcodescanner"
      },
      {
       "what": "Microphone use",
       "key": "NSMicrophoneUsageDescription",
-      "pattern": "AVAudioRecorder|requestRecordPermission|flutter_sound|expo-av|react-native-audio"
+      "pattern": "AVAudioRecorder|requestRecordPermission|flutter_sound|expo-av|react-native-audio|Microphone\\.Start|cordova-plugin-media-capture|cordova-plugin-media\\b"
      },
      {
       "what": "Location use",
       "key": "NSLocationWhenInUseUsageDescription",
-      "pattern": "CLLocationManager|geolocator|react-native-geolocation|expo-location|@capacitor/geolocation"
+      "pattern": "CLLocationManager|geolocator|react-native-geolocation|expo-location|@capacitor/geolocation|Input\\.location|LocationService\\.Start|cordova-plugin-geolocation|navigator\\.geolocation"
      },
      {
       "what": "Photo library use",
       "key": "NSPhotoLibraryUsageDescription",
-      "pattern": "PHPhotoLibrary|expo-media-library|photo_manager|PHAsset"
+      "pattern": "PHPhotoLibrary|expo-media-library|photo_manager|PHAsset",
+      "keys": [
+       "NSPhotoLibraryUsageDescription",
+       "NSPhotoLibraryAddUsageDescription"
+      ]
      },
      {
       "what": "Contacts use",
@@ -51,7 +55,7 @@
      }
     ]
    },
-   "fix": "Add the key to Info.plist with a clear, specific purpose string. Detection is a text heuristic: confirm the feature is really used, and the dependency isn't just listed. Test files, docs and lockfiles are ignored. Note: image pickers using the system photo picker (PHPicker) need no photo permission.",
+   "fix": "Add the key to Info.plist with a clear, specific purpose string. Detection is a text heuristic: confirm the feature is really used, and the dependency isn't just listed. Test files, docs and lockfiles are ignored. Note: image pickers using the system photo picker (PHPicker) need no photo permission. Photo-library use that only saves images needs NSPhotoLibraryAddUsageDescription instead. Keys localized in InfoPlist.strings count.",
    "source": "https://developer.apple.com/documentation/bundleresources/information_property_list/protected_resources",
    "verified": ""
   },

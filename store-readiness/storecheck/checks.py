@@ -33,6 +33,7 @@ def android_permission(p: Project, a: dict):
             name = el.get(ANDROID + "name", "")
             if name.rsplit(".", 1)[-1] in bad:
                 out.append((str(m.relative_to(p.root)), name))
+    out += [(where, short) for where, short in p.extra_permissions if short in bad]
     return out
 
 
@@ -45,7 +46,7 @@ def android_attr(p: Project, a: dict):
     return out
 
 
-_TARGET_RX = re.compile(r"\btargetSdk(?:Version)?\s*(?:=|\s)\s*(\d+)\b")
+_TARGET_RX = re.compile(r"\btargetSdk(?:Version)?[\"']?\s*(?:=|:|\s)\s*[\"']?(\d+)\b")
 # newer AGP DSL:  targetSdk { version = release(36) }  or  release(SOME_CONSTANT)
 _TARGET_BLOCK_RX = re.compile(r"\btargetSdk\s*\{\s*version\s*=\s*(?:release\(\s*)?(\w+)\s*\)?")
 
@@ -89,10 +90,10 @@ def android_target_sdk(p: Project, a: dict):
 def android_target_sdk_unknown(p: Project, a: dict):
     if _target_sdk_values(p):
         return []
-    if not (p.gradle_files or p.android_manifests):
+    if not (p.gradle_files or p.android_manifests or p.android_hint):
         return []
     return [("(project)", "no numeric targetSdk found; it may be inherited from Flutter, React Native, "
-                          "Expo or a version catalog")]
+                          "Expo, a version catalog, or Unity's 'Automatic (highest installed)' setting")]
 
 
 def plist_value(p: Project, a: dict):
@@ -116,17 +117,30 @@ def plist_key_missing(p: Project, a: dict):
 
 
 def privacy_manifest_missing(p: Project, a: dict):
-    return [] if p.has_privacy_manifest else [("(project)", "no PrivacyInfo.xcprivacy found")]
+    if p.has_privacy_manifest:
+        return []
+    if p.plists and all(label in p.synthetic_plists for label, _ in p.plists):
+        return [("(project)", "no PrivacyInfo.xcprivacy or privacyManifests config found; generated projects "
+                              "may add one at build time, so check the generated ios/ folder", "advisory")]
+    return [("(project)", "no PrivacyInfo.xcprivacy found")]
 
 
 def signal_requires_plist_key(p: Project, a: dict):
     if not p.plists:
         return []
+    only_inferred = all(label in p.synthetic_plists for label, _ in p.plists)
     out = []
     for s in a["signals"]:
         hit = p.find_signal(s["pattern"])
-        if hit and not any(s["key"] in d for _, d in p.plists):
-            out.append((hit, f"{s['what']} detected but Info.plist has no {s['key']}"))
+        keys = s.get("keys") or [s["key"]]
+        if hit and not any(k in d for _, d in p.plists for k in keys):
+            detail = f"{s['what']} detected but Info.plist has no " + " or ".join(keys)
+            if only_inferred:
+                note = next(iter(p.synthetic_plists.values()))
+                out.append((hit, detail + f" (Info.plist is inferred from config: {note}; confirm in the "
+                                          "generated project)", "likely"))
+            else:
+                out.append((hit, detail))
     return out
 
 

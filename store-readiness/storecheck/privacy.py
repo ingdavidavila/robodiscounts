@@ -48,6 +48,10 @@ def build_draft(project: Project) -> dict:
             for key in DATA["permissions"]["android_permissions"].get(short, []):
                 add(key, "permission", f"Android permission {short}", str(m.relative_to(project.root)), False)
 
+    for where, short in project.extra_permissions:
+        for key in DATA["permissions"]["android_permissions"].get(short, []):
+            add(key, "permission", f"Android permission {short} (config)", where, False)
+
     for label, d in project.plists:
         for k, keys in DATA["permissions"]["ios_plist_keys"].items():
             if k in d:

@@ -33,12 +33,18 @@ class Project:
         self.texts: list[tuple[str, str, bool]] = []  # (path, text, is_lockfile)
         self.sdk_sources: list[tuple[str, str]] = []  # files that may define targetSdk
         self.notes: list[str] = []
+        self.config_files: list[Path] = []            # project.pbxproj, app.json, config.xml, ...
+        self.extra_permissions: list[tuple[str, str]] = []  # (where, short name) from config files
+        self.synthetic_plists: dict[str, str] = {}    # label -> note, plists inferred from config
+        self.android_hint = False                     # Android configured in a config file
+        self.localized_plist_keys: set[str] = set()   # usage keys found in InfoPlist.strings
+        self.passed: list[tuple[str, str]] = []
         self._search_cache: dict[tuple, str | None] = {}
 
     # --- platform footprint -------------------------------------------------
     @property
     def has_android(self) -> bool:
-        return bool(self.android_manifests or self.gradle_files or
+        return bool(self.android_manifests or self.gradle_files or self.android_hint or
                     any(a.suffix in (".apk", ".aab") for a in self.artifacts))
 
     @property
@@ -76,6 +82,10 @@ _TEST_FILE_RX = re.compile(r"[a-z]Tests?\.[A-Za-z]+$|[._-](test|tests|spec)\.[A-
 _DOC_SUFFIXES = {".md", ".markdown", ".txt", ".rst", ".adoc"}
 _LOCK_NAMES = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "pubspec.lock", "podfile.lock",
                "cargo.lock", "gemfile.lock", "package.resolved", "composer.lock", "bun.lockb"}
+# Info.plist is often renamed per build variant: Wikipedia-Info.plist, Info-iOS.plist, Alpha-Info.plist
+_INFO_PLIST_RX = re.compile(r"(?i)^(.*[-_.])?info([-_.].*)?\.plist$")
+_CONFIG_NAMES = {"project.pbxproj", "app.json", "config.xml", "ProjectSettings.asset"}
+_APP_CONFIG_RX = re.compile(r"app\.config\.(js|ts|json|mjs|cjs)$")
 _SDK_NAMES = {"build.gradle", "build.gradle.kts", "variables.gradle", "gradle.properties", "libs.versions.toml"}
 
 
@@ -98,10 +108,16 @@ def _load_plist(data: bytes) -> dict | None:
     return d if isinstance(d, dict) else None
 
 
+_FIREBASE_KEYS = {"GCM_SENDER_ID", "GOOGLE_APP_ID", "BUNDLE_ID", "PROJECT_ID", "API_KEY", "CLIENT_ID"}
+
+
 def _is_app_plist(d: dict) -> bool:
-    """An app's Info.plist, not a framework, test bundle or app extension."""
-    return ("CFBundleIdentifier" in d and "NSExtension" not in d
-            and d.get("CFBundlePackageType") not in ("FMWK", "BNDL"))
+    """An app's Info.plist, not a framework, test bundle, app extension or Firebase config.
+
+    Generated-plist projects keep only a few extra keys in the file (or none), so no particular key is required."""
+    return ("NSExtension" not in d
+            and d.get("CFBundlePackageType") not in ("FMWK", "BNDL")
+            and not (_FIREBASE_KEYS & set(d)))
 
 
 def discover(path: str | Path) -> Project:
@@ -117,7 +133,7 @@ def discover(path: str | Path) -> Project:
             proj.android_manifests.append(f)
         elif name in ("build.gradle", "build.gradle.kts"):
             proj.gradle_files.append(f)
-        elif name == "Info.plist" and not _is_test_path(f.relative_to(path)):
+        elif _INFO_PLIST_RX.match(name) and not _is_test_path(f.relative_to(path)):
             d = _load_plist(f.read_bytes())
             if d is not None and _is_app_plist(d):
                 proj.plists.append((rel, d))
@@ -131,9 +147,49 @@ def discover(path: str | Path) -> Project:
         elif suffix == ".so":
             with open(f, "rb") as fh:
                 proj.native_libs.append((rel, fh.read(ELF_HEAD)))
+        if name.lower() == "infoplist.strings" and not _is_test_rel(rel):
+            _read_localized_keys(proj, f)
+        if (name in _CONFIG_NAMES or suffix == ".xcconfig" or _APP_CONFIG_RX.match(name)) \
+                and not _is_test_rel(rel):
+            proj.config_files.append(f)
         _maybe_read_text(proj, f, rel)
     _detect_frameworks(proj, path)
+    from . import frameworks
+    frameworks.apply(proj)
+    _drop_dev_plists(proj)
+    if proj.has_ios_project and not proj.plists:
+        proj.notes.append("iOS project found but no app Info.plist: usage-string, ATS, version and "
+                          "export-compliance checks were skipped.")
     return proj
+
+
+def _read_localized_keys(proj: Project, f: Path) -> None:
+    try:
+        raw = f.read_bytes()[:200_000]
+    except OSError:
+        return
+    for enc in ("utf-16", "utf-8"):
+        try:
+            text = raw.decode(enc)
+            break
+        except UnicodeDecodeError:
+            continue
+    else:
+        return
+    proj.localized_plist_keys.update(re.findall(r"\"?(NS[A-Za-z]+UsageDescription)\"?\s*=", text))
+
+
+_DEV_PLIST_RX = re.compile(r"(?i)(^|[/\\])([^/\\]*[-_.])?(local|debug|dev|development)([-_.][^/\\]*)?info[^/\\]*\.plist$|"
+                           r"(^|[/\\])info[-_.](local|debug|dev|development)[^/\\]*\.plist$")
+
+
+def _drop_dev_plists(proj: Project) -> None:
+    """Local/debug build variants (e.g. Local-Info.plist) are not shipped: ignore them when a release plist exists."""
+    dev = [(l, d) for l, d in proj.plists if _DEV_PLIST_RX.search(l)]
+    keep = [(l, d) for l, d in proj.plists if not _DEV_PLIST_RX.search(l)]
+    if dev and keep:
+        proj.plists = keep
+        proj.notes.append("Ignored development-variant plists: " + ", ".join(l for l, _ in dev))
 
 
 def _walk(root: Path):
@@ -202,8 +258,8 @@ def _scan_archive(proj: Project, f: Path) -> None:
 
 def _detect_frameworks(proj: Project, root: Path) -> None:
     markers = {
-        "flutter": "pubspec.yaml", "unity": "ProjectSettings", "cordova/capacitor": "config.xml",
-        "capacitor": "capacitor.config.json", "expo": "app.json",
+        "flutter": "pubspec.yaml", "unity": "ProjectSettings",
+        "capacitor": "capacitor.config.json",
     }
     for fw, marker in markers.items():
         if (root / marker).exists():
