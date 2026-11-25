@@ -412,3 +412,18 @@ class FixPatches(Base):
             main([str(self.root), "--fix-plan", str(out)])
         self.assertIn("debuggable", out.read_text())
         out.unlink()
+
+
+class SigningFormatting(Base):
+    def test_single_line_gradle_with_release_fallback(self):
+        self.w("android/AndroidManifest.xml", f'<manifest {NS}><application/></manifest>')
+        self.w("app/build.gradle", "android{buildTypes{release{ if(k){signingConfig signingConfigs.release}"
+                                   "else{signingConfig signingConfigs.debug} }}}")
+        _, ids = self.ids("google")
+        self.assertNotIn("play.release_debug_signing", ids)
+
+    def test_named_debug_config_is_recognised(self):
+        self.w("android/AndroidManifest.xml", f'<manifest {NS}><application/></manifest>')
+        self.w("app/build.gradle.kts", 'android { buildTypes { release { signingConfig = signingConfigs.named("debug").get() } } }')
+        _, ids = self.ids("google")
+        self.assertIn("play.release_debug_signing", ids)

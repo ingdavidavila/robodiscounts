@@ -13,6 +13,9 @@ from pathlib import Path
 from .discover import Project
 from .engine import Finding, load_rules
 
+# Rules this module can fix with a patch; the scorecard reads this set.
+FIXABLE_RULES = {"play.debuggable", "play.target_sdk", "play.exported_missing", "apple.deployment_target",
+                 "apple.usage_strings"}
 TODO_STRING = "TODO: explain why this app needs access (required by App Review)"
 
 

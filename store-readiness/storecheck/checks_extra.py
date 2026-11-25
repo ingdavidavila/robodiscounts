@@ -92,7 +92,9 @@ def _balanced(text: str, open_idx: int) -> str:
     return text[open_idx:]
 
 
-_SIGNING_REF = re.compile(r"signingConfig\s*(?:=\s*)?(signingConfigs[^\n;]*)")
+_SIGNING_REF = re.compile(
+    r"signingConfig\s*(?:=\s*)?(signingConfigs(?:\.getByName\(\s*[\"'][^\"']*[\"']\s*\)"
+    r"|\.named\(\s*[\"'][^\"']*[\"']\s*\)|\[\s*[\"'][^\"']*[\"']\s*\]|\.\w+))")
 
 
 def android_release_debug_signing(p: Project, a: dict):

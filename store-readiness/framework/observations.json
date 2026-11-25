@@ -1,0 +1,6 @@
+{
+ "os_observed": [
+  "linux"
+ ],
+ "note": "Operating systems on which the full test suite has been seen passing. Update only from a real run."
+}

@@ -1,0 +1,471 @@
+{
+ "version": 1,
+ "target_stacks": [
+  "android-native",
+  "ios-native",
+  "ios-swiftui",
+  "kotlin-multiplatform",
+  "flutter",
+  "react-native-bare",
+  "expo",
+  "capacitor",
+  "cordova",
+  "unity",
+  "dotnet-maui",
+  "godot",
+  "nativescript"
+ ],
+ "apps": [
+  {
+   "name": "nowinandroid",
+   "repo": "android/nowinandroid",
+   "commit": "2982e63cb691ad49cd009aab43dc206fee6699c2",
+   "stack": "android-native",
+   "labels": [
+    {
+     "rule": "play.release_debug_signing",
+     "loc": "app/build.gradle.kts",
+     "verdict": "tp",
+     "note": "the file's own comment says release uses the debug key"
+    },
+    {
+     "rule": "play.release_debug_signing",
+     "loc": "app-nia-catalog/",
+     "verdict": "unverified",
+     "note": "same pattern, file not read"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "play.release_debug_signing",
+     "loc": "app/build.gradle.kts"
+    }
+   ],
+   "must_not": []
+  },
+  {
+   "name": "NewPipe",
+   "repo": "TeamNewPipe/NewPipe",
+   "commit": "2f295de28266e214f6011dbb27eacf90a0ed943d",
+   "stack": "kotlin-multiplatform",
+   "labels": [
+    {
+     "rule": "play.target_sdk",
+     "loc": "app/build.gradle.kts",
+     "verdict": "tp",
+     "note": "NEWPIPE_VERSION_SDK_TARGET = 35 in buildSrc"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no PrivacyInfo.xcprivacy in the repo"
+    },
+    {
+     "rule": "listing.play_screenshots",
+     "loc": "phoneScreenshots",
+     "verdict": "tp",
+     "note": "9 screenshots, Play allows 2 to 8"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "iosApp/",
+     "verdict": "tp",
+     "note": "plist has no ITSAppUsesNonExemptEncryption"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "play.target_sdk",
+     "loc": "app/build.gradle.kts"
+    },
+    {
+     "rule": "listing.play_screenshots",
+     "loc": "phoneScreenshots"
+    }
+   ],
+   "must_not": [
+    {
+     "rule": "both.ugc_moderation",
+     "loc": "",
+     "why": "a GitHub Actions script calls createComment"
+    }
+   ]
+  },
+  {
+   "name": "Tusky",
+   "repo": "tuskyapp/Tusky",
+   "commit": "43ae0bb4556392393a3d759ce42a93f3a003e83a",
+   "stack": "android-native",
+   "labels": [],
+   "must_find": [],
+   "must_not": [
+    {
+     "rule": "both.payments_iap",
+     "loc": "",
+     "why": "'stripe' appears only in drawable art"
+    }
+   ]
+  },
+  {
+   "name": "wikipedia-ios",
+   "repo": "wikimedia/wikipedia-ios",
+   "commit": "4969cba667833b399bc87ce8fb6ee4009ddc0b35",
+   "stack": "ios-native",
+   "labels": [],
+   "must_find": [],
+   "must_not": [
+    {
+     "rule": "apple.usage_strings",
+     "loc": "MockCLLocationManager",
+     "why": "signal only in a unit-test mock"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "WMF Framework",
+     "why": "a framework plist is not an app"
+    },
+    {
+     "rule": "apple.ats",
+     "loc": "Local-Info.plist",
+     "why": "local development build variant"
+    }
+   ]
+  },
+  {
+   "name": "mattermost-mobile",
+   "repo": "mattermost/mattermost-mobile",
+   "commit": "786e12289930b28324987401f71c61c6bf2cc4c2",
+   "stack": "react-native-bare",
+   "labels": [
+    {
+     "rule": "apple.ats",
+     "loc": "ios/Mattermost/Info.plist",
+     "verdict": "tp",
+     "note": "NSAllowsArbitraryLoads is true"
+    },
+    {
+     "rule": "play.cleartext",
+     "loc": "AndroidManifest.xml",
+     "verdict": "tp",
+     "note": "usesCleartextTraffic is true"
+    },
+    {
+     "rule": "play.fgs_type",
+     "loc": "AndroidManifest.xml",
+     "verdict": "unverified",
+     "note": "the listed service may not be a foreground service"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "apple.ats",
+     "loc": "ios/Mattermost/Info.plist"
+    },
+    {
+     "rule": "play.cleartext",
+     "loc": "AndroidManifest.xml"
+    }
+   ],
+   "must_not": [
+    {
+     "rule": "play.account_deletion",
+     "loc": "",
+     "why": "'signup' appears only in a reserved-words list"
+    }
+   ]
+  },
+  {
+   "name": "localsend",
+   "repo": "localsend/localsend",
+   "commit": "44f48f18a5503c43873570ff489d27ff1983e198",
+   "stack": "flutter",
+   "labels": [
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no PrivacyInfo.xcprivacy"
+    },
+    {
+     "rule": "play.sensitive_permissions",
+     "loc": "AndroidManifest.xml",
+     "verdict": "tp",
+     "note": "QUERY_ALL_PACKAGES"
+    },
+    {
+     "rule": "play.sensitive_permissions",
+     "loc": "AndroidManifest.xml",
+     "verdict": "tp",
+     "note": "REQUEST_INSTALL_PACKAGES"
+    },
+    {
+     "rule": "play.cleartext",
+     "loc": "AndroidManifest.xml",
+     "verdict": "tp",
+     "note": "usesCleartextTraffic is true"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "play.sensitive_permissions",
+     "loc": "AndroidManifest.xml"
+    },
+    {
+     "rule": "play.cleartext",
+     "loc": "AndroidManifest.xml"
+    }
+   ],
+   "must_not": [
+    {
+     "rule": "apple.usage_strings",
+     "loc": "pubspec.lock",
+     "why": "image_picker appears only in a lockfile"
+    }
+   ]
+  },
+  {
+   "name": "ionic-conference-app",
+   "repo": "ionic-team/ionic-conference-app",
+   "commit": "55eaea28f21726d6ecad48179a966523d112246a",
+   "stack": "capacitor",
+   "labels": [
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no PrivacyInfo.xcprivacy"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "ios/App/App/Info.plist",
+     "verdict": "tp",
+     "note": "key missing"
+    },
+    {
+     "rule": "apple.account_deletion",
+     "loc": "user.service.ts",
+     "verdict": "unverified",
+     "note": "sign-up code exists; deletion absence not confirmed"
+    },
+    {
+     "rule": "play.account_deletion",
+     "loc": "user.service.ts",
+     "verdict": "unverified",
+     "note": "sign-up code exists; deletion absence not confirmed"
+    }
+   ],
+   "must_find": [],
+   "must_not": []
+  },
+  {
+   "name": "gallery",
+   "repo": "flutter/gallery",
+   "commit": "d12640d4b08ee6e706fd8c64a83fba0620c9aa8d",
+   "stack": "flutter",
+   "labels": [
+    {
+     "rule": "apple.deployment_target",
+     "loc": "project.pbxproj",
+     "verdict": "tp",
+     "note": "Runner targets 11.0 and 12.0"
+    },
+    {
+     "rule": "apple.deployment_target",
+     "loc": "project.pbxproj",
+     "verdict": "tp",
+     "note": "Runner targets 11.0 and 12.0"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no PrivacyInfo.xcprivacy"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "ios/Runner/Info.plist",
+     "verdict": "tp",
+     "note": "key missing"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "macos/Runner/Info.plist",
+     "verdict": "tp",
+     "note": "key missing"
+    },
+    {
+     "rule": "both.privacy_policy",
+     "loc": "(project)",
+     "verdict": "unverified",
+     "note": "Crashlytics is present; policy absence not fully confirmed"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "flutter.targetSdkVersion is inherited"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "apple.deployment_target",
+     "loc": "project.pbxproj"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)"
+    }
+   ],
+   "must_not": [
+    {
+     "rule": "apple.deployment_target",
+     "loc": "Podfile",
+     "why": "the Podfile platform line is commented out"
+    },
+    {
+     "rule": "both.payments_iap",
+     "loc": "",
+     "why": "'stripe' appears only in product names"
+    }
+   ]
+  },
+  {
+   "name": "IceCubesApp",
+   "repo": "Dimillian/IceCubesApp",
+   "commit": "98098b9c4b5928f89f338203193c2bf40ab7f38c",
+   "stack": "ios-swiftui",
+   "labels": [
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no PrivacyInfo.xcprivacy"
+    }
+   ],
+   "must_find": [],
+   "must_not": [
+    {
+     "rule": "apple.launch_screen",
+     "loc": "",
+     "why": "Xcode stores the key as INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]"
+    }
+   ]
+  },
+  {
+   "name": "mastodon-ios",
+   "repo": "mastodon/mastodon-ios",
+   "commit": "f3dc8d37ad81a8aaa5607f0086bd78d3e41430fb",
+   "stack": "ios-native",
+   "labels": [
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no PrivacyInfo.xcprivacy"
+    }
+   ],
+   "must_find": [],
+   "must_not": [
+    {
+     "rule": "apple.usage_strings",
+     "loc": "",
+     "why": "photo use is add-only; camera key is in InfoPlist.strings"
+    }
+   ]
+  },
+  {
+   "name": "social-app",
+   "repo": "bluesky-social/social-app",
+   "commit": "b4a27408716013275f9b0d84004f1dc93096ddae",
+   "stack": "expo",
+   "labels": [],
+   "must_find": [],
+   "must_not": []
+  },
+  {
+   "name": "react-native-template-obytes",
+   "repo": "obytes/react-native-template-obytes",
+   "commit": "fd9b358ed11913d2a49fd9ffa6582fe03ba130e7",
+   "stack": "expo",
+   "labels": [
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacyManifests config"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "inherited from the Expo SDK"
+    }
+   ],
+   "must_find": [],
+   "must_not": []
+  },
+  {
+   "name": "arfoundation-samples",
+   "repo": "Unity-Technologies/arfoundation-samples",
+   "commit": "16489599d11baf15548b1d8b632bc455c65e07ca",
+   "stack": "unity",
+   "labels": [
+    {
+     "rule": "apple.export_compliance",
+     "loc": "ProjectSettings",
+     "verdict": "unverified",
+     "note": "Unity may add the key in a build step"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "unverified",
+     "note": "Unity may add a manifest at build time"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "AndroidTargetSdkVersion is 0 (automatic)"
+    }
+   ],
+   "must_find": [],
+   "must_not": [
+    {
+     "rule": "both.privacy_policy",
+     "loc": "",
+     "why": "'amplitude' appears only in a .unity scene value"
+    }
+   ]
+  },
+  {
+   "name": "phonegap-app-developer",
+   "repo": "phonegap/phonegap-app-developer",
+   "commit": "0ae5e3daf344da9ed474e5f1ae12c274fab288c3",
+   "stack": "cordova",
+   "labels": [
+    {
+     "rule": "apple.export_compliance",
+     "loc": "config.xml",
+     "verdict": "unverified",
+     "note": "config lacks the key; a plugin may add it"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "unverified",
+     "note": "Cordova may add a manifest at build time"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no targetSdk preference"
+    }
+   ],
+   "must_find": [],
+   "must_not": []
+  }
+ ]
+}
