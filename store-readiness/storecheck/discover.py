@@ -15,6 +15,7 @@ from pathlib import Path
 SKIP_DIRS = {".git", "node_modules", ".gradle", "build", "Pods", "DerivedData",
              ".dart_tool", ".idea", "__pycache__", "venv", ".venv", "dist", "out",
              "target", ".next"}
+BUILD_ARTIFACT_DIRS = ("outputs", "ios/ipa", "app/outputs")
 MAX_TEXT_BYTES = 512 * 1024
 MAX_TEXT_FILES = 20000
 ELF_HEAD = 8192
@@ -239,8 +240,13 @@ def _walk(root: Path):
             if e.is_dir():
                 if e.suffix in (".xcodeproj", ".xcworkspace"):
                     yield e
-                if e.name not in SKIP_DIRS and not e.is_symlink():
+                if e.is_symlink():
+                    continue
+                if e.name not in SKIP_DIRS:
                     stack.append(e)
+                elif e.name == "build":
+                    # build output is skipped, except where built APK/AAB/IPA artifacts are normally written
+                    stack.extend(e / sub for sub in BUILD_ARTIFACT_DIRS if (e / sub).is_dir())
             else:
                 yield e
 
@@ -295,8 +301,16 @@ def _scan_archive(proj: Project, f: Path) -> None:
         except (AxmlError, KeyError, OSError, zipfile.BadZipFile, struct_error) as e:
             proj.notes.append(f"{f.name}: could not decode AndroidManifest.xml ({e}); manifest checks skipped.")
     elif f.suffix.lower() == ".aab":
-        proj.notes.append(f"{f.name}: an AAB stores its manifest as protobuf, which is not decoded; "
-                          "manifest checks were skipped. Point storecheck at the source project or an APK.")
+        from .pbxml import PbxmlError, decode_proto_manifest
+        try:
+            with zipfile.ZipFile(f) as z:
+                names = [n for n in z.namelist() if n.endswith("/manifest/AndroidManifest.xml")]
+                for n in names:
+                    proj.archive_manifests.append((f"{f.name}!{n}", decode_proto_manifest(z.read(n))))
+            if not names:
+                proj.notes.append(f"{f.name}: no module manifest found; manifest checks skipped.")
+        except (PbxmlError, OSError, zipfile.BadZipFile) as e:
+            proj.notes.append(f"{f.name}: could not decode the bundle manifest ({e}); manifest checks skipped.")
 
 
 def _detect_frameworks(proj: Project, root: Path) -> None:

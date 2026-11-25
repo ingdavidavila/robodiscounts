@@ -32,6 +32,12 @@ class MeasureTests(unittest.TestCase):
                 self.assertTrue(it.get("reason"), it["id"])
             self.assertTrue(it["source"].startswith("https://"), it["id"])
 
+    def test_verified_readers_name_a_reference_and_an_existing_test(self):
+        for r in json.loads((measure.FW / "readers.json").read_text())["readers"]:
+            if r["status"] == "verified":
+                self.assertTrue(r["reference"], r["reader"])
+                self.assertTrue((measure.ROOT / r["test"]).exists(), r["reader"])
+
     def test_recording_a_run_requires_log_and_review(self):
         with self.assertRaises(SystemExit):
             measure.main(["--log", "only a log"])

@@ -1,0 +1,33 @@
+{
+ "note": "File-format readers written for this tool (not stdlib parsers). 'verified' needs an independent reference run on real data and a test that keeps it that way.",
+ "readers": [
+  {
+   "reader": "axml (APK binary manifest)",
+   "module": "storecheck/axml.py",
+   "status": "verified",
+   "reference": "androguard, on a real aapt2-built APK and on encoder output with UTF-8 and UTF-16 pools",
+   "test": "tests/test_real_manifests.py"
+  },
+  {
+   "reader": "pbxml (AAB protobuf manifest)",
+   "module": "storecheck/pbxml.py",
+   "status": "verified",
+   "reference": "AOSP aapt2 Resources.proto compiled with protoc, on 6 real bundle manifests",
+   "test": "tests/test_real_manifests.py"
+  },
+  {
+   "reader": "ELF alignment (16 KB page size)",
+   "module": "storecheck/checks.py:elf_alignment",
+   "status": "unverified",
+   "reference": "",
+   "test": ""
+  },
+  {
+   "reader": "PNG/JPEG dimensions",
+   "module": "storecheck/media.py",
+   "status": "unverified",
+   "reference": "",
+   "test": ""
+  }
+ ]
+}

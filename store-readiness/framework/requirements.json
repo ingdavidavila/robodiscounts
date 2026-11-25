@@ -1171,7 +1171,7 @@
     "play.target_sdk",
     "play.target_sdk_unknown"
    ],
-   "reason": ""
+   "reason": "source Gradle files, version catalogs, Expo/Unity/Cordova config, and built APK/AAB manifests (a missing target equals minSdk; for bundles only the base module is compared, an assumption)"
   },
   {
    "id": "google.app_bundle",
@@ -1182,7 +1182,7 @@
    "rules": [
     "play.aab"
    ],
-   "reason": ""
+   "reason": "checks that an AAB accompanies an APK; cannot see what is uploaded to the Play Console"
   },
   {
    "id": "google.page_size_16kb",
@@ -1193,7 +1193,7 @@
    "rules": [
     "play.16kb"
    ],
-   "reason": "APK and repo libraries only; AAB contents not read"
+   "reason": "APK, AAB and repo native libraries (arm64-v8a and x86_64); other ABIs are not required"
   },
   {
    "id": "google.exported",
@@ -1204,7 +1204,7 @@
    "rules": [
     "play.exported_missing"
    ],
-   "reason": "source manifests and APKs"
+   "reason": "complete for built APK and AAB manifests; a source-only scan misses components merged in from libraries"
   },
   {
    "id": "google.fgs_types",

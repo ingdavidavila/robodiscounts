@@ -76,12 +76,29 @@ def _target_sdk_values(p: Project):
             v = int(tok) if tok.isdigit() else _resolve_constant(p, tok)
             if v is not None:
                 vals.append((rel, v))
+    archive = {l for l, _ in p.archive_manifests}
+    has_base = {l.split("!")[0] for l in archive if _module_of(l) == "base"}
     for mf, root in _manifest_roots(p):
         sdk = root.find("uses-sdk")
         v = sdk.get(ANDROID + "targetSdkVersion") if sdk is not None else None
-        if v and v.isdigit():
+        if mf in archive:
+            # Built artifacts: Android's rule is that a missing targetSdkVersion equals minSdkVersion (default 1).
+            # In a bundle only the base module is compared (an assumption: the app's target is the base module's).
+            if _module_of(mf) not in (None, "base") and mf.split("!")[0] in has_base:
+                continue
+            mn = sdk.get(ANDROID + "minSdkVersion") if sdk is not None else None
+            eff = v if v and v.isdigit() else (mn if mn and mn.isdigit() else "1")
+            vals.append((mf, int(eff)))
+        elif v and v.isdigit():
             vals.append((mf, int(v)))
     return vals
+
+
+def _module_of(label: str):
+    """'app.aab!base/manifest/AndroidManifest.xml' -> 'base'; None for APKs and source manifests."""
+    if ".aab!" not in label:
+        return None
+    return label.split("!", 1)[1].split("/", 1)[0]
 
 
 def android_target_sdk(p: Project, a: dict):
@@ -92,7 +109,7 @@ def android_target_sdk(p: Project, a: dict):
 def android_target_sdk_unknown(p: Project, a: dict):
     if _target_sdk_values(p):
         return []
-    if not (p.gradle_files or p.android_manifests or p.android_hint):
+    if not (p.gradle_files or p.android_manifests or p.android_hint or p.archive_manifests):
         return []
     return [("(project)", "no numeric targetSdk found; it may be inherited from Flutter, React Native, "
                           "Expo, a version catalog, or Unity's 'Automatic (highest installed)' setting")]

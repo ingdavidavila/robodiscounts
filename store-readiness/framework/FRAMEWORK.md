@@ -31,7 +31,7 @@ Eight dimensions, each with a metric a script computes, a weight, and a **gate**
 | | Dimension | Weight | Gate | Metric |
 |---|---|---|---|---|
 | D1 | Requirement coverage | 25 | 80% | 0.7 x static coverage + 0.3 x checklist coverage of the requirements catalog |
-| D2 | Correctness | 25 | 90% | 0.5 x synthetic benchmark + 0.5 x real-app benchmark |
+| D2 | Correctness | 25 | 90% | 0.45 x synthetic benchmark + 0.45 x real-app benchmark + 0.10 x file-format readers verified |
 | D3 | Verification | 10 | 90% | 0.6 x rules verified + 0.2 x rules fresh + 0.2 x SDK mappings verified |
 | D4 | Actionability | 10 | 80% | 0.5 x rule schema complete + 0.5 x auto-fixable share (target 30% of rules) |
 | D5 | Stack reach | 10 | 75% | stacks validated on at least 2 real apps (1 app counts half) over the target stack list |
@@ -73,6 +73,10 @@ Each item has a class:
   `unverified` with evidence. Precision = tp / (tp + fp + known false positives that came back). Known-issue recall =
   true issues the tool must find. Score = precision x recall x min(1, verified fraction / 0.8). **Any unlabeled
   finding halves the score** until it is triaged against the source.
+
+- **Readers verified** (`framework/readers.json`): every file-format reader the tool wrote itself (binary manifests,
+  ELF headers, image sizes) counts as verified only when it was run against an independent reference on real data and
+  a test keeps it that way. Added 2026-11-25 after manifest work showed the scorecard could not see this kind of trust.
 
 ### D3 Verification
 

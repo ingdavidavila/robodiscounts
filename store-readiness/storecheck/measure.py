@@ -107,6 +107,12 @@ def run_synthetic() -> dict:
                 if r in ids:
                     not_bad += 1
                     failures.append(f"{c['id']}: false positive {r}")
+            for rid, limit in c.get("max_count", {}).items():
+                found_total += 1
+                if sum(1 for f in findings if f.rule_id == rid) <= limit:
+                    found_ok += 1
+                else:
+                    failures.append(f"{c['id']}: {rid} reported more than {limit} time(s)")
             for n in c.get("must_note", []):
                 note_total += 1
                 if any(n in x for x in project.notes):
@@ -185,9 +191,17 @@ def run_real(corpus: Path) -> dict:
             "crashes": crashes, "slowest_seconds": slowest, "problems": problems, "per_app": per_app}
 
 
+def readers_verified() -> dict:
+    rs = _load("readers.json")["readers"]
+    ok = [r for r in rs if r["status"] == "verified" and r.get("reference") and (ROOT / r["test"]).exists()]
+    return {"score": len(ok) / len(rs), "verified": [r["reader"] for r in ok],
+            "unverified": [r["reader"] for r in rs if r not in ok]}
+
+
 def d2_correctness(syn: dict, real: dict | None) -> dict:
-    score = 0.5 * syn["score"] + (0.5 * real["score"] if real else 0.0)
-    return {"score": score, "synthetic": syn, "real": real, "real_measured": real is not None}
+    rd = readers_verified()
+    score = 0.45 * syn["score"] + (0.45 * real["score"] if real else 0.0) + 0.10 * rd["score"]
+    return {"score": score, "synthetic": syn, "real": real, "real_measured": real is not None, "readers": rd}
 
 
 # ---------------------------------------------------------------------------------------------- D3
@@ -332,6 +346,8 @@ def render(res: dict, prev: dict | None) -> str:
     if prev:
         L.append(f"previous overall {prev['overall'] * 100:.1f}% ({prev['ts']} @ {prev['commit']}: {prev['log']})")
     d2 = res["dims"]["D2"]
+    if d2.get("readers", {}).get("unverified"):
+        L.append("D2 readers not yet verified against an independent reference: " + ", ".join(d2["readers"]["unverified"]))
     L.append("D2 real corpus: " + ("measured" if d2["real_measured"] else "NOT MEASURED (pass --corpus; counted as 0)"))
     for f in d2["synthetic"]["failures"][:12]:
         L.append("  synthetic failure: " + f)
