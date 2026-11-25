@@ -1,3 +1,0 @@
-[console_scripts]
-storecheck = storecheck.__main__:main
-storecheck-gui = storecheck.gui:main
