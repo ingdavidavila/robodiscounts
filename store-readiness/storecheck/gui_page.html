@@ -156,11 +156,13 @@ function renderPrivacy(pr){
       tr.appendChild(el("td","",r.key));
       tr.appendChild(el("td","",r.google_category?r.google_category+" › "+r.google_type:"(no direct equivalent)"));
       tr.appendChild(el("td","",r.apple_category+" › "+r.apple_type));
-      tr.appendChild(el("td","",r.strength));
+      tr.appendChild(el("td","",r.strength+(r.stores&&r.stores!=="both"?" ("+r.stores+" only)":"")));
       tr.appendChild(el("td","",r.evidence.slice(0,3).map(function(e){return e.what+" ("+e.where+")"}).join("; ")));
       t.appendChild(tr)});
     w.appendChild(t);p.appendChild(w)}
   if(pr.tracking_signals.length)p.appendChild(el("p","","Possible tracking (Apple ATT prompt needed): "+pr.tracking_signals.join(", ")));
+  if(pr.sdk_notes&&pr.sdk_notes.length){p.appendChild(el("h3","","SDK notes"));
+    pr.sdk_notes.forEach(function(n){p.appendChild(el("p","k",n.name+" ("+(n.verified?"mapping verified "+n.verified:"mapping NOT verified")+"): "+n.hint))})}
   pr.notes.forEach(function(n){p.appendChild(el("p","k","Note: "+n))});
   p.appendChild(el("p","k","The store forms also ask things only you can answer (purposes, sharing, linked to identity, encryption, deletion, privacy policy URL). Download the draft for the full checklist."));
 }

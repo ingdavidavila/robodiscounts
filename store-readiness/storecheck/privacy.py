@@ -19,26 +19,52 @@ GOOGLE_PURPOSES = ["App functionality", "Analytics", "Developer communications",
                    "Personalization", "Account management"]
 
 
+def _items(sig):
+    """Normalize a signal's data list: strings or {"key", "only", "usage_dependent"}."""
+    for it in sig["data"]:
+        yield (it, None, False) if isinstance(it, str) else (it["key"], it.get("only"), bool(it.get("usage_dependent")))
+
+
 def build_draft(project: Project) -> dict:
     entries: dict[str, dict] = {}
     tracking: list[str] = []
     notes: list[str] = []
+    sdk_notes: list[dict] = []
 
-    def add(key, kind, what, where, transmits, purposes=(), hint=""):
-        e = entries.setdefault(key, {"evidence": [], "purposes": set(), "hints": set(), "transmits": False})
-        e["evidence"].append({"kind": kind, "what": what, "where": where})
-        e["transmits"] |= transmits
+    def add(key, kind, what, where, transmits, purposes=(), hint="", only=None, usage_dep=False, verified=""):
+        e = entries.setdefault(key, {"evidence": [], "purposes": set(), "hints": set(), "certain": False,
+                                     "sdk_dep": False, "stores": set()})
+        e["evidence"].append({"kind": kind, "what": what, "where": where, "verified": verified,
+                              "usage_dependent": usage_dep, "only": only})
+        if kind == "sdk":
+            if transmits and not usage_dep:
+                e["certain"] = True
+            else:
+                e["sdk_dep"] = True
+        e["stores"].add(only or "both")
         e["purposes"].update(purposes)
         if hint:
             e["hints"].add(hint)
 
     for sig in DATA["signals"]:
-        for where in project.find_signals(sig["pattern"]):
-            for key in sig["data"]:
-                add(key, sig["kind"], sig["name"], where, sig["transmits"], sig["purposes"], sig["hint"])
-            if sig["tracking"]:
-                tracking.append(sig["name"])
-            break  # one location per signal is enough evidence for the draft
+        hits = project.find_signals(sig["pattern"], limit=40)
+        if not hits:
+            continue
+        dep_files = DATA["dependency_files"]
+        # prefer a dependency declaration as the evidence location over an arbitrary source file
+        where = min(hits, key=lambda h: (h.replace("\\", "/").rsplit("/", 1)[-1].lower() not in dep_files, 0))
+        off = project.find_signal(sig["disabled_pattern"]) if sig.get("disabled_pattern") else None
+        what = sig["name"] + (f" (collection disabled by default in {off})" if off else "")
+        hint = sig["hint"] + (f" Collection looks disabled by default in {off}; it still counts if you turn it "
+                              "on later, for example after consent." if off else "")
+        for key, only, usage_dep in _items(sig):
+            add(key, sig["kind"], what, where, sig["transmits"], sig["purposes"], hint,
+                only, usage_dep or bool(off), sig.get("verified", ""))
+        if sig["tracking"] and not off:
+            tracking.append(sig["name"])
+        if sig["kind"] == "sdk":
+            sdk_notes.append({"name": sig["name"], "where": where, "hint": hint,
+                              "verified": sig.get("verified", ""), "sources": sig.get("sources", [])})
 
     for m, root in _manifest_roots(project):
         for el in list(root.iter("uses-permission")) + list(root.iter("uses-permission-sdk-23")):
@@ -46,17 +72,18 @@ def build_draft(project: Project) -> dict:
                 continue
             short = el.get(ANDROID + "name", "").rsplit(".", 1)[-1]
             for key in DATA["permissions"]["android_permissions"].get(short, []):
-                add(key, "permission", f"Android permission {short}", str(m.relative_to(project.root)), False)
+                add(key, "permission", f"Android permission {short}", str(m.relative_to(project.root)), False,
+                    only="google")
 
     for where, short in project.extra_permissions:
         for key in DATA["permissions"]["android_permissions"].get(short, []):
-            add(key, "permission", f"Android permission {short} (config)", where, False)
+            add(key, "permission", f"Android permission {short} (config)", where, False, only="google")
 
     for label, d in project.plists:
         for k, keys in DATA["permissions"]["ios_plist_keys"].items():
             if k in d:
                 for key in keys:
-                    add(key, "plist", f"Info.plist {k}", label, False)
+                    add(key, "plist", f"Info.plist {k}", label, False, only="apple")
         if DATA["permissions"]["ios_tracking_key"] in d:
             tracking.append("NSUserTrackingUsageDescription present")
 
@@ -68,23 +95,26 @@ def build_draft(project: Project) -> dict:
     for key, e in entries.items():
         t = DATA["data_types"][key]
         kinds = {x["kind"] for x in e["evidence"]}
-        if e["transmits"]:
+        if e["certain"]:
             strength = "likely collected (SDK sends data off-device)"
+        elif e["sdk_dep"]:
+            strength = "possible (depends on how you use the SDK)"
         elif len(kinds) > 1:
             strength = "possible (permission and API both present; collected only if it leaves the device)"
         else:
             strength = "possible (capability only; collected only if it leaves the device)"
-        rows.append({"key": key, **t, "strength": strength, "evidence": e["evidence"],
+        stores = "both" if "both" in e["stores"] or len(e["stores"]) > 1 else next(iter(e["stores"]))
+        rows.append({"key": key, **t, "strength": strength, "stores": stores, "evidence": e["evidence"],
                      "purposes_hint": sorted(e["purposes"]), "hints": sorted(e["hints"])})
     rows.sort(key=lambda r: (not r["strength"].startswith("likely"), r["google_category"] or "~", r["key"]))
-    return {"verified": DATA["verified"], "mapping_note": DATA["note"], "rows": rows,
+    return {"verified": DATA["verified"], "mapping_note": DATA["note"], "rows": rows, "sdk_notes": sdk_notes,
             "tracking_signals": sorted(set(tracking)), "notes": notes}
 
 
 def to_markdown(draft: dict) -> str:
     L = ["# Privacy label draft", "",
-         "> **Draft only.** Built from code and manifest evidence. The mappings are unverified "
-         "(see below) and the store forms ask things only you can answer. Review every row.", ""]
+         "> **Draft only.** Built from code and manifest evidence. SDK mappings are marked verified or unverified "
+         "below, and the store forms ask things only you can answer. Review every row.", ""]
     L += [f"Mapping status: {'verified' if draft['verified'] else 'NOT verified against current store docs/vendor guides'}. "
           + draft["mapping_note"], ""]
     if not draft["rows"]:
@@ -95,11 +125,17 @@ def to_markdown(draft: dict) -> str:
               "| Data | Google Data safety | Apple privacy label | Status | Evidence |", "|---|---|---|---|---|"]
         for r in draft["rows"]:
             g = f"{r['google_category']} › {r['google_type']}" if r["google_category"] else "(no direct equivalent)"
-            ev = "; ".join(f"{e['what']} ({e['where']})" for e in r["evidence"][:3])
-            L.append(f"| {r['key']} | {g} | {r['apple_category']} › {r['apple_type']} | {r['strength']} | {ev} |")
-        hints = [(r["key"], h) for r in draft["rows"] for h in r["hints"]]
-        if hints:
-            L += ["", "### SDK notes", ""] + [f"- **{k}**: {h}" for k, h in hints]
+            ev = "; ".join(f"{e['what']} ({e['where']})" + ("" if e["kind"] != "sdk" or e["verified"]
+                                                               else " [mapping unverified]")
+                            for e in r["evidence"][:3])
+            status = r["strength"] + (f" ({r['stores'].capitalize()} only)" if r["stores"] != "both" else "")
+            L.append(f"| {r['key']} | {g} | {r['apple_category']} › {r['apple_type']} | {status} | {ev} |")
+        if draft["sdk_notes"]:
+            L += ["", "### SDK notes", ""]
+            for n in draft["sdk_notes"]:
+                v = f"mapping verified {n['verified']}" if n["verified"] else "mapping NOT verified"
+                src = (" Sources: " + ", ".join(n["sources"])) if n["sources"] else ""
+                L.append(f"- **{n['name']}** ({v}): {n['hint']}{src}".rstrip())
     if draft["tracking_signals"]:
         L += ["", "## Tracking (Apple)", "",
               "These suggest data may be used for tracking, which means declaring it, showing the App "

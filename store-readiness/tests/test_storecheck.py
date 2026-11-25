@@ -481,3 +481,75 @@ class PlistDiscovery(unittest.TestCase):
         self.w("App/Local-Info.plist", plist(ats))
         _, f = scan(str(self.root), "apple")
         self.assertIn("apple.ats", ids(f))      # only variant: still checked
+
+
+class VerifiedSdkMappings(unittest.TestCase):
+    """Corrections made after reading each vendor's own disclosure page (2026-11-25)."""
+
+    def setUp(self):
+        self.d = tempfile.TemporaryDirectory()
+        self.root = Path(self.d.name)
+
+    def tearDown(self):
+        self.d.cleanup()
+
+    def draft(self, deps: str):
+        from storecheck import privacy
+        from storecheck.discover import discover
+        (self.root / "pubspec.yaml").write_text("dependencies:\n" + deps)
+        d = privacy.build_draft(discover(self.root))
+        return d, {r["key"]: r for r in d["rows"]}
+
+    def test_adjust_does_not_claim_advertising_data_or_location(self):
+        _, rows = self.draft("  adjust_sdk: 1\n")
+        self.assertIn("device_id", rows)
+        self.assertIn("app_interactions", rows)
+        self.assertNotIn("ad_data", rows)
+        self.assertNotIn("approx_location", rows)
+
+    def test_mixpanel_includes_coarse_location(self):
+        _, rows = self.draft("  mixpanel_flutter: 1\n")
+        self.assertIn("approx_location", rows)
+        self.assertIn("user_id", rows)
+
+    def test_usage_dependent_types_are_possible_not_likely(self):
+        _, rows = self.draft("  firebase_auth: 1\n")
+        self.assertIn("likely", rows["user_id"]["strength"])
+        for k in ("email", "name", "phone"):
+            self.assertIn("depends on how you use", rows[k]["strength"])
+
+    def test_store_specific_data(self):
+        _, rows = self.draft("  onesignal_flutter: 1\n  OneSignal: 1\n")
+        self.assertEqual(rows["device_id"]["stores"], "apple")      # Google: not collected by default
+        self.assertEqual(rows["app_interactions"]["stores"], "both")
+
+    def test_crashlytics_collects_installation_id(self):
+        _, rows = self.draft("  firebase_crashlytics: 1\n")
+        self.assertTrue({"crash_logs", "diagnostics", "device_id"} <= set(rows))
+
+    def test_sdk_notes_show_verification_status_once_per_sdk(self):
+        from storecheck import privacy
+        d, _ = self.draft("  firebase_crashlytics: 1\n  stripe_android: 1\n  flutter_stripe: 1\n")
+        names = [n["name"] for n in d["sdk_notes"]]
+        self.assertEqual(names.count("Firebase Crashlytics"), 1)
+        md = privacy.to_markdown(d)
+        self.assertIn("mapping verified 2026-11-25", md)
+        self.assertIn("mapping NOT verified", md)               # Stripe
+        self.assertIn("[mapping unverified]", md)
+
+    def test_disabled_collection_flag_downgrades_to_possible(self):
+        self.root.joinpath("android/app/src/main").mkdir(parents=True)
+        self.root.joinpath("android/app/src/main/AndroidManifest.xml").write_text(
+            f'<manifest {NS}><application><meta-data android:name="firebase_analytics_collection_deactivated" '
+            'android:value="true"/></application></manifest>')
+        _, rows = self.draft("  firebase_analytics: 1\n")
+        self.assertIn("depends on how you use", rows["app_interactions"]["strength"])
+        self.assertIn("disabled by default", rows["app_interactions"]["evidence"][0]["what"])
+
+    def test_evidence_prefers_dependency_file_over_other_text(self):
+        from storecheck import privacy
+        from storecheck.discover import discover
+        (self.root / "jest.config.js").write_text("transformIgnorePatterns: ['@sentry/react-native']")
+        (self.root / "package.json").write_text('{"dependencies": {"@sentry/react-native": "8"}}')
+        d = privacy.build_draft(discover(self.root))
+        self.assertEqual(d["sdk_notes"][0]["where"], "package.json")

@@ -73,3 +73,30 @@ Findings that rely on a plist inferred from config are reported as "likely", not
   key in the main app.
 - No app was checked against an actual store review outcome.
 - macOS `Info.plist` files in cross-platform projects are checked with the same iOS rules.
+
+## Verifying the SDK-to-data mappings (2026-11-25)
+
+Read each vendor's own disclosure page (Firebase, AdMob, Sentry, Facebook, Adjust, Mixpanel, OneSignal, RevenueCat; the
+Facebook post is from 2022). Not read: Stripe (pages need JavaScript), AppsFlyer (HTTP 403 to automated fetching), Branch,
+Amplitude, Segment, PostHog, Google/Apple sign-in. Those stay marked unverified.
+
+Corrections the vendor pages forced:
+
+| Mapping | Was | Now |
+|---|---|---|
+| Adjust | "advertising data" | Adjust says it does NOT collect advertising data, location or diagnostics |
+| AppsFlyer + Adjust + Branch | one group | split; only Adjust verified |
+| Firebase Analytics | interactions, device ID | also coarse location (masked IP), in-app purchase events, advertising ID |
+| AdMob | no crash logs | Apple's page lists crash logs |
+| Firebase Auth | email, user ID | also name and phone (only depending on use) and IP address |
+| Mixpanel | interactions, device ID | also user ID and coarse location (city, region, country by default) |
+| OneSignal | device ID | Apple: identifier yes; Google: device IDs not collected by default (store-specific now) |
+| RevenueCat | purchases, user ID | user ID and device ID only depending on use; no location or diagnostics |
+| Sentry | analytics + app functionality purposes | App functionality only (its published manifest example) |
+
+Two more problems found by running the draft on Mattermost:
+
+| # | Problem | Fix |
+|---|---|---|
+| 17 | `firebase_analytics_collection_deactivated = true` in the manifest still produced "likely collected" | collection-disabled flags (Firebase Analytics, Crashlytics) downgrade to "possible" with a note that it still counts if turned on later; the flag names are from memory of the Firebase docs |
+| 18 | Evidence cited `jest.config.js` instead of the `package.json` dependency | dependency files are preferred as the evidence location |

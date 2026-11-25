@@ -33,7 +33,7 @@ python -m storecheck path --privacy-draft              # Markdown draft
 python -m storecheck path --privacy-draft --format json
 python -m storecheck path --privacy-draft --explain    # + local-LLM 'Data we collect' wording ([CONFIRM] on guesses)
 ```
-Maps evidence (known SDKs in dependency files, Android permissions, iOS usage-description keys, sensitive API names) to Google Data safety categories and Apple App Privacy types, flags likely tracking, and lists the questions only you can answer (purposes, sharing, linked to identity, encryption, deletion). SDK-sent data is "likely collected"; permission/API-only evidence is "possible" because the stores only count data that leaves the device. Mappings live in `storecheck/privacy_data.json` and use verified Apple and Google category/type names; the SDK-to-data mappings are not verified.
+Maps evidence (known SDKs in dependency files, Android permissions, iOS usage-description keys, sensitive API names) to Google Data safety categories and Apple App Privacy types, flags likely tracking, and lists the questions only you can answer (purposes, sharing, linked to identity, encryption, deletion). SDK-sent data is "likely collected"; permission/API-only evidence is "possible" because the stores only count data that leaves the device. Mappings live in `storecheck/privacy_data.json` and use verified Apple and Google category/type names. SDK-to-data mappings are verified for 11 of 26 signal groups (Firebase Analytics/Crashlytics/Auth/Messaging, AdMob, Sentry, Facebook, Adjust, Mixpanel, OneSignal, RevenueCat) against each vendor's own disclosure page on 2026-11-25; the rest are marked "mapping NOT verified" in the draft.
 
 ## Severity
 - **blocker**: the store will reject the build
