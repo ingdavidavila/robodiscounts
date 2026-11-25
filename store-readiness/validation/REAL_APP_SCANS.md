@@ -100,3 +100,31 @@ Two more problems found by running the draft on Mattermost:
 |---|---|---|
 | 17 | `firebase_analytics_collection_deactivated = true` in the manifest still produced "likely collected" | collection-disabled flags (Firebase Analytics, Crashlytics) downgrade to "possible" with a note that it still counts if turned on later; the flag names are from memory of the Firebase docs |
 | 18 | Evidence cited `jest.config.js` instead of the `package.json` dependency | dependency files are preferred as the evidence location |
+
+## The 11 missing requirement areas (2026-11-25)
+
+Each area was built from the official source (Android 12 and 14 behavior pages, Android signing docs, Apple's Human
+Interface Guidelines, upcoming-requirements page, entitlement and Info.plist docs, App Store Connect limits and
+screenshot specs, Google Play listing, Payments, UGC and User Data policies, Apple guidelines 1.2, 2.5.4, 3.1.1),
+then run on the 14 apps and every new finding was checked against the source.
+
+APK manifests: a binary-manifest decoder (`storecheck/axml.py`) was cross-checked against two independent libraries
+(pyaxml to encode, androguard to decode) with UTF-8 and UTF-16 string pools and typed attributes. Not verified on a
+real aapt2-built APK (none was reachable). AAB manifests are protobuf and are **not** decoded.
+
+New findings that were true: NewPipe has 9 Play phone screenshots (limit 8); Gallery's iOS targets are 11.0 and 12.0
+(below 13); Gallery and nowinandroid sign release builds with the debug key (nowinandroid's own comments say so).
+
+| # | Problem found by running on real apps | Fix |
+|---|---|---|
+| 19 | NewPipe: "user-generated content" from a GitHub Actions script | CI and repo-automation folders are not app code |
+| 20 | Tusky, Gallery: "payment SDK" from the word "stripe" in drawables and product names | payment SDKs are judged from dependency files only |
+| 21 | Mattermost, Gallery: debug signing flagged although it was only a fallback next to a real release key | only flag when the debug key is the release build's sole signing config |
+| 22 | Gallery: iOS 11 target from a commented-out Podfile line | comments are stripped before matching |
+| 23 | IceCubes: launch screen "missing" because Xcode stores the key as `"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]"` | parse conditional and quoted build-setting keys |
+| 24 | Foreground-service advisory fired on framework, system-bound and disabled services | only when code starts foreground services; library/permission-bound/disabled services skipped |
+| 25 | ARFoundation: "Amplitude" analytics from a `.unity` scene value (older privacy-draft bug) | SDK evidence only from code, manifests and dependency files |
+
+Known gaps: AAB manifests; Play App Signing and keystore handling; icon alpha rule (Apple's page does not state it);
+Play screenshot pixel sizes; whether Apple's upload validation rejects a missing launch screen or push entitlement (not
+stated on the pages read); Google's IARC questionnaire wording; only 5 kinds of fix patch.

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import plistlib
 import re
+import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
@@ -17,6 +18,7 @@ SKIP_DIRS = {".git", "node_modules", ".gradle", "build", "Pods", "DerivedData",
 MAX_TEXT_BYTES = 512 * 1024
 MAX_TEXT_FILES = 20000
 ELF_HEAD = 8192
+from struct import error as struct_error
 
 
 class Project:
@@ -37,6 +39,12 @@ class Project:
         self.extra_permissions: list[tuple[str, str]] = []  # (where, short name) from config files
         self.synthetic_plists: dict[str, str] = {}    # label -> note, plists inferred from config
         self.android_hint = False                     # Android configured in a config file
+        self.archive_manifests: list[tuple[str, "ET.Element"]] = []   # decoded APK manifests
+        self.entitlements: list[tuple[str, dict]] = []                 # *.entitlements plists
+        self.appicon_sets: list[Path] = []                             # Contents.json of *.appiconset
+        self.has_icon_composer = False                                 # Xcode 26 *.icon bundle
+        self.listing_files: list[Path] = []                            # fastlane / F-Droid store text files
+        self.screenshots: list[Path] = []                              # store screenshot images
         self.localized_plist_keys: set[str] = set()   # usage keys found in InfoPlist.strings
         self.passed: list[tuple[str, str]] = []
         self._search_cache: dict[tuple, str | None] = {}
@@ -56,7 +64,7 @@ class Project:
         rx = re.compile(pattern)
         out = []
         for name, text, is_lock in self.texts:
-            if is_lock and not locks:
+            if (is_lock and not locks) or _is_ci_path(name):
                 continue
             if rx.search(text):
                 out.append(name)
@@ -72,7 +80,7 @@ class Project:
             rx = re.compile(pattern)
             self._search_cache[key] = next(
                 (name for name, text, is_lock in self.texts
-                 if (locks or not is_lock) and rx.search(text)), None)
+                 if (locks or not is_lock) and not _is_ci_path(name) and rx.search(text)), None)
         return self._search_cache[key]
 
 
@@ -84,9 +92,18 @@ _LOCK_NAMES = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "pubspec.lock
                "cargo.lock", "gemfile.lock", "package.resolved", "composer.lock", "bun.lockb"}
 # Info.plist is often renamed per build variant: Wikipedia-Info.plist, Info-iOS.plist, Alpha-Info.plist
 _INFO_PLIST_RX = re.compile(r"(?i)^(.*[-_.])?info([-_.].*)?\.plist$")
+LISTING_NAMES = {"name.txt", "subtitle.txt", "description.txt", "keywords.txt", "promotional_text.txt",
+                 "title.txt", "short_description.txt", "full_description.txt", "privacy_url.txt"}
+IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg"}
 _CONFIG_NAMES = {"project.pbxproj", "app.json", "config.xml", "ProjectSettings.asset"}
 _APP_CONFIG_RX = re.compile(r"app\.config\.(js|ts|json|mjs|cjs)$")
 _SDK_NAMES = {"build.gradle", "build.gradle.kts", "variables.gradle", "gradle.properties", "libs.versions.toml"}
+
+
+def _is_ci_path(rel: str) -> bool:
+    """CI and repo-automation files (GitHub Actions scripts and so on) are not app code."""
+    low = "/" + rel.replace("\\", "/").lower()
+    return any(x in low for x in ("/.github/", "/.circleci/", "/.gitlab/", "/.buildkite/"))
 
 
 def _is_test_path(p: Path) -> bool:
@@ -147,6 +164,7 @@ def discover(path: str | Path) -> Project:
         elif suffix == ".so":
             with open(f, "rb") as fh:
                 proj.native_libs.append((rel, fh.read(ELF_HEAD)))
+        _collect_store_assets(proj, f, rel, name, suffix)
         if name.lower() == "infoplist.strings" and not _is_test_rel(rel):
             _read_localized_keys(proj, f)
         if (name in _CONFIG_NAMES or suffix == ".xcconfig" or _APP_CONFIG_RX.match(name)) \
@@ -161,6 +179,23 @@ def discover(path: str | Path) -> Project:
         proj.notes.append("iOS project found but no app Info.plist: usage-string, ATS, version and "
                           "export-compliance checks were skipped.")
     return proj
+
+
+def _collect_store_assets(proj: Project, f: Path, rel: str, name: str, suffix: str) -> None:
+    parts = [x.lower() for x in Path(rel).parts]
+    if suffix == ".entitlements":
+        d = _load_plist(f.read_bytes())
+        if d is not None:
+            proj.entitlements.append((rel, d))
+    elif name == "Contents.json" and f.parent.name.endswith(".appiconset"):
+        proj.appicon_sets.append(f)
+    if any(x.endswith(".icon") for x in parts[:-1]):
+        proj.has_icon_composer = True
+    in_listing = "metadata" in parts[:-1] or "fastlane" in parts[:-1]
+    if name in LISTING_NAMES and in_listing:
+        proj.listing_files.append(f)
+    elif suffix in IMAGE_SUFFIXES and in_listing and any("screenshots" in x for x in parts[:-1]):
+        proj.screenshots.append(f)
 
 
 def _read_localized_keys(proj: Project, f: Path) -> None:
@@ -251,9 +286,17 @@ def _scan_archive(proj: Project, f: Path) -> None:
                     proj.plists.append((f"{f.name}!{n}", d))
             elif low.endswith("privacyinfo.xcprivacy") and ".app/" in low:
                 proj.has_privacy_manifest = True
-    if f.suffix.lower() in (".apk", ".aab"):
-        proj.notes.append(f"{f.name}: AndroidManifest inside archives is binary XML and is "
-                          "not decoded; point storecheck at the source project for manifest checks.")
+    if f.suffix.lower() == ".apk":
+        try:
+            from .axml import AxmlError, decode_axml
+            with zipfile.ZipFile(f) as z:
+                proj.archive_manifests.append((f"{f.name}!AndroidManifest.xml",
+                                               decode_axml(z.read("AndroidManifest.xml"))))
+        except (AxmlError, KeyError, OSError, zipfile.BadZipFile, struct_error) as e:
+            proj.notes.append(f"{f.name}: could not decode AndroidManifest.xml ({e}); manifest checks skipped.")
+    elif f.suffix.lower() == ".aab":
+        proj.notes.append(f"{f.name}: an AAB stores its manifest as protobuf, which is not decoded; "
+                          "manifest checks were skipped. Point storecheck at the source project or an APK.")
 
 
 def _detect_frameworks(proj: Project, root: Path) -> None:

@@ -16,11 +16,13 @@ PAGE_16K = 0x4000
 
 
 def _manifest_roots(p: Project):
+    """(label, root element) for every readable manifest: source files and decoded APK manifests."""
     for m in p.android_manifests:
         try:
-            yield m, ET.parse(m).getroot()
+            yield str(m.relative_to(p.root)), ET.parse(m).getroot()
         except ET.ParseError:
             continue
+    yield from p.archive_manifests
 
 
 def android_permission(p: Project, a: dict):
@@ -32,7 +34,7 @@ def android_permission(p: Project, a: dict):
                 continue
             name = el.get(ANDROID + "name", "")
             if name.rsplit(".", 1)[-1] in bad:
-                out.append((str(m.relative_to(p.root)), name))
+                out.append((m, name))
     out += [(where, short) for where, short in p.extra_permissions if short in bad]
     return out
 
@@ -42,7 +44,7 @@ def android_attr(p: Project, a: dict):
     for m, root in _manifest_roots(p):
         app = root.find("application")
         if app is not None and app.get(ANDROID + a["attr"]) == a["bad_value"]:
-            out.append((str(m.relative_to(p.root)), f'android:{a["attr"]}="{a["bad_value"]}"'))
+            out.append((m, f'android:{a["attr"]}="{a["bad_value"]}"'))
     return out
 
 
@@ -78,7 +80,7 @@ def _target_sdk_values(p: Project):
         sdk = root.find("uses-sdk")
         v = sdk.get(ANDROID + "targetSdkVersion") if sdk is not None else None
         if v and v.isdigit():
-            vals.append((str(mf.relative_to(p.root)), int(v)))
+            vals.append((mf, int(v)))
     return vals
 
 
@@ -186,3 +188,7 @@ CHECKS = {f.__name__: f for f in (
     android_permission, android_attr, android_target_sdk, android_target_sdk_unknown, plist_value, plist_key_missing,
     privacy_manifest_missing, signal_requires_plist_key, signal_without, apk_without_aab,
     elf_alignment)}
+
+
+from .checks_extra import CHECKS_EXTRA  # noqa: E402  (new check types live in checks_extra)
+CHECKS.update(CHECKS_EXTRA)

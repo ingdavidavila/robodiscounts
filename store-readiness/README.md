@@ -20,6 +20,22 @@ Paste a **GitHub link** (`https://github.com/owner/repo`, optionally `/tree/bran
 - The server listens on 127.0.0.1 only, requires a random token in the URL it prints, and checks the Host header. The page never inserts repo text as HTML.
 - No blockers is not a guarantee of approval.
 
+## What it checks
+15 original rules plus 17 added for: Android 12 `android:exported`, Android 14 foreground-service types, release builds
+signed with the debug key, iOS app icon size, launch screen, iOS deployment target and Xcode version (CI), push
+entitlement, background modes, payment SDK without in-app purchase, App Store and Google Play listing text limits and
+screenshot rules (fastlane / F-Droid metadata folders), privacy policy link, and user-generated content moderation.
+Every rule shows its source and the date it was checked; rules marked "partly" say what could not be confirmed.
+
+```bash
+python -m storecheck path --fix-plan fixes.patch    # unified diff of safe fixes; never edits your files
+python -m storecheck path --privacy-draft           # also prints age and content rating hints
+python -m storecheck app.apk                        # the APK's binary manifest is decoded (AAB manifests are not)
+```
+`--fix-plan` fixes only what the official docs spell out: remove `android:debuggable`, raise `targetSdk`, add
+`android:exported`, raise the iOS deployment target, and add `TODO` usage strings (you must replace them).
+Everything else is listed as "not fixed automatically".
+
 ## Supported project styles
 Reads real files (`AndroidManifest.xml`, `Info.plist` including renamed variants, Gradle, privacy manifests) and,
 when the repo has no such files, the config that generates them: Xcode build settings (`INFOPLIST_KEY_*`),

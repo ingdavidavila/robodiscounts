@@ -36,11 +36,13 @@ def run(project: Project, rules: list[dict], store: str = "both") -> list[Findin
     findings: list[Finding] = []
     project.passed = []
     for r in rules:
-        if store != "both" and r["store"] != store:
+        if store != "both" and r["store"] not in (store, "both"):
             continue
         if r["applies_to"] == "android" and not project.has_android:
             continue
         if r["applies_to"] == "ios" and not project.has_ios:
+            continue
+        if r["applies_to"] == "mobile" and not (project.has_android or project.has_ios):
             continue
         check = CHECKS[r["check"]["type"]]
         params = {k: v for k, v in r["check"].items() if k != "type"}

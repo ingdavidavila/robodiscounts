@@ -78,7 +78,8 @@ class T(unittest.TestCase):
         self.w("App/Info.plist", plist(
             "<key>CFBundleShortVersionString</key><string>1</string>"
             "<key>CFBundleVersion</key><string>1</string>"
-            "<key>ITSAppUsesNonExemptEncryption</key><false/>"))
+            "<key>ITSAppUsesNonExemptEncryption</key><false/>"
+            "<key>UILaunchScreen</key><dict/>"))
         self.w("App/PrivacyInfo.xcprivacy", "<plist/>")
         _, f = scan(str(self.root), "apple")
         self.assertEqual(ids(f), set())
@@ -553,3 +554,18 @@ class VerifiedSdkMappings(unittest.TestCase):
         (self.root / "package.json").write_text('{"dependencies": {"@sentry/react-native": "8"}}')
         d = privacy.build_draft(discover(self.root))
         self.assertEqual(d["sdk_notes"][0]["where"], "package.json")
+
+
+class SdkEvidenceFiles(unittest.TestCase):
+    def test_sdk_words_in_scenes_and_translations_are_not_evidence(self):
+        from storecheck import privacy
+        from storecheck.discover import discover
+        with tempfile.TemporaryDirectory() as d:
+            r = Path(d)
+            (r / "Assets").mkdir()
+            (r / "Assets/Scene.unity").write_text("amplitude: 0.5\nm_Name: posthog")
+            (r / "strings.arb").write_text('{"a": "mixpanel"}')
+            (r / "data.json").write_text('{"k": "amplitude"}')
+            self.assertEqual(privacy.build_draft(discover(r))["rows"], [])
+            (r / "pubspec.yaml").write_text("dependencies:\n  amplitude_flutter: 1\n")
+            self.assertTrue(privacy.build_draft(discover(r))["rows"])

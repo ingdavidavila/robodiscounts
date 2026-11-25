@@ -11,12 +11,29 @@ from pathlib import Path
 
 from .checks import ANDROID, TOOLS, _manifest_roots
 from .discover import Project
+from .rating import rating_hints
 
 DATA = json.loads((Path(__file__).parent / "privacy_data.json").read_text())
 
 GOOGLE_PURPOSES = ["App functionality", "Analytics", "Developer communications",
                    "Advertising or marketing", "Fraud prevention, security, and compliance",
                    "Personalization", "Account management"]
+
+
+_NOT_EVIDENCE_SUFFIXES = {".unity", ".asset", ".prefab", ".mat", ".anim", ".controller", ".meta", ".svg", ".arb",
+                          ".strings", ".po", ".csv", ".tsv", ".ttf", ".otf", ".lottie", ".txt"}
+_CONFIG_JSON = {"package.json", "app.json", "manifest.json", "google-services.json", "composer.json"}
+
+
+def _evidence_ok(name: str) -> bool:
+    """SDK evidence must come from code, manifests or dependency files, not art, scenes or translations."""
+    base = name.replace("\\", "/").rsplit("/", 1)[-1].lower()
+    if base in _CONFIG_JSON:
+        return True
+    suffix = "." + base.rsplit(".", 1)[-1] if "." in base else ""
+    if suffix == ".json":
+        return False
+    return suffix not in _NOT_EVIDENCE_SUFFIXES
 
 
 def _items(sig):
@@ -47,7 +64,8 @@ def build_draft(project: Project) -> dict:
             e["hints"].add(hint)
 
     for sig in DATA["signals"]:
-        hits = project.find_signals(sig["pattern"], limit=40)
+        hits = [h for h in project.find_signals(sig["pattern"], limit=400)
+                if sig["kind"] != "sdk" or _evidence_ok(h)]
         if not hits:
             continue
         dep_files = DATA["dependency_files"]
@@ -72,7 +90,7 @@ def build_draft(project: Project) -> dict:
                 continue
             short = el.get(ANDROID + "name", "").rsplit(".", 1)[-1]
             for key in DATA["permissions"]["android_permissions"].get(short, []):
-                add(key, "permission", f"Android permission {short}", str(m.relative_to(project.root)), False,
+                add(key, "permission", f"Android permission {short}", m, False,
                     only="google")
 
     for where, short in project.extra_permissions:
@@ -108,7 +126,7 @@ def build_draft(project: Project) -> dict:
                      "purposes_hint": sorted(e["purposes"]), "hints": sorted(e["hints"])})
     rows.sort(key=lambda r: (not r["strength"].startswith("likely"), r["google_category"] or "~", r["key"]))
     return {"verified": DATA["verified"], "mapping_note": DATA["note"], "rows": rows, "sdk_notes": sdk_notes,
-            "tracking_signals": sorted(set(tracking)), "notes": notes}
+            "tracking_signals": sorted(set(tracking)), "notes": notes, "rating": rating_hints(project)}
 
 
 def to_markdown(draft: dict) -> str:
@@ -143,6 +161,14 @@ def to_markdown(draft: dict) -> str:
               + ", ".join(draft["tracking_signals"]) + "."]
     for n in draft["notes"]:
         L += ["", f"**Note:** {n}"]
+    if draft.get("rating"):
+        L += ["", "## Age and content rating hints", "",
+              "Apple's age rating asks about these capabilities (verified against Apple's age ratings page); Google's "
+              "IARC questionnaire asks similar things (its wording was not read). The code only shows what is present, "
+              "so answer from what the app really does:", ""]
+        L += [f"- **{r['topic']}** (seen in {r['evidence']}): {r['ask']}" for r in draft["rating"]]
+        L += ["", "Apple also required updated age rating answers in App Store Connect (new system effective "
+              "31 January 2026)."]
     L += ["", "## What only you can answer", "", "### Google Play Data safety (per data type)", ""]
     L += ["- Is it **collected** (leaves the device), **shared** with third parties, or both? "
           "(Google excludes data processed only on-device, and has rules about service providers.)",

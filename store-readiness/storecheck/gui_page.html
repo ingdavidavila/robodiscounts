@@ -90,6 +90,7 @@ a{color:var(--accent)}.hidden{display:none}
       <div class="row" style="margin-top:12px">
         <button class="ghost" id="dl-json">Download JSON</button>
         <button class="ghost" id="dl-md">Download privacy draft (.md)</button>
+        <button class="ghost" id="dl-patch" disabled>Download fix patch</button>
       </div>
     </div>
   </section>
@@ -142,6 +143,8 @@ function render(d){
   if(hasAi){var a=$("p-ai");a.textContent="";a.appendChild(el("p","k","Advisory only, written by a local model. It can be wrong."));
     a.appendChild(el("h3","","About the findings"));a.appendChild(el("pre","",d.ai_findings||"(nothing to explain)"));
     a.appendChild(el("h3","","Draft privacy policy wording"));a.appendChild(el("pre","",d.ai_privacy||"(no data types detected)"))}
+  $("dl-patch").disabled=!d.fix_patch;$("dl-patch").title=d.fix_patch?"Review, then apply with git apply":"No safe automatic fixes for these findings";
+  if(d.fix_skipped&&d.fix_skipped.length){p.appendChild(el("p","k","Not fixed automatically: "+d.fix_skipped.slice(0,8).join("; ")))}
   tab("find");$("result").classList.remove("hidden");
 }
 
@@ -163,6 +166,8 @@ function renderPrivacy(pr){
   if(pr.tracking_signals.length)p.appendChild(el("p","","Possible tracking (Apple ATT prompt needed): "+pr.tracking_signals.join(", ")));
   if(pr.sdk_notes&&pr.sdk_notes.length){p.appendChild(el("h3","","SDK notes"));
     pr.sdk_notes.forEach(function(n){p.appendChild(el("p","k",n.name+" ("+(n.verified?"mapping verified "+n.verified:"mapping NOT verified")+"): "+n.hint))})}
+  if(pr.rating&&pr.rating.length){p.appendChild(el("h3","","Age and content rating hints"));
+    pr.rating.forEach(function(r){p.appendChild(el("p","k",r.topic+" (seen in "+r.evidence+"): "+r.ask))})}
   pr.notes.forEach(function(n){p.appendChild(el("p","k","Note: "+n))});
   p.appendChild(el("p","k","The store forms also ask things only you can answer (purposes, sharing, linked to identity, encryption, deletion, privacy policy URL). Download the draft for the full checklist."));
 }
@@ -170,6 +175,7 @@ function renderPrivacy(pr){
 function download(name,text,type){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
 $("dl-json").onclick=function(){if(last)download("storecheck-report.json",JSON.stringify(last,null,2),"application/json")};
 $("dl-md").onclick=function(){if(last)download("privacy-draft.md",last.privacy_markdown,"text/markdown")};
+$("dl-patch").onclick=function(){if(last&&last.fix_patch)download("storecheck-fixes.patch",last.fix_patch,"text/x-diff")};
 
 function go(){
   var b=$("go");showError("");b.disabled=true;b.textContent="";b.appendChild(el("span","spin"));b.appendChild(document.createTextNode("Checking…"));

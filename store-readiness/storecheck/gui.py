@@ -21,7 +21,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import llm, privacy
+from . import fixes, llm, privacy
 from .engine import scan
 
 GITHUB_RX = re.compile(
@@ -100,6 +100,9 @@ def run_scan(req: dict) -> dict:
             "privacy": draft,
             "privacy_markdown": privacy.to_markdown(draft),
         }
+        ed, skipped = fixes.build_fixes(project, findings)
+        out["fix_patch"] = fixes.to_patch(ed)
+        out["fix_skipped"] = skipped
         if req.get("explain"):
             url_ = req.get("llm_url") or "http://localhost:11434/v1"
             model = req.get("model") or "qwen2.5-coder:14b"

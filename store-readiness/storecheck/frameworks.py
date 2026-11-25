@@ -100,7 +100,7 @@ def _xcode(proj: Project) -> None:
         if f.name != "project.pbxproj" and f.suffix != ".xcconfig":
             continue
         text = _read(f)
-        for m in re.finditer(r"INFOPLIST_KEY_(\w+)\s*=\s*([^;\n]+)", text):
+        for m in re.finditer(r"INFOPLIST_KEY_(\w+)(?:\[[^\]]*\])?\"?\s*=\s*([^;\n]+)", text):
             val = m.group(2).strip().strip('"').strip()
             if val:
                 overlay.setdefault(m.group(1), val)
