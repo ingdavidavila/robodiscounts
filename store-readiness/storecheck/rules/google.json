@@ -4,16 +4,16 @@
    "id": "play.debuggable",
    "store": "google",
    "applies_to": "android",
-   "severity": "blocker",
+   "severity": "likely",
    "title": "Release manifest is debuggable",
    "check": {
     "type": "android_attr",
     "attr": "debuggable",
     "bad_value": "true"
    },
-   "fix": "Remove android:debuggable from the manifest; build systems set it per build type.",
-   "source": "https://developer.android.com/google/play/requirements/target-sdk",
-   "verified": ""
+   "fix": "Android's release guide says to turn debugging off for release builds (isDebuggable = false / debuggable false). I could not confirm on the pages checked that Google Play rejects debuggable uploads, so this is reported as likely, not blocker.",
+   "source": "https://developer.android.com/studio/publish/preparing",
+   "verified": "2026-11-25 (partly: Play rejection unconfirmed)"
   },
   {
    "id": "play.target_sdk",
@@ -54,6 +54,9 @@
      "READ_SMS",
      "SEND_SMS",
      "RECEIVE_SMS",
+     "RECEIVE_MMS",
+     "RECEIVE_WAP_PUSH",
+     "WRITE_SMS",
      "READ_CALL_LOG",
      "WRITE_CALL_LOG",
      "PROCESS_OUTGOING_CALLS",
@@ -63,9 +66,9 @@
      "REQUEST_INSTALL_PACKAGES"
     ]
    },
-   "fix": "Remove the permission, or prepare the Permissions Declaration Form with a core-feature justification. (Only SMS and Call Log are confirmed as high-risk examples on the Play help page; the rest of this list is from memory and unverified.)",
-   "source": "https://support.google.com/googleplay/android-developer/answer/9214102",
-   "verified": ""
+   "fix": "Play restricts these: SMS and Call Log permissions are for the default SMS, Phone or Assistant handler only; MANAGE_EXTERNAL_STORAGE needs a Console declaration; background location needs strong justification and a declaration; QUERY_ALL_PACKAGES is limited to core functionality needing broad app visibility; REQUEST_INSTALL_PACKAGES is limited to apps whose core purpose is installing packages. Remove the permission or complete the declaration.",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9888170",
+   "verified": "2026-11-25"
   },
   {
    "id": "play.cleartext",
@@ -78,9 +81,9 @@
     "attr": "usesCleartextTraffic",
     "bad_value": "true"
    },
-   "fix": "Use HTTPS, or restrict cleartext to specific domains via a network security config.",
-   "source": "https://developer.android.com/privacy-and-security/security-config",
-   "verified": ""
+   "fix": "Cleartext HTTP is off by default for apps targeting Android 9 (API 28)+. Use HTTPS, or restrict cleartext to specific domains in a network security config. Note: android:usesCleartextTraffic is deprecated and ignored for apps targeting API 38+; a network security config with cleartextTrafficPermitted=\"true\" is not scanned yet.",
+   "source": "https://developer.android.com/guide/topics/manifest/application-element",
+   "verified": "2026-11-25"
   },
   {
    "id": "play.aab",

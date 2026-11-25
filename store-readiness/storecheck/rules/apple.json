@@ -4,7 +4,7 @@
    "id": "apple.usage_strings",
    "store": "apple",
    "applies_to": "ios",
-   "severity": "blocker",
+   "severity": "likely",
    "title": "Protected-resource use detected without a usage description",
    "check": {
     "type": "signal_requires_plist_key",
@@ -55,9 +55,9 @@
      }
     ]
    },
-   "fix": "Add the key to Info.plist with a clear, specific purpose string. Detection is a text heuristic: confirm the feature is really used, and the dependency isn't just listed. Test files, docs and lockfiles are ignored. Note: image pickers using the system photo picker (PHPicker) need no photo permission. Photo-library use that only saves images needs NSPhotoLibraryAddUsageDescription instead. Keys localized in InfoPlist.strings count.",
-   "source": "https://developer.apple.com/documentation/bundleresources/information_property_list/protected_resources",
-   "verified": ""
+   "fix": "Apple's App Review guideline 5.1.1(ii) says to make purpose strings clearly and completely describe your use of the data, and Apple's protected-resources page lists these keys. Add the key to Info.plist (or the generated build settings, or localized InfoPlist.strings) with a specific purpose. Detection is a text heuristic: confirm the feature is really used. Photo use that only saves images needs NSPhotoLibraryAddUsageDescription. Test files, docs and lockfiles are ignored.",
+   "source": "https://developer.apple.com/documentation/bundleresources/protected-resources",
+   "verified": "2026-11-25 (partly: rejection consequence unconfirmed)"
   },
   {
    "id": "apple.privacy_manifest",
@@ -86,9 +86,9 @@
     ],
     "bad_value": true
    },
-   "fix": "Use HTTPS, or scope exceptions to specific domains; global opt-outs need a justification in App Store Connect.",
-   "source": "https://developer.apple.com/documentation/bundleresources/information_property_list/nsapptransportsecurity",
-   "verified": ""
+   "fix": "Apple's docs: you must supply a justification during App Store review if NSAllowsArbitraryLoads is true. Prefer upgrading servers to HTTPS or using narrower per-domain exceptions.",
+   "source": "https://developer.apple.com/documentation/bundleresources/information-property-list/nsapptransportsecurity/nsallowsarbitraryloads",
+   "verified": "2026-11-25"
   },
   {
    "id": "apple.version_keys",
@@ -103,9 +103,9 @@
      "CFBundleVersion"
     ]
    },
-   "fix": "Set marketing version and build number; every upload needs a higher build number.",
-   "source": "https://developer.apple.com/documentation/bundleresources/information_property_list",
-   "verified": ""
+   "fix": "CFBundleVersion is required by the App Store. CFBundleShortVersionString must be three period-separated integers (for example 1.2.3).",
+   "source": "https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleversion",
+   "verified": "2026-11-25"
   },
   {
    "id": "apple.export_compliance",
@@ -119,9 +119,9 @@
      "ITSAppUsesNonExemptEncryption"
     ]
    },
-   "fix": "Set ITSAppUsesNonExemptEncryption (false if you only use standard HTTPS) to skip the per-build prompt.",
-   "source": "https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations",
-   "verified": ""
+   "fix": "If ITSAppUsesNonExemptEncryption is missing, App Store Connect walks you through the export compliance questionnaire on every upload. Set it to false if the app and its libraries use no encryption or only exempt encryption.",
+   "source": "https://developer.apple.com/documentation/bundleresources/information-property-list/itsappusesnonexemptencryption",
+   "verified": "2026-11-25"
   },
   {
    "id": "apple.sign_in_with_apple",
@@ -135,9 +135,9 @@
     "unless": "ASAuthorizationAppleIDProvider|AuthenticationServices|sign_in_with_apple|apple-authentication|SignInWithApple",
     "what": "Third-party login code found, no Sign in with Apple code found (heuristic)"
    },
-   "fix": "Guideline 4.8: if you offer third-party login, also offer a login service that limits collection to name and email, lets users keep email private, and doesn't track for ads without consent (Sign in with Apple qualifies). Exceptions exist, e.g. company-only sign-in.",
+   "fix": "Guideline 4.8: an app that uses a third-party or social login for the user's primary account must also offer an equivalent login that limits data collection to name and email, lets users keep their email private, and doesn't collect interactions for advertising without consent (Sign in with Apple qualifies). Not required if the app only uses your own account system, is an education/enterprise sign-in, uses a government ID system, or is a client for a specific third-party service.",
    "source": "https://developer.apple.com/app-store/review/guidelines/#sign-in-with-apple",
-   "verified": ""
+   "verified": "2026-11-25"
   },
   {
    "id": "apple.account_deletion",
@@ -153,7 +153,7 @@
    },
    "fix": "Guideline 5.1.1(v): if your app supports account creation, you must also offer account deletion within the app.",
    "source": "https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage",
-   "verified": ""
+   "verified": "2026-11-25"
   }
  ]
 }
