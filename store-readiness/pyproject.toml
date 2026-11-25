@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "storecheck"
+dynamic = ["version"]
+description = "Check an app against Google Play and App Store requirements and get fix recommendations"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []          # standard library only
+
+[project.scripts]
+storecheck = "storecheck.__main__:main"
+storecheck-gui = "storecheck.gui:main"
+
+[tool.setuptools]
+packages = ["storecheck"]
+
+[tool.setuptools.dynamic]
+version = {attr = "storecheck.__version__"}
+
+[tool.setuptools.package-data]
+storecheck = ["rules/*.json", "*.json", "gui_page.html"]

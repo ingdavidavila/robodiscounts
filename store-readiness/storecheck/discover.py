@@ -145,7 +145,7 @@ def discover(path: str | Path) -> Project:
         _scan_archive(proj, path)
         return proj
     for f in _walk(path):
-        rel = str(f.relative_to(path))
+        rel = f.relative_to(path).as_posix()
         name, suffix = f.name, f.suffix.lower()
         if name == "AndroidManifest.xml" and not _is_test_path(f.relative_to(path)):
             proj.android_manifests.append(f)
@@ -322,7 +322,7 @@ def _detect_frameworks(proj: Project, root: Path) -> None:
         if (root / marker).exists():
             proj.frameworks.add(fw)
     pkg = root / "package.json"
-    if pkg.exists() and "react-native" in pkg.read_text(errors="ignore"):
+    if pkg.exists() and "react-native" in pkg.read_text(encoding="utf-8", errors="ignore"):
         proj.frameworks.add("react-native")
     if (root / "Cargo.toml").exists():
         proj.frameworks.add("rust")

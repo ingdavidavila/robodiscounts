@@ -110,7 +110,7 @@ then run on the 14 apps and every new finding was checked against the source.
 
 APK manifests: a binary-manifest decoder (`storecheck/axml.py`) was cross-checked against two independent libraries
 (pyaxml to encode, androguard to decode) with UTF-8 and UTF-16 string pools and typed attributes. Not verified on a
-real aapt2-built APK (none was reachable). AAB manifests are protobuf and are **not** decoded.
+real aapt2-built APK (none was reachable). AAB manifests (aapt2 protobuf) are decoded by `storecheck/pbxml.py`, checked against the AOSP `Resources.proto` schema compiled with protoc on 6 real bundle manifests from google/bundletool's test data.
 
 New findings that were true: NewPipe has 9 Play phone screenshots (limit 8); Gallery's iOS targets are 11.0 and 12.0
 (below 13); Gallery and nowinandroid sign release builds with the debug key (nowinandroid's own comments say so).
@@ -125,6 +125,6 @@ New findings that were true: NewPipe has 9 Play phone screenshots (limit 8); Gal
 | 24 | Foreground-service advisory fired on framework, system-bound and disabled services | only when code starts foreground services; library/permission-bound/disabled services skipped |
 | 25 | ARFoundation: "Amplitude" analytics from a `.unity` scene value (older privacy-draft bug) | SDK evidence only from code, manifests and dependency files |
 
-Known gaps: AAB manifests; Play App Signing and keystore handling; icon alpha rule (Apple's page does not state it);
+Known gaps: Play App Signing and keystore handling; icon alpha rule (Apple's page does not state it);
 Play screenshot pixel sizes; whether Apple's upload validation rejects a missing launch screen or push entitlement (not
 stated on the pages read); Google's IARC questionnaire wording; only 5 kinds of fix patch.

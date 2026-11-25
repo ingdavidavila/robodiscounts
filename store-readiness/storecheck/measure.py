@@ -36,12 +36,12 @@ FRESH_DAYS = 90
 
 
 def _load(name: str):
-    return json.loads((FW / name).read_text())
+    return json.loads((FW / name).read_text(encoding="utf-8"))
 
 
 # ---------------------------------------------------------------------------------------------- D1
 def d1_coverage() -> dict:
-    cat = _load("requirements.json")
+    cat = json.loads((ROOT / "storecheck" / "requirements.json").read_text(encoding="utf-8"))
     rule_ids = {r["id"] for r in load_rules()}
     items = cat["items"]
     by = {"automated": 0, "partial": 0, "unmapped": 0, "not_checkable": 0}
@@ -56,8 +56,10 @@ def d1_coverage() -> dict:
             broken.append(it["id"])
     checkable = len(items) - by["not_checkable"]
     static = (by["automated"] + 0.5 * by["partial"]) / checkable if checkable else 0.0
+    from .checklist import checklist_ids
+    emitted = checklist_ids(None)                     # what the feature really lists for a project on both stores
     nc = [i for i in items if i["class"] == "not_checkable"]
-    checklist = sum(1 for i in nc if i.get("checklist")) / len(nc) if nc else 1.0
+    checklist = sum(1 for i in nc if i["id"] in emitted) / len(nc) if nc else 1.0
     excluded_share = by["not_checkable"] / len(items)
     score = 0.7 * static + 0.3 * checklist
     if excluded_share > 0.6 or broken:
@@ -222,7 +224,7 @@ def d3_verification() -> dict:
             fresh += 1
     n = len(rules)
     rules_score = (full + 0.5 * part) / n
-    sdk = json.loads((ROOT / "storecheck" / "privacy_data.json").read_text())["signals"]
+    sdk = json.loads((ROOT / "storecheck" / "privacy_data.json").read_text(encoding="utf-8"))["signals"]
     sdk_verified = sum(1 for s in sdk if s.get("verified")) / len(sdk)
     score = 0.6 * rules_score + 0.2 * (fresh / n) + 0.2 * sdk_verified
     return {"score": score, "rules": n, "fully_verified": full, "partly_verified": part, "unverified": none,
@@ -259,17 +261,25 @@ def _pip_install_works() -> bool:
     if not (ROOT / "pyproject.toml").exists():
         return False
     with tempfile.TemporaryDirectory() as d:
-        r = subprocess.run([sys.executable, "-m", "pip", "install", "-q", "--no-deps", "--no-build-isolation",
-                            "--target", d, str(ROOT)], capture_output=True, text=True, timeout=300)
-        return r.returncode == 0 and (Path(d) / "storecheck").exists()
+        r = subprocess.run([sys.executable, "-m", "pip", "install", "-q", "--no-deps", "--target", d, str(ROOT)],
+                           capture_output=True, text=True, timeout=600)
+        if r.returncode != 0 or not (Path(d) / "storecheck").exists():
+            return False
+        # the installed copy must work on its own: rules, catalog, privacy data and the GUI page are package data
+        code = ("import storecheck, storecheck.gui as g, storecheck.checklist as c, json, pathlib;"
+                "from storecheck.engine import load_rules;"
+                "assert len(load_rules())>20 and c.build_checklist()['ids'] and 'Store Check' in g.PAGE;"
+                "from storecheck.engine import scan;import tempfile;scan(tempfile.mkdtemp())")
+        env = {**__import__("os").environ, "PYTHONPATH": d}
+        return subprocess.run([sys.executable, "-c", code], capture_output=True, env=env, cwd=d).returncode == 0
 
 
 def d6_portability() -> dict:
     wf = ROOT.parent / ".github" / "workflows"
-    ci_text = " ".join(p.read_text() for p in wf.glob("*.y*ml")) if wf.exists() else ""
+    ci_text = " ".join(p.read_text(encoding="utf-8") for p in wf.glob("*.y*ml")) if wf.exists() else ""
     ci = all(x in ci_text for x in ("ubuntu", "macos", "windows"))
     observed = _load("observations.json")["os_observed"]
-    stdlib_only = not (ROOT / "requirements.txt").exists() or not (ROOT / "requirements.txt").read_text().strip()
+    stdlib_only = not (ROOT / "requirements.txt").exists() or not (ROOT / "requirements.txt").read_text(encoding="utf-8").strip()
     parts = {"pyproject": (ROOT / "pyproject.toml").exists(), "pip_install": _pip_install_works(),
              "ci_three_os": ci, "os_observed": min(1.0, len(set(observed)) / 3),
              "gui_test": (ROOT / "tests" / "test_gui.py").exists(), "stdlib_only": stdlib_only}
@@ -284,9 +294,9 @@ NETWORK_RX = re.compile(r"^\s*(?:import|from)\s+(urllib|http\.client|socket|requ
 def d7_safety() -> dict:
     pkg = ROOT / "storecheck"
     allowed = {"llm.py", "gui.py"}
-    net_modules = {p.name for p in pkg.glob("*.py") if NETWORK_RX.search(p.read_text())}
-    gui = (pkg / "gui.py").read_text()
-    fixes = (pkg / "fixes.py").read_text()
+    net_modules = {p.name for p in pkg.glob("*.py") if NETWORK_RX.search(p.read_text(encoding="utf-8"))}
+    gui = (pkg / "gui.py").read_text(encoding="utf-8")
+    fixes = (pkg / "fixes.py").read_text(encoding="utf-8")
     checks = {
         "network_only_in_llm_and_gui": net_modules <= allowed,
         "fixes_never_write_project_files": not re.search(r"write_text|write_bytes|open\([^)]*[\"']w", fixes),
@@ -328,9 +338,9 @@ def _commit() -> str:
 
 def _previous() -> dict | None:
     h = FW / "history.jsonl"
-    if not h.exists() or not h.read_text().strip():
+    if not h.exists() or not h.read_text(encoding="utf-8").strip():
         return None
-    return json.loads(h.read_text().strip().splitlines()[-1])
+    return json.loads(h.read_text(encoding="utf-8").strip().splitlines()[-1])
 
 
 def render(res: dict, prev: dict | None) -> str:
@@ -374,9 +384,9 @@ def main(argv=None) -> int:
         entry = {"ts": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), "commit": _commit(), "log": a.log,
                  "overall": res["overall"], "scores": {k: res["dims"][k]["score"] for k in WEIGHTS},
                  "real_measured": res["dims"]["D2"]["real_measured"], "goal_achieved": res["goal_achieved"]}
-        with open(FW / "history.jsonl", "a") as h:
+        with open(FW / "history.jsonl", "a", encoding="utf-8") as h:
             h.write(json.dumps(entry) + "\n")
-        with open(FW / "REVIEW_LOG.md", "a") as r:
+        with open(FW / "REVIEW_LOG.md", "a", encoding="utf-8") as r:
             r.write(f"\n## {entry['ts']} @ {entry['commit']}: {a.log}\n\nOverall {res['overall'] * 100:.1f}%. "
                     f"Framework re-evaluation: {a.review}\n")
     return 0

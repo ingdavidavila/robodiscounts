@@ -5,8 +5,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from .checks import CHECKS
+from .checks_extra import CHECKS_EXTRA
 from .discover import Project, discover
 
+CHECKS = {**CHECKS, **CHECKS_EXTRA}      # one registry; checks_extra imports checks, never the reverse
 RULES_DIR = Path(__file__).parent / "rules"
 SEVERITY_ORDER = {"blocker": 0, "likely": 1, "advisory": 2}
 
@@ -28,7 +30,7 @@ def load_rules(extra_dir: Path | None = None) -> list[dict]:
     rules = []
     for d in [RULES_DIR] + ([extra_dir] if extra_dir else []):
         for f in sorted(Path(d).glob("*.json")):
-            rules.extend(json.loads(f.read_text())["rules"])
+            rules.extend(json.loads(f.read_text(encoding="utf-8"))["rules"])
     return rules
 
 

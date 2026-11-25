@@ -19,7 +19,7 @@ def _manifest_roots(p: Project):
     """(label, root element) for every readable manifest: source files and decoded APK manifests."""
     for m in p.android_manifests:
         try:
-            yield str(m.relative_to(p.root)), ET.parse(m).getroot()
+            yield m.relative_to(p.root).as_posix(), ET.parse(m).getroot()
         except ET.ParseError:
             continue
     yield from p.archive_manifests
@@ -206,6 +206,3 @@ CHECKS = {f.__name__: f for f in (
     privacy_manifest_missing, signal_requires_plist_key, signal_without, apk_without_aab,
     elf_alignment)}
 
-
-from .checks_extra import CHECKS_EXTRA  # noqa: E402  (new check types live in checks_extra)
-CHECKS.update(CHECKS_EXTRA)

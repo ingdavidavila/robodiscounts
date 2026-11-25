@@ -26,7 +26,7 @@ class MeasureTests(unittest.TestCase):
         self.assertLessEqual(d1["excluded_share"], 0.6)
 
     def test_not_checkable_items_always_state_a_reason(self):
-        cat = json.loads((measure.FW / "requirements.json").read_text())
+        cat = json.loads((measure.ROOT / "storecheck" / "requirements.json").read_text())
         for it in cat["items"]:
             if it["class"] == "not_checkable":
                 self.assertTrue(it.get("reason"), it["id"])
@@ -46,7 +46,7 @@ class MeasureTests(unittest.TestCase):
         syn = measure.run_synthetic()
         d2 = measure.d2_correctness(syn, None)
         self.assertFalse(d2["real_measured"])
-        self.assertLessEqual(d2["score"], 0.5)
+        self.assertAlmostEqual(d2["score"], 0.45 * syn["score"] + 0.10 * d2["readers"]["score"])   # real part is 0
 
 
 if __name__ == "__main__":

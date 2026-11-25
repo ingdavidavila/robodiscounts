@@ -102,13 +102,13 @@ def android_release_debug_signing(p: Project, a: dict):
     release config (for example when no keystore is present on a dev machine) is not flagged."""
     out = []
     for g in p.gradle_files:
-        text = g.read_text(errors="ignore")
+        text = g.read_text(encoding="utf-8", errors="ignore")
         for bt in re.finditer(r"\bbuildTypes\s*\{", text):
             block = _balanced(text, bt.end() - 1)
             for rel in re.finditer(r"\b(?:release|getByName\(\s*[\"']release[\"']\s*\))\s*\{", block):
                 refs = [m.group(1) for m in _SIGNING_REF.finditer(_balanced(block, rel.end() - 1))]
                 if refs and all(re.search(r"debug", r) for r in refs):
-                    out.append((str(g.relative_to(p.root)), "release build type is signed only with the debug key"))
+                    out.append((g.relative_to(p.root).as_posix(), "release build type is signed only with the debug key"))
     return out
 
 
@@ -131,7 +131,7 @@ def ios_app_icon(p: Project, a: dict):
     ios_sets = 0
     for cj in p.appicon_sets:
         try:
-            data = json.loads(cj.read_text(errors="ignore"))
+            data = json.loads(cj.read_text(encoding="utf-8", errors="ignore"))
         except ValueError:
             continue
         images = data.get("images", [])
@@ -140,7 +140,7 @@ def ios_app_icon(p: Project, a: dict):
         if not is_ios:
             continue
         ios_sets += 1
-        label = str(cj.relative_to(p.root))
+        label = cj.relative_to(p.root).as_posix()
         big = [i for i in images if i.get("size") == f"{want}x{want}"]
         if not big:
             out.append((label, f"no {want}x{want} entry in the app icon set"))
@@ -154,7 +154,7 @@ def ios_app_icon(p: Project, a: dict):
         if size is None:
             out.append((label, f"{fn} is missing or not a readable PNG/JPEG"))
         elif size != (want, want):
-            out.append((str(path.relative_to(p.root)), f"icon is {size[0]}x{size[1]}, expected {want}x{want}"))
+            out.append((path.relative_to(p.root).as_posix(), f"icon is {size[0]}x{size[1]}, expected {want}x{want}"))
     if not ios_sets and p.has_ios_project and p.plists and not any(l in p.synthetic_plists for l, _ in p.plists):
         out.append(("(project)", "no iOS app icon set (AppIcon.appiconset) or Icon Composer .icon bundle found"))
     return out
@@ -181,10 +181,10 @@ def ios_deployment_target(p: Project, a: dict):
     sources = []
     for f in p.config_files:
         if f.name == "project.pbxproj" or f.suffix == ".xcconfig":
-            sources.append((str(f.relative_to(p.root)), f.read_text(errors="ignore"),
+            sources.append((f.relative_to(p.root).as_posix(), f.read_text(encoding="utf-8", errors="ignore"),
                             r"IPHONEOS_DEPLOYMENT_TARGET\s*=\s*\"?([0-9.]+)"))
         elif f.name in ("app.json",) or re.fullmatch(r"app\.config\.\w+", f.name):
-            sources.append((str(f.relative_to(p.root)), f.read_text(errors="ignore"),
+            sources.append((f.relative_to(p.root).as_posix(), f.read_text(encoding="utf-8", errors="ignore"),
                             r"[\"']?deploymentTarget[\"']?\s*:\s*[\"']([0-9.]+)"))
     for name, text, _lock in p.texts:
         low = name.replace("\\", "/").rsplit("/", 1)[-1].lower()
@@ -279,13 +279,13 @@ def listing_limits(p: Project, a: dict):
     for f in p.listing_files:
         if _is_android_listing(f.relative_to(p.root)) != android or f.name not in limits:
             continue
-        text = f.read_text(errors="ignore").rstrip("\n")
+        text = f.read_text(encoding="utf-8", errors="ignore").rstrip("\n")
         rule = limits[f.name]
         n = len(text.encode("utf-8")) if rule.get("unit") == "bytes" else len(text)
         if n > rule["max"]:
-            out.append((str(f.relative_to(p.root)), f"{n} {rule.get('unit', 'chars')}, limit {rule['max']}"))
+            out.append((f.relative_to(p.root).as_posix(), f"{n} {rule.get('unit', 'chars')}, limit {rule['max']}"))
         if rule.get("min") and 0 < n < rule["min"]:
-            out.append((str(f.relative_to(p.root)), f"{n} chars, minimum {rule['min']}"))
+            out.append((f.relative_to(p.root).as_posix(), f"{n} chars, minimum {rule['min']}"))
     return out
 
 
@@ -304,7 +304,7 @@ def listing_screenshots(p: Project, a: dict):
                 out.append((str(rel), f"{size[0]}x{size[1]} is not an accepted App Store screenshot size"))
         for d, files in groups.items():
             if len(files) > a["max"]:
-                out.append((str(d.relative_to(p.root)), f"{len(files)} screenshots, at most {a['max']} per device size"))
+                out.append((d.relative_to(p.root).as_posix(), f"{len(files)} screenshots, at most {a['max']} per device size"))
         return out
     groups = {}
     for f in p.screenshots:
@@ -313,7 +313,7 @@ def listing_screenshots(p: Project, a: dict):
             groups.setdefault(f.parent, []).append(f)
     for d, files in groups.items():
         if not a["min"] <= len(files) <= a["max"]:
-            out.append((str(d.relative_to(p.root)), f"{len(files)} phone screenshots, Play wants {a['min']} to {a['max']}"))
+            out.append((d.relative_to(p.root).as_posix(), f"{len(files)} phone screenshots, Play wants {a['min']} to {a['max']}"))
     return out
 
 
@@ -321,9 +321,9 @@ def privacy_policy(p: Project, a: dict):
     urls = [f for f in p.listing_files if f.name == "privacy_url.txt"]
     out = []
     for f in urls:
-        v = f.read_text(errors="ignore").strip()
+        v = f.read_text(encoding="utf-8", errors="ignore").strip()
         if v and not v.lower().startswith("https://"):
-            out.append((str(f.relative_to(p.root)), f"privacy policy URL is not https: {v[:60]}"))
+            out.append((f.relative_to(p.root).as_posix(), f"privacy policy URL is not https: {v[:60]}"))
     if urls or p.find_signal(a["signal"]):
         return out
     from . import privacy

@@ -82,10 +82,12 @@ a{color:var(--accent)}.hidden{display:none}
       <div class="tabs" role="tablist">
         <button role="tab" id="t-find" aria-selected="true">Findings</button>
         <button role="tab" id="t-priv" aria-selected="false">Privacy draft</button>
+        <button role="tab" id="t-check" aria-selected="false">Still needs a human</button>
         <button role="tab" id="t-ai" aria-selected="false" class="hidden">AI notes</button>
       </div>
       <div id="p-find"></div>
       <div id="p-priv" class="hidden"></div>
+      <div id="p-check" class="hidden"></div>
       <div id="p-ai" class="hidden"></div>
       <div class="row" style="margin-top:12px">
         <button class="ghost" id="dl-json">Download JSON</button>
@@ -110,9 +112,9 @@ function setSource(s){source=s;
 $("src-github").onclick=function(){setSource("github")};$("src-local").onclick=function(){setSource("local")};
 setSource("github");
 
-function tab(name){["find","priv","ai"].forEach(function(n){
+function tab(name){["find","priv","check","ai"].forEach(function(n){
   $("t-"+n).setAttribute("aria-selected",n===name);$("p-"+n).classList.toggle("hidden",n!==name)})}
-$("t-find").onclick=function(){tab("find")};$("t-priv").onclick=function(){tab("priv")};$("t-ai").onclick=function(){tab("ai")};
+$("t-find").onclick=function(){tab("find")};$("t-priv").onclick=function(){tab("priv")};$("t-ai").onclick=function(){tab("ai")};$("t-check").onclick=function(){tab("check")};
 
 function showError(m){var e=$("err");e.textContent=m;e.classList.toggle("hidden",!m)}
 var LABEL={blocker:["bad","Blocker"],likely:["warn","Likely issue"],advisory:["info","Advisory"]};
@@ -138,7 +140,7 @@ function render(d){
     if(/^https:\/\//.test(f.source)){var a=el("a","","source");a.href=f.source;a.target="_blank";a.rel="noopener noreferrer";s.appendChild(a)}
     b.appendChild(s);p.appendChild(b)});
   if(d.passed&&d.passed.length){var ps=el("p","k","Checked, no problems: "+d.passed.map(function(x){return x.title}).join("; "));p.appendChild(ps)}
-  renderPrivacy(d.privacy);
+  renderPrivacy(d.privacy);renderChecklist(d.checklist);
   var hasAi=d.ai_findings!==undefined;$("t-ai").classList.toggle("hidden",!hasAi);
   if(hasAi){var a=$("p-ai");a.textContent="";a.appendChild(el("p","k","Advisory only, written by a local model. It can be wrong."));
     a.appendChild(el("h3","","About the findings"));a.appendChild(el("pre","",d.ai_findings||"(nothing to explain)"));
@@ -146,6 +148,16 @@ function render(d){
   $("dl-patch").disabled=!d.fix_patch;$("dl-patch").title=d.fix_patch?"Review, then apply with git apply":"No safe automatic fixes for these findings";
   if(d.fix_skipped&&d.fix_skipped.length){p.appendChild(el("p","k","Not fixed automatically: "+d.fix_skipped.slice(0,8).join("; ")))}
   tab("find");$("result").classList.remove("hidden");
+}
+
+function renderChecklist(cl){
+  var p=$("p-check");p.textContent="";
+  p.appendChild(el("p","k","What storecheck cannot decide or does not check yet. Passing the automated checks does not cover these."));
+  [["needs_human","Needs a human, the store console or a running app"],["not_checked","Not checked by storecheck yet"]].forEach(function(sec){
+    var n=cl[sec[0]].reduce(function(a,g){return a+g.ids.length},0);
+    p.appendChild(el("h3","",sec[1]+" ("+n+")"));
+    cl[sec[0]].forEach(function(g){var li=el("p","k");li.appendChild(document.createTextNode((g.title.length>64?g.title.slice(0,64).replace(/\\s+\\S*$/,'')+' ...':g.title)+(g.reason?" — "+g.reason:"")+" "));
+      if(/^https:\/\//.test(g.source)){var a=el("a","",g.store+" source");a.href=g.source;a.target="_blank";a.rel="noopener noreferrer";li.appendChild(a)}p.appendChild(li)})})
 }
 
 function renderPrivacy(pr){

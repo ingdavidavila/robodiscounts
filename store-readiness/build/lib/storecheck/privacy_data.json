@@ -1,0 +1,822 @@
+{
+ "verified": false,
+ "note": "Apple and Google type/purpose names verified 2026-11-24 against the official pages. SDK mappings: 11 of 26 signal groups verified on 2026-11-25 against each vendor's own disclosure page (Firebase, AdMob, Sentry, Facebook, Adjust, Mixpanel, OneSignal, RevenueCat). Stripe, AppsFlyer, Branch, Amplitude, Segment, PostHog, Google/Apple sign-in and the platform-API signals are not verified.",
+ "data_types": {
+  "precise_location": {
+   "google_category": "Location",
+   "google_type": "Precise location",
+   "apple_category": "Location",
+   "apple_type": "Precise Location"
+  },
+  "approx_location": {
+   "google_category": "Location",
+   "google_type": "Approximate location",
+   "apple_category": "Location",
+   "apple_type": "Coarse Location"
+  },
+  "name": {
+   "google_category": "Personal info",
+   "google_type": "Name",
+   "apple_category": "Contact Info",
+   "apple_type": "Name"
+  },
+  "email": {
+   "google_category": "Personal info",
+   "google_type": "Email address",
+   "apple_category": "Contact Info",
+   "apple_type": "Email Address"
+  },
+  "user_id": {
+   "google_category": "Personal info",
+   "google_type": "User IDs",
+   "apple_category": "Identifiers",
+   "apple_type": "User ID"
+  },
+  "phone": {
+   "google_category": "Personal info",
+   "google_type": "Phone number",
+   "apple_category": "Contact Info",
+   "apple_type": "Phone Number"
+  },
+  "address": {
+   "google_category": "Personal info",
+   "google_type": "Address",
+   "apple_category": "Contact Info",
+   "apple_type": "Physical Address"
+  },
+  "payment_info": {
+   "google_category": "Financial info",
+   "google_type": "User payment info",
+   "apple_category": "Financial Info",
+   "apple_type": "Payment Info"
+  },
+  "purchase_history": {
+   "google_category": "Financial info",
+   "google_type": "Purchase history",
+   "apple_category": "Purchases",
+   "apple_type": "Purchase History"
+  },
+  "health": {
+   "google_category": "Health and fitness",
+   "google_type": "Health info",
+   "apple_category": "Health & Fitness",
+   "apple_type": "Health"
+  },
+  "fitness": {
+   "google_category": "Health and fitness",
+   "google_type": "Fitness info",
+   "apple_category": "Health & Fitness",
+   "apple_type": "Fitness"
+  },
+  "photos": {
+   "google_category": "Photos and videos",
+   "google_type": "Photos",
+   "apple_category": "User Content",
+   "apple_type": "Photos or Videos"
+  },
+  "videos": {
+   "google_category": "Photos and videos",
+   "google_type": "Videos",
+   "apple_category": "User Content",
+   "apple_type": "Photos or Videos"
+  },
+  "audio_recordings": {
+   "google_category": "Audio files",
+   "google_type": "Voice or sound recordings",
+   "apple_category": "User Content",
+   "apple_type": "Audio Data"
+  },
+  "other_audio": {
+   "google_category": "Audio files",
+   "google_type": "Other audio files",
+   "apple_category": "User Content",
+   "apple_type": "Audio Data"
+  },
+  "contacts": {
+   "google_category": "Contacts",
+   "google_type": "Contacts",
+   "apple_category": "Contacts",
+   "apple_type": "Contacts"
+  },
+  "calendar": {
+   "google_category": "Calendar",
+   "google_type": "Calendar events",
+   "apple_category": "User Content",
+   "apple_type": "Other User Content"
+  },
+  "sms": {
+   "google_category": "Messages",
+   "google_type": "SMS or MMS",
+   "apple_category": "User Content",
+   "apple_type": "Emails or Text Messages"
+  },
+  "app_interactions": {
+   "google_category": "App activity",
+   "google_type": "App interactions",
+   "apple_category": "Usage Data",
+   "apple_type": "Product Interaction"
+  },
+  "installed_apps": {
+   "google_category": "App activity",
+   "google_type": "Installed apps",
+   "apple_category": "Usage Data",
+   "apple_type": "Other Usage Data"
+  },
+  "crash_logs": {
+   "google_category": "App info and performance",
+   "google_type": "Crash logs",
+   "apple_category": "Diagnostics",
+   "apple_type": "Crash Data"
+  },
+  "diagnostics": {
+   "google_category": "App info and performance",
+   "google_type": "Diagnostics",
+   "apple_category": "Diagnostics",
+   "apple_type": "Performance Data"
+  },
+  "device_id": {
+   "google_category": "Device or other IDs",
+   "google_type": "Device or other IDs",
+   "apple_category": "Identifiers",
+   "apple_type": "Device ID"
+  },
+  "ad_data": {
+   "google_category": null,
+   "google_type": null,
+   "apple_category": "Usage Data",
+   "apple_type": "Advertising Data"
+  }
+ },
+ "signals": [
+  {
+   "id": "firebase_analytics",
+   "name": "Firebase / Google Analytics",
+   "pattern": "firebase_analytics|FirebaseAnalytics|firebase-analytics|@react-native-firebase/analytics|google-analytics",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "app_interactions",
+    "device_id",
+    "approx_location",
+    "purchase_history"
+   ],
+   "purposes": [
+    "Analytics"
+   ],
+   "tracking": false,
+   "hint": "Google's Analytics for Firebase Android article lists: app-instance ID, Android advertising ID (can be disabled), coarse location derived from masked IP, in-app purchase events, screen and session events. The Apple article was not read.",
+   "verified": "2026-11-25 (Android article; Apple article not read)",
+   "sources": [
+    "https://support.google.com/analytics/answer/11582702",
+    "https://firebase.google.com/docs/android/play-data-disclosure"
+   ],
+   "disabled_pattern": "firebase_analytics_collection_deactivated[\"'\\s]+android:value\\s*=\\s*[\"']true|firebase_analytics_collection_enabled[\"'\\s]+android:value\\s*=\\s*[\"']false|FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>\\s*<false|FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED</key>\\s*<true|setAnalyticsCollectionEnabled\\(\\s*false"
+  },
+  {
+   "id": "crashlytics",
+   "name": "Firebase Crashlytics",
+   "pattern": "(?i)crashlytics",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "crash_logs",
+    "diagnostics",
+    "device_id"
+   ],
+   "purposes": [
+    "Analytics",
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "Collects stack traces, app state, device metadata and a Crashlytics installation UUID. Custom keys, logs and free-text user IDs you attach are also collected.",
+   "verified": "2026-11-25",
+   "sources": [
+    "https://firebase.google.com/docs/android/play-data-disclosure",
+    "https://firebase.google.com/docs/ios/app-store-data-collection"
+   ],
+   "disabled_pattern": "firebase_crashlytics_collection_enabled[\"'\\s]+android:value\\s*=\\s*[\"']false|FirebaseCrashlyticsCollectionEnabled</key>\\s*<false|setCrashlyticsCollectionEnabled\\(\\s*false"
+  },
+  {
+   "id": "firebase_auth",
+   "name": "Firebase Auth",
+   "pattern": "firebase_auth|FirebaseAuth|firebase-auth|@react-native-firebase/auth|createUserWithEmailAndPassword",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "user_id",
+    {
+     "key": "email",
+     "usage_dependent": true
+    },
+    {
+     "key": "name",
+     "usage_dependent": true
+    },
+    {
+     "key": "phone",
+     "usage_dependent": true
+    }
+   ],
+   "purposes": [
+    "Account management",
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "Always generates identifiers for authentication and collects IP addresses (abuse prevention). Display name, email and phone are collected only depending on how you use it. Google says approximate location inferred from IP must be disclosed.",
+   "verified": "2026-11-25",
+   "sources": [
+    "https://firebase.google.com/docs/android/play-data-disclosure",
+    "https://firebase.google.com/docs/ios/app-store-data-collection"
+   ]
+  },
+  {
+   "id": "fcm",
+   "name": "Firebase Cloud Messaging",
+   "pattern": "firebase_messaging|FirebaseMessaging|firebase-messaging",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "device_id"
+   ],
+   "purposes": [
+    "App functionality",
+    "Developer communications"
+   ],
+   "tracking": false,
+   "hint": "Uses the Firebase installation ID as the registration token (Apple: APNs token plus installation ID) and collects device model, language, time zone and OS version for topics.",
+   "verified": "2026-11-25",
+   "sources": [
+    "https://firebase.google.com/docs/android/play-data-disclosure",
+    "https://firebase.google.com/docs/ios/app-store-data-collection"
+   ]
+  },
+  {
+   "id": "onesignal",
+   "name": "OneSignal",
+   "pattern": "OneSignal",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    {
+     "key": "purchase_history",
+     "usage_dependent": true
+    },
+    "app_interactions",
+    {
+     "key": "device_id",
+     "only": "apple"
+    },
+    {
+     "key": "user_id",
+     "only": "apple"
+    }
+   ],
+   "purposes": [
+    "Analytics"
+   ],
+   "tracking": false,
+   "hint": "Default collection per OneSignal: in-app purchase events and usage (sessions, notification clicks). Apple page: OneSignal assigns a unique OneSignal ID under Identifiers. Google page: device IDs not collected by default (only if you link aliases). Email, phone and tags you send add more types.",
+   "verified": "2026-11-25",
+   "sources": [
+    "https://documentation.onesignal.com/docs/apple-app-privacy-requirements",
+    "https://documentation.onesignal.com/docs/google-play-data-safety-requirements"
+   ]
+  },
+  {
+   "id": "push_other",
+   "name": "Other push libraries (expo-notifications, react-native-push-notification)",
+   "pattern": "expo-notifications|react-native-push-notification",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "device_id"
+   ],
+   "purposes": [
+    "App functionality",
+    "Developer communications"
+   ],
+   "tracking": false,
+   "hint": "Push token counts as a device identifier.",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "admob",
+   "name": "Google AdMob / Mobile Ads",
+   "pattern": "google_mobile_ads|play-services-ads|GoogleMobileAds|react-native-google-mobile-ads|expo-ads-admob",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "device_id",
+    "app_interactions",
+    "diagnostics",
+    "approx_location",
+    "ad_data",
+    {
+     "key": "crash_logs",
+     "only": "apple"
+    }
+   ],
+   "purposes": [
+    "Advertising or marketing",
+    "Analytics"
+   ],
+   "tracking": true,
+   "hint": "Per Google: IP address (general location), user product interactions, diagnostics (launch time, hang rate, energy), device and account identifiers (advertising ID, app set ID). The Apple page also lists crash logs and advertising data. Whether this counts as tracking under Apple's definition depends on your ad setup.",
+   "verified": "2026-11-25",
+   "sources": [
+    "https://developers.google.com/admob/ios/data-disclosure",
+    "https://developers.google.com/admob/android/privacy/play-data-disclosure"
+   ]
+  },
+  {
+   "id": "facebook",
+   "name": "Facebook SDK",
+   "pattern": "FBSDKCoreKit|facebook_app_events|react-native-fbsdk|com\\.facebook\\.android|flutter_facebook_auth",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "device_id",
+    {
+     "key": "app_interactions",
+     "usage_dependent": true
+    },
+    {
+     "key": "user_id",
+     "usage_dependent": true
+    }
+   ],
+   "purposes": [
+    "Analytics",
+    "Advertising or marketing"
+   ],
+   "tracking": true,
+   "hint": "Meta's post (July 2022, dated) lists device identifiers, device attributes and network information including IP. App events are what you send plus automatic install/launch/purchase events. Facebook Login adds a user-specific identifier. Advanced matching can add email, name, phone, address, gender, date of birth.",
+   "verified": "2026-11-25 (2022 Meta post)",
+   "sources": [
+    "https://developers.facebook.com/blog/post/2022/07/18/resources-for-completing-app-store-data-practice-questionnaires-apps-facebook-or-audience-network-sdk/"
+   ]
+  },
+  {
+   "id": "adjust",
+   "name": "Adjust",
+   "pattern": "com\\.adjust\\.sdk|adjust_sdk|AdjustSdk|adjust-android|adjust-ios",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "device_id",
+    "app_interactions",
+    {
+     "key": "purchase_history",
+     "usage_dependent": true
+    }
+   ],
+   "purposes": [
+    "Analytics",
+    "Advertising or marketing"
+   ],
+   "tracking": true,
+   "hint": "Adjust says it collects device IDs (IDFA only with ATT consent, IDFV, Android advertising ID or Android ID) and session/product-interaction data by default, does NOT collect advertising data, location or diagnostics, and purchase data only if you configure it. Its Apple manifest sets Third-Party Advertising to yes. Adjust does not state whether it counts as tracking.",
+   "verified": "2026-11-25",
+   "sources": [
+    "https://help.adjust.com/en/article/submit-privacy-details-to-apple",
+    "https://help.adjust.com/en/article/google-play-data-safety"
+   ]
+  },
+  {
+   "id": "attribution_other",
+   "name": "Attribution SDK (AppsFlyer/Branch)",
+   "pattern": "(?i)appsflyer|io\\.branch|flutter_branch_sdk|react-native-branch",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "device_id",
+    "app_interactions",
+    "ad_data"
+   ],
+   "purposes": [
+    "Advertising or marketing",
+    "Analytics"
+   ],
+   "tracking": true,
+   "hint": "Not verified: AppsFlyer's pages returned 403 to automated fetching.",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "mixpanel",
+   "name": "Mixpanel",
+   "pattern": "(?i)mixpanel",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "app_interactions",
+    "device_id",
+    "user_id",
+    "approx_location"
+   ],
+   "purposes": [
+    "Analytics"
+   ],
+   "tracking": false,
+   "hint": "Mixpanel's iOS page says it collects, by default: a Mixpanel-generated user ID and event ID, device identifiers and model, device-interaction usage data, and city, region and country location. Not by default: contact info, purchases, diagnostics, precise location. Whatever you add via properties also counts. Google side not read.",
+   "verified": "2026-11-25 (iOS page; Google side not read)",
+   "sources": [
+    "https://mixpanel.com/legal/app-store-privacy-details/"
+   ]
+  },
+  {
+   "id": "product_analytics_other",
+   "name": "Product analytics (Amplitude/Segment/PostHog)",
+   "pattern": "(?i)amplitude|segment[_-]analytics|analytics-react-native|posthog",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "app_interactions",
+    "device_id"
+   ],
+   "purposes": [
+    "Analytics"
+   ],
+   "tracking": false,
+   "hint": "Add user IDs/emails if you call identify() with them.",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "sentry",
+   "name": "Sentry",
+   "pattern": "sentry_flutter|@sentry/|io\\.sentry|SentrySDK|sentry-cocoa|sentry-android",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "crash_logs",
+    "diagnostics"
+   ],
+   "purposes": [
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "Sentry's published manifest example declares crash data, performance data and other diagnostic data for App Functionality, not linked to identity, not used for tracking. Add user IDs or emails if you set Sentry user context.",
+   "verified": "2026-11-25 (Apple manifest example; Google side not read)",
+   "sources": [
+    "https://docs.sentry.io/platforms/apple/data-management/apple-privacy-manifest/"
+   ]
+  },
+  {
+   "id": "stripe",
+   "name": "Stripe payments",
+   "pattern": "flutter_stripe|stripe-android|@stripe/stripe-react-native|StripePaymentSheet|StripeApplePay",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "payment_info",
+    "purchase_history"
+   ],
+   "purposes": [
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "Check whether the store treats SDK-handled card data as your collection. Not verified: Stripe's help pages need JavaScript and could not be read.",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "revenuecat",
+   "name": "RevenueCat",
+   "pattern": "RevenueCat|purchases_flutter|react-native-purchases|purchases-android|com\\.revenuecat",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "purchase_history",
+    {
+     "key": "user_id",
+     "usage_dependent": true
+    },
+    {
+     "key": "device_id",
+     "usage_dependent": true
+    }
+   ],
+   "purposes": [
+    "Analytics",
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "RevenueCat says Purchases data is always required. User ID only if you set a custom app user ID. Device ID only if you use integrations that read an advertising identifier. It does not collect location, diagnostics, payment info or health data.",
+   "verified": "2026-11-25",
+   "sources": [
+    "https://www.revenuecat.com/docs/platform-resources/apple-platform-resources/apple-app-privacy"
+   ]
+  },
+  {
+   "id": "iap_other",
+   "name": "In-app purchases (StoreKit, Play Billing, other libraries)",
+   "pattern": "in_app_purchase|react-native-iap|com\\.android\\.billingclient|billing-ktx",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "purchase_history",
+    "user_id"
+   ],
+   "purposes": [
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "Not verified. Plain StoreKit/Play Billing may not need disclosure; a third-party server does.",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "google_signin",
+   "name": "Google Sign-In",
+   "pattern": "google_sign_in|GIDSignIn|GoogleSignIn|@react-native-google-signin|play-services-auth",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "name",
+    "email",
+    "user_id"
+   ],
+   "purposes": [
+    "Account management"
+   ],
+   "tracking": false,
+   "hint": "",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "apple_signin",
+   "name": "Sign in with Apple",
+   "pattern": "sign_in_with_apple|ASAuthorizationAppleIDProvider|apple-authentication",
+   "kind": "sdk",
+   "transmits": true,
+   "data": [
+    "name",
+    "email",
+    "user_id"
+   ],
+   "purposes": [
+    "Account management"
+   ],
+   "tracking": false,
+   "hint": "Users may hide their email; you still receive a relay address.",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "device_ids",
+   "name": "Device identifier APIs",
+   "pattern": "advertisingIdentifier|ASIdentifierManager|AdvertisingIdClient|identifierForVendor|android_id|device_info_plus|react-native-device-info",
+   "kind": "api",
+   "transmits": false,
+   "data": [
+    "device_id"
+   ],
+   "purposes": [
+    "Analytics"
+   ],
+   "tracking": false,
+   "hint": "",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "location_api",
+   "name": "Location APIs",
+   "pattern": "CLLocationManager|geolocator|FusedLocationProviderClient|expo-location|react-native-geolocation|@capacitor/geolocation|google_maps_flutter",
+   "kind": "api",
+   "transmits": false,
+   "data": [
+    "precise_location"
+   ],
+   "purposes": [
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "Confirm precise vs approximate; the permission list may narrow this.",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "camera_api",
+   "name": "Camera / photo APIs",
+   "pattern": "AVCaptureDevice|AVCaptureSession|UIImagePickerController|image_picker|react-native-camera|expo-camera|vision-camera|package:camera|PHPhotoLibrary|CameraX|camerax",
+   "kind": "api",
+   "transmits": false,
+   "data": [
+    "photos"
+   ],
+   "purposes": [
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "audio_api",
+   "name": "Audio recording APIs",
+   "pattern": "AVAudioRecorder|requestRecordPermission|MediaRecorder|AudioRecord\\b|flutter_sound|expo-av|react-native-audio",
+   "kind": "api",
+   "transmits": false,
+   "data": [
+    "audio_recordings"
+   ],
+   "purposes": [
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "contacts_api",
+   "name": "Contacts APIs",
+   "pattern": "CNContactStore|ContactsContract|flutter_contacts|contacts_service|expo-contacts",
+   "kind": "api",
+   "transmits": false,
+   "data": [
+    "contacts"
+   ],
+   "purposes": [
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "health_api",
+   "name": "Health APIs",
+   "pattern": "HealthKit|HKHealthStore|HealthConnectClient|health_connect|react-native-health|package:health",
+   "kind": "api",
+   "transmits": false,
+   "data": [
+    "health",
+    "fitness"
+   ],
+   "purposes": [
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "calendar_api",
+   "name": "Calendar APIs",
+   "pattern": "EKEventStore|CalendarContract|device_calendar|expo-calendar",
+   "kind": "api",
+   "transmits": false,
+   "data": [
+    "calendar"
+   ],
+   "purposes": [
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "",
+   "verified": "",
+   "sources": []
+  },
+  {
+   "id": "installed_apps_api",
+   "name": "Installed-apps APIs",
+   "pattern": "getInstalledPackages|getInstalledApplications|installed_apps",
+   "kind": "api",
+   "transmits": false,
+   "data": [
+    "installed_apps"
+   ],
+   "purposes": [
+    "App functionality"
+   ],
+   "tracking": false,
+   "hint": "",
+   "verified": "",
+   "sources": []
+  }
+ ],
+ "permissions": {
+  "android_permissions": {
+   "ACCESS_FINE_LOCATION": [
+    "precise_location"
+   ],
+   "ACCESS_COARSE_LOCATION": [
+    "approx_location"
+   ],
+   "ACCESS_BACKGROUND_LOCATION": [
+    "precise_location"
+   ],
+   "READ_CONTACTS": [
+    "contacts"
+   ],
+   "WRITE_CONTACTS": [
+    "contacts"
+   ],
+   "READ_CALENDAR": [
+    "calendar"
+   ],
+   "CAMERA": [
+    "photos"
+   ],
+   "RECORD_AUDIO": [
+    "audio_recordings"
+   ],
+   "READ_SMS": [
+    "sms"
+   ],
+   "RECEIVE_SMS": [
+    "sms"
+   ],
+   "READ_PHONE_NUMBERS": [
+    "phone"
+   ],
+   "READ_PHONE_STATE": [
+    "device_id"
+   ],
+   "READ_MEDIA_IMAGES": [
+    "photos"
+   ],
+   "READ_MEDIA_VIDEO": [
+    "videos"
+   ],
+   "READ_MEDIA_AUDIO": [
+    "other_audio"
+   ],
+   "ACTIVITY_RECOGNITION": [
+    "fitness"
+   ],
+   "BODY_SENSORS": [
+    "health"
+   ],
+   "GET_ACCOUNTS": [
+    "email"
+   ],
+   "QUERY_ALL_PACKAGES": [
+    "installed_apps"
+   ],
+   "AD_ID": [
+    "device_id",
+    "ad_data"
+   ]
+  },
+  "ios_plist_keys": {
+   "NSLocationWhenInUseUsageDescription": [
+    "precise_location"
+   ],
+   "NSLocationAlwaysAndWhenInUseUsageDescription": [
+    "precise_location"
+   ],
+   "NSLocationAlwaysUsageDescription": [
+    "precise_location"
+   ],
+   "NSContactsUsageDescription": [
+    "contacts"
+   ],
+   "NSCalendarsUsageDescription": [
+    "calendar"
+   ],
+   "NSCalendarsFullAccessUsageDescription": [
+    "calendar"
+   ],
+   "NSCameraUsageDescription": [
+    "photos"
+   ],
+   "NSMicrophoneUsageDescription": [
+    "audio_recordings"
+   ],
+   "NSPhotoLibraryUsageDescription": [
+    "photos"
+   ],
+   "NSHealthShareUsageDescription": [
+    "health"
+   ],
+   "NSHealthUpdateUsageDescription": [
+    "health"
+   ]
+  },
+  "ios_tracking_key": "NSUserTrackingUsageDescription"
+ },
+ "network_pattern": "okhttp|retrofit|URLSession|reqwest|axios|\\bdio\\b|http\\.Client|HttpClient|fetch\\(",
+ "dependency_files": [
+  "package.json",
+  "pubspec.yaml",
+  "podfile",
+  "package.swift",
+  "build.gradle",
+  "build.gradle.kts",
+  "libs.versions.toml",
+  "cargo.toml",
+  "gemfile",
+  "requirements.txt",
+  "config.xml",
+  "app.json"
+ ]
+}

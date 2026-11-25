@@ -2,7 +2,13 @@
 
 Checks an app against Google Play and Apple App Store requirements and recommends fixes. **Language-agnostic**: it never parses source code. It reads what the stores inspect (manifests, `Info.plist`, Gradle files, privacy manifests, `.so` libraries, built `.apk`/`.aab`/`.ipa`) and runs text-pattern searches that work in any language or framework (native, Flutter, React Native, Capacitor, Unity, Rust, Go, ...).
 
-Runs on Linux, macOS and Windows. Python 3.9+, standard library only.
+Runs on Linux, macOS and Windows (CI runs the tests on all three; see `.github/workflows/storecheck.yml`). Python 3.10+, standard library only.
+
+```bash
+pip install ./store-readiness      # or: pip install git+https://github.com/<you>/<repo>#subdirectory=store-readiness
+storecheck path/to/app             # command line
+storecheck-gui                     # local web page
+```
 
 ```bash
 python -m storecheck path/to/project            # or a built .apk / .aab / .ipa
@@ -30,7 +36,8 @@ Every rule shows its source and the date it was checked; rules marked "partly" s
 ```bash
 python -m storecheck path --fix-plan fixes.patch    # unified diff of safe fixes; never edits your files
 python -m storecheck path --privacy-draft           # also prints age and content rating hints
-python -m storecheck app.apk                        # the APK's binary manifest is decoded (AAB manifests are not)
+python -m storecheck app.aab                        # APK and AAB manifests are decoded (build/outputs is scanned too)
+python -m storecheck path --checklist               # what storecheck cannot decide or does not check yet
 ```
 `--fix-plan` fixes only what the official docs spell out: remove `android:debuggable`, raise `targetSdk`, add
 `android:exported`, raise the iOS deployment target, and add `TODO` usage strings (you must replace them).
@@ -50,6 +57,14 @@ python -m storecheck path --privacy-draft --format json
 python -m storecheck path --privacy-draft --explain    # + local-LLM 'Data we collect' wording ([CONFIRM] on guesses)
 ```
 Maps evidence (known SDKs in dependency files, Android permissions, iOS usage-description keys, sensitive API names) to Google Data safety categories and Apple App Privacy types, flags likely tracking, and lists the questions only you can answer (purposes, sharing, linked to identity, encryption, deletion). SDK-sent data is "likely collected"; permission/API-only evidence is "possible" because the stores only count data that leaves the device. Mappings live in `storecheck/privacy_data.json` and use verified Apple and Google category/type names. SDK-to-data mappings are verified for 11 of 26 signal groups (Firebase Analytics/Crashlytics/Auth/Messaging, AdMob, Sentry, Facebook, Adjust, Mixpanel, OneSignal, RevenueCat) against each vendor's own disclosure page on 2026-11-25; the rest are marked "mapping NOT verified" in the draft.
+
+## How progress is measured
+See [`framework/FRAMEWORK.md`](framework/FRAMEWORK.md): eight weighted dimensions with pass gates, a requirements catalog
+built from the stores' own numbering, and a benchmark with labeled real apps.
+
+```bash
+python -m storecheck.measure --corpus <dir> --log "what changed" --review "does the framework still fit?"
+```
 
 ## Severity
 - **blocker**: the store will reject the build

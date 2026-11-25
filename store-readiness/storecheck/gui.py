@@ -21,7 +21,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from . import fixes, llm, privacy
+from . import checklist, fixes, llm, privacy
 from .engine import scan
 
 GITHUB_RX = re.compile(
@@ -101,6 +101,8 @@ def run_scan(req: dict) -> dict:
             "privacy_markdown": privacy.to_markdown(draft),
         }
         ed, skipped = fixes.build_fixes(project, findings)
+        out["checklist"] = checklist.build_checklist(project)
+        out["checklist_markdown"] = checklist.to_markdown(out["checklist"])
         out["fix_patch"] = fixes.to_patch(ed)
         out["fix_skipped"] = skipped
         if req.get("explain"):

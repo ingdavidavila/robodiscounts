@@ -72,7 +72,7 @@ def _read(f: Path, limit: int = 8 * 1024 * 1024) -> str:
 
 
 def _rel(proj: Project, f: Path) -> str:
-    return str(f.relative_to(proj.root))
+    return f.relative_to(proj.root).as_posix()
 
 
 def _add_synthetic(proj: Project, label: str, keys: dict, note: str) -> None:

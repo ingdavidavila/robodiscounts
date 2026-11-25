@@ -13,7 +13,7 @@ from .checks import ANDROID, TOOLS, _manifest_roots
 from .discover import Project
 from .rating import rating_hints
 
-DATA = json.loads((Path(__file__).parent / "privacy_data.json").read_text())
+DATA = json.loads((Path(__file__).parent / "privacy_data.json").read_text(encoding="utf-8"))
 
 GOOGLE_PURPOSES = ["App functionality", "Analytics", "Developer communications",
                    "Advertising or marketing", "Fraud prevention, security, and compliance",

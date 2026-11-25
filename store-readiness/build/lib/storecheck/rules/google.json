@@ -1,0 +1,131 @@
+{
+ "rules": [
+  {
+   "id": "play.debuggable",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "likely",
+   "title": "Release manifest is debuggable",
+   "check": {
+    "type": "android_attr",
+    "attr": "debuggable",
+    "bad_value": "true"
+   },
+   "fix": "Android's release guide says to turn debugging off for release builds (isDebuggable = false / debuggable false). I could not confirm on the pages checked that Google Play rejects debuggable uploads, so this is reported as likely, not blocker.",
+   "source": "https://developer.android.com/studio/publish/preparing",
+   "verified": "2026-11-25 (partly: Play rejection unconfirmed)"
+  },
+  {
+   "id": "play.target_sdk",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "blocker",
+   "title": "targetSdk below Google Play's minimum",
+   "check": {
+    "type": "android_target_sdk",
+    "min_target_sdk": 36
+   },
+   "fix": "New apps and updates must target Android 16 (API 36) or higher since Aug 31, 2026 (Wear OS/Automotive: 35, TV/XR: 34; extension to Nov 1, 2026 has passed). Raise targetSdk. Google raises this yearly; re-check the source.",
+   "source": "https://developer.android.com/google/play/requirements/target-sdk",
+   "verified": "2026-11-24"
+  },
+  {
+   "id": "play.target_sdk_unknown",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "advisory",
+   "title": "targetSdk could not be determined",
+   "check": {
+    "type": "android_target_sdk_unknown"
+   },
+   "fix": "Confirm your app targets API 36 or higher. Flutter, React Native and Expo apps inherit it from the framework or SDK version; check the generated android/ project or upgrade the framework.",
+   "source": "https://developer.android.com/google/play/requirements/target-sdk",
+   "verified": "2026-11-24"
+  },
+  {
+   "id": "play.sensitive_permissions",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "likely",
+   "title": "Permission needs a Play Console declaration or is restricted",
+   "check": {
+    "type": "android_permission",
+    "permissions": [
+     "READ_SMS",
+     "SEND_SMS",
+     "RECEIVE_SMS",
+     "RECEIVE_MMS",
+     "RECEIVE_WAP_PUSH",
+     "WRITE_SMS",
+     "READ_CALL_LOG",
+     "WRITE_CALL_LOG",
+     "PROCESS_OUTGOING_CALLS",
+     "MANAGE_EXTERNAL_STORAGE",
+     "QUERY_ALL_PACKAGES",
+     "ACCESS_BACKGROUND_LOCATION",
+     "REQUEST_INSTALL_PACKAGES"
+    ]
+   },
+   "fix": "Play restricts these: SMS and Call Log permissions are for the default SMS, Phone or Assistant handler only; MANAGE_EXTERNAL_STORAGE needs a Console declaration; background location needs strong justification and a declaration; QUERY_ALL_PACKAGES is limited to core functionality needing broad app visibility; REQUEST_INSTALL_PACKAGES is limited to apps whose core purpose is installing packages. Remove the permission or complete the declaration.",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9888170",
+   "verified": "2026-11-25"
+  },
+  {
+   "id": "play.cleartext",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "advisory",
+   "title": "Cleartext (HTTP) traffic allowed",
+   "check": {
+    "type": "android_attr",
+    "attr": "usesCleartextTraffic",
+    "bad_value": "true"
+   },
+   "fix": "Cleartext HTTP is off by default for apps targeting Android 9 (API 28)+. Use HTTPS, or restrict cleartext to specific domains in a network security config. Note: android:usesCleartextTraffic is deprecated and ignored for apps targeting API 38+; a network security config with cleartextTrafficPermitted=\"true\" is not scanned yet.",
+   "source": "https://developer.android.com/guide/topics/manifest/application-element",
+   "verified": "2026-11-25"
+  },
+  {
+   "id": "play.aab",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "likely",
+   "title": "New apps must be published as an Android App Bundle",
+   "check": {
+    "type": "apk_without_aab"
+   },
+   "fix": "Build an .aab (bundleRelease) and upload that to Play.",
+   "source": "https://developer.android.com/guide/app-bundle",
+   "verified": "2026-11-24"
+  },
+  {
+   "id": "play.16kb",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "likely",
+   "title": "Native library not aligned for 16 KB page sizes",
+   "check": {
+    "type": "elf_alignment"
+   },
+   "fix": "Apps targeting API 35+ must support 16 KB page sizes on 64-bit devices; updates that don't can't be released from Feb 1, 2027. Rebuild native libraries with 16 KB alignment (-Wl,-z,max-page-size=16384) or update NDK/SDKs. Pure Java/Kotlin apps are already fine.",
+   "source": "https://developer.android.com/guide/practices/page-sizes",
+   "verified": "2026-11-24"
+  },
+  {
+   "id": "play.account_deletion",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "advisory",
+   "title": "Account creation without an apparent account-deletion path",
+   "check": {
+    "type": "signal_without",
+    "signal": "createUserWithEmailAndPassword|\\b[Ss]ign_?[Uu]p\\s*\\(|\\bcreateUser\\(|\\bregisterUser\\(|signUpWith",
+    "unless": "deleteAccount|delete_account|account/delete|deleteUser|delete-account|account_deletion",
+    "what": "Sign-up code found, no account deletion code found (heuristic)"
+   },
+   "fix": "If users can create an account in the app, Play requires BOTH an in-app path to delete the account and associated data AND a web link where users can request deletion. Answer the Data deletion questions in the Data safety form.",
+   "source": "https://support.google.com/googleplay/android-developer/answer/13327111",
+   "verified": "2026-11-24"
+  }
+ ]
+}

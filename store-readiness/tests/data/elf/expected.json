@@ -1,0 +1,35 @@
+{
+ "source": "real Glide libraries from google/bundletool test data (Apache-2.0); expected values from readelf",
+ "libs": {
+  "arm64-v8a_libglide-webp": {
+   "machine": "AArch64",
+   "load_aligns": [
+    65536
+   ]
+  },
+  "armeabi-v7a_libglide-webp": {
+   "machine": "ARM",
+   "load_aligns": [
+    4096
+   ]
+  },
+  "armeabi_libglide-webp": {
+   "machine": "ARM",
+   "load_aligns": [
+    4096
+   ]
+  },
+  "x86_64_libglide-webp": {
+   "machine": "Advanced Micro Devices X86-64",
+   "load_aligns": [
+    4096
+   ]
+  },
+  "x86_libglide-webp": {
+   "machine": "Intel 80386",
+   "load_aligns": [
+    4096
+   ]
+  }
+ }
+}

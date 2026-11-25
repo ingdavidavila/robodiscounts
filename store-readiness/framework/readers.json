@@ -18,16 +18,16 @@
   {
    "reader": "ELF alignment (16 KB page size)",
    "module": "storecheck/checks.py:elf_alignment",
-   "status": "unverified",
-   "reference": "",
-   "test": ""
+   "status": "verified",
+   "reference": "readelf and pyelftools on 5 real shared libraries (Glide, from google/bundletool test data)",
+   "test": "tests/test_readers.py"
   },
   {
    "reader": "PNG/JPEG dimensions",
    "module": "storecheck/media.py",
-   "status": "unverified",
-   "reference": "",
-   "test": ""
+   "status": "verified",
+   "reference": "Pillow: 78 generated images and 274 real screenshots/icons from the benchmark apps, 0 mismatches",
+   "test": "tests/test_readers.py"
   }
  ]
 }

@@ -1,0 +1,28 @@
+name: storecheck
+on:
+  push:
+    paths: ["store-readiness/**", ".github/workflows/storecheck.yml"]
+  pull_request:
+    paths: ["store-readiness/**", ".github/workflows/storecheck.yml"]
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.10", "3.13"]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: store-readiness
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: python -m pip install .
+      - name: Tests
+        run: python -m unittest discover -s tests -v
+      - name: Scorecard (synthetic benchmark only)
+        run: python -m storecheck.measure --no-history

@@ -427,3 +427,38 @@ class SigningFormatting(Base):
         self.w("app/build.gradle.kts", 'android { buildTypes { release { signingConfig = signingConfigs.named("debug").get() } } }')
         _, ids = self.ids("google")
         self.assertIn("play.release_debug_signing", ids)
+
+
+class ChecklistTests(Base):
+    def test_lists_every_not_checkable_item_for_both_stores_and_never_double_lists(self):
+        import json as _j
+        from storecheck import checklist
+        cat = _j.loads((Path(__file__).parent.parent / "storecheck" / "requirements.json").read_text())["items"]
+        cl = checklist.build_checklist(None)
+        self.assertEqual(set(cl["ids"]), {i["id"] for i in cat if i["class"] in ("not_checkable", "unmapped")})
+        human = {i for g in cl["needs_human"] for i in g["ids"]}
+        todo = {i for g in cl["not_checked"] for i in g["ids"]}
+        self.assertFalse(human & todo)
+        self.assertTrue(all(g["reason"] for g in cl["needs_human"]))
+
+    def test_only_the_stores_in_scope_are_listed(self):
+        from storecheck import checklist
+        self.w("android/AndroidManifest.xml", f'<manifest {NS}><application/></manifest>')
+        project, _ = scan(str(self.root))
+        cl = checklist.build_checklist(project)
+        self.assertEqual(cl["stores"], ["google"])
+        self.assertFalse(any(i.startswith("apple.") for i in cl["ids"]))
+
+    def test_cli_and_markdown(self):
+        import contextlib
+        import io
+        from storecheck.__main__ import main
+        self.w("ios/App/Info.plist", plist())
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = main([str(self.root), "--checklist"])
+        out = buf.getvalue()
+        self.assertEqual(rc, 0)
+        self.assertIn("Needs a human, the store console or a running app", out)
+        self.assertIn("Not checked by storecheck yet", out)
+        self.assertIn("https://developer.apple.com/app-store/review/guidelines/", out)

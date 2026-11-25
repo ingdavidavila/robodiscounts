@@ -1,0 +1,1662 @@
+{
+ "version": 1,
+ "generated": "2026-11-25",
+ "method": "Apple: every numbered section of the App Review Guidelines (parsed from the page on this date). Google: Play Policy Center topics plus the specific policies and technical requirements read so far. Technical: Apple and Android requirements outside the guideline numbering.",
+ "classes": {
+  "automated": "deterministic rule covering the whole statically testable requirement",
+  "partial": "rule or hint covers part of it (heuristic, narrower scope, or draft only)",
+  "unmapped": "statically checkable in principle, not built yet",
+  "not_checkable": "cannot be decided from the package; needs a human, the console or a running app (reason required)"
+ },
+ "items": [
+  {
+   "id": "apple.guideline.1.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Objectionable Content Apps should not include content that is offensive, insensitive, upse",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "content judgment: needs a human reviewer"
+  },
+  {
+   "id": "apple.guideline.1.1.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Defamatory, discriminatory, or mean-spirited content, including references or commentary a",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "content judgment: needs a human reviewer"
+  },
+  {
+   "id": "apple.guideline.1.1.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Realistic portrayals of people or animals being killed, maimed, tortured, or abused, or co",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "content judgment: needs a human reviewer"
+  },
+  {
+   "id": "apple.guideline.1.1.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Depictions that encourage illegal or reckless use of weapons and dangerous objects, or fac",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "content judgment: needs a human reviewer"
+  },
+  {
+   "id": "apple.guideline.1.1.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Overtly sexual or pornographic material, defined as \u201cexplicit descriptions or displays of ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "content judgment: needs a human reviewer"
+  },
+  {
+   "id": "apple.guideline.1.1.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Inflammatory religious commentary or inaccurate or misleading quotations of religious text",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "content judgment: needs a human reviewer"
+  },
+  {
+   "id": "apple.guideline.1.1.6",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "False information and features, including inaccurate device data or trick/joke functionali",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "content judgment: needs a human reviewer"
+  },
+  {
+   "id": "apple.guideline.1.1.7",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Harmful concepts which capitalize or seek to profit on recent or current events, such as v",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "content judgment: needs a human reviewer"
+  },
+  {
+   "id": "apple.guideline.1.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "User-Generated Content Apps that enable users to create, generate, upload, share, or other",
+   "class": "partial",
+   "rules": [
+    "both.ugc_moderation"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.1.2.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Creator Content Apps which feature content from a specific community of users called \u201ccrea",
+   "class": "partial",
+   "rules": [
+    "both.ugc_moderation"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.1.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Kids Category The Kids Category is a great way for people to easily find apps that are des",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.1.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Physical Harm If your app behaves in a way that risks physical harm, we may reject it. For",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "physical-harm and medical content judgment"
+  },
+  {
+   "id": "apple.guideline.1.4.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Medical apps that could provide inaccurate data or information, or that could be used for ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "physical-harm and medical content judgment"
+  },
+  {
+   "id": "apple.guideline.1.4.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Drug dosage calculators must come from the drug manufacturer, a hospital, university, heal",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "physical-harm and medical content judgment"
+  },
+  {
+   "id": "apple.guideline.1.4.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps that encourage consumption of tobacco and vape products, illegal drugs, or excessive ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "physical-harm and medical content judgment"
+  },
+  {
+   "id": "apple.guideline.1.4.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps may only display DUI checkpoints that are published by law enforcement agencies, and ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "physical-harm and medical content judgment"
+  },
+  {
+   "id": "apple.guideline.1.4.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps should not urge customers to participate in activities (like bets, challenges, etc.) ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "physical-harm and medical content judgment"
+  },
+  {
+   "id": "apple.guideline.1.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Developer Information People need to know how to reach you with questions and support issu",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "developer contact information lives in App Store Connect, not the package"
+  },
+  {
+   "id": "apple.guideline.1.6",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Data Security Apps should implement appropriate security measures to ensure proper handlin",
+   "class": "partial",
+   "rules": [
+    "apple.ats",
+    "play.cleartext"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.1.7",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Reporting Criminal Activity Apps for reporting alleged criminal activity must involve loca",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "reporting criminal activity: process, not code"
+  },
+  {
+   "id": "apple.guideline.2.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "App Completeness (a) Submissions to App Review, including apps you make available for pre-",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "app completeness needs running the app"
+  },
+  {
+   "id": "apple.guideline.2.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Beta Testing Demos, betas, and trial versions of your app don\u2019t belong on the App Store \u2013 ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "beta-testing policy"
+  },
+  {
+   "id": "apple.guideline.2.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Accurate Metadata Customers should know what they\u2019re getting when they download or buy you",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.3.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "If your app includes in-app purchases, make sure your app description, screenshots, and pr",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.3.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Screenshots should show the app in use, and not merely the title art, login page, or splas",
+   "class": "partial",
+   "rules": [
+    "listing.apple_screenshots"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.3.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Previews are a great way for customers to see what your app looks like and what it does. T",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.3.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Select the most appropriate category for your app, and check out the App Store Category De",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.3.6",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Answer the age rating questions in App Store Connect honestly so that your app aligns prop",
+   "class": "partial",
+   "rules": [
+    "rating_hints"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.3.7",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Choose a unique app name, assign keywords that accurately describe your app, and don\u2019t try",
+   "class": "partial",
+   "rules": [
+    "listing.apple_text_limits"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.3.8",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Metadata should be appropriate for all audiences, so make sure your app and in-app purchas",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.3.9",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "You are responsible for securing the rights to use all materials in your app icons, screen",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.3.10",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Make sure your app is focused on the experience of the Apple platforms it supports, and do",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.3.11",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps you submit for pre-order on the App Store must be complete and deliverable as submitt",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.3.12",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps must clearly describe new features and product changes in their \u201cWhat\u2019s New\u201d text. Si",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.3.13",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "In-app events are timely events that happen within your app. To feature your event on the ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.3.14",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Creative assets allow you to highlight the value of your app in new ways compared to app-i",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "metadata truthfulness needs human review"
+  },
+  {
+   "id": "apple.guideline.2.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Hardware Compatibility",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.4.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "To ensure people get the most out of your app, iPhone apps should run on iPad whenever pos",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.4.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Design your app to use power efficiently and be used in a way that does not risk damage to",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "battery and performance need runtime measurement"
+  },
+  {
+   "id": "apple.guideline.2.4.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "People should be able to use your Apple TV app without the need for hardware inputs beyond",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.4.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps should never suggest or require a restart of the device or modifications to system se",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.4.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps distributed via the Mac App Store have some additional requirements to keep in mind: ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Software Requirements",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps may only use public APIs and must run on the currently shipping OS. Learn more about ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps should be self-contained in their bundles, and may not read or write data outside the",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps that transmit viruses, files, computer code, or programs that may harm or disrupt the",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "malicious behavior needs dynamic analysis"
+  },
+  {
+   "id": "apple.guideline.2.5.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Multitasking apps may only use background services for their intended purposes: VoIP, audi",
+   "class": "partial",
+   "rules": [
+    "apple.background_modes"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps must be fully functional on IPv6-only networks.",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "IPv6-only behavior needs runtime testing"
+  },
+  {
+   "id": "apple.guideline.2.5.6",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps that browse the web must use the appropriate WebKit framework and WebKit JavaScript. ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.7",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Intentionally omitted.",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.8",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps that create alternate desktop/home screen environments will be rejected.",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.9",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps that alter or disable the functions of standard switches, such as the Volume Up/Down ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.10",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Intentionally omitted.",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.11",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "SiriKit and Shortcuts (i) Apps integrating SiriKit and Shortcuts should only sign up for i",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.12",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps using CallKit or including an SMS Fraud Extension should only block phone numbers tha",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.13",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps using facial recognition for account authentication must use LocalAuthentication (and",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.14",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps must request explicit user consent and provide a clear visual and/or audible indicati",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.15",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps that enable users to view and select files should include items from the Files app an",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.16",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Widgets, extensions, and notifications should be related to the content and functionality ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.17",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps that support Matter must use Apple\u2019s support framework for Matter to initiate pairing",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.18",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Display advertising should be limited to your main app binary, and should not be included ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.2.5.19",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Don\u2019t include any hidden, dormant, or undocumented features in your app; your app\u2019s functi",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.3.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Payments",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.3.1.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "In-App Purchase: If you want to unlock features or functionality within your app, (by way ",
+   "class": "partial",
+   "rules": [
+    "both.payments_iap"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.3.1.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Subscriptions: Apps may offer auto-renewable in-app purchase subscriptions, regardless of ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.3.1.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Other Purchase Methods: The following apps may use purchase methods other than in-app purc",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.3.1.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Hardware-Specific Content: In limited circumstances, such as when features are dependent u",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.3.1.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Cryptocurrencies: (i) Wallets: Apps may facilitate virtual currency storage, provided they",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.3.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Other Business Model Issues The lists below are not exhaustive, and your submission may tr",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "business and legal arrangements"
+  },
+  {
+   "id": "apple.guideline.3.2.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Acceptable (i) Displaying your own apps for purchase or promotion within your app, provide",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "business and legal arrangements"
+  },
+  {
+   "id": "apple.guideline.3.2.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Unacceptable (i) Creating an interface for displaying third-party apps, extensions, or plu",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "business and legal arrangements"
+  },
+  {
+   "id": "apple.guideline.4.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Copycats (a) Come up with your own ideas. We know you have them, so make yours come to lif",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "originality judgment"
+  },
+  {
+   "id": "apple.guideline.4.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Minimum Functionality Your app should include features, content, and UI that elevate it be",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.2.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps using ARKit should provide rich and integrated augmented reality experiences; merely ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.2.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Other than catalogs, apps shouldn\u2019t primarily be marketing materials, advertisements, web ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.2.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Intentionally omitted.",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.2.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Intentionally omitted.",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.2.6",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps created from a commercialized template or app generation service will be rejected unl",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.2.7",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Remote Desktop Clients: If your remote desktop app acts as a mirror of specific software o",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Spam (a) Don\u2019t create multiple Bundle IDs of the same app (for example, submitting a separ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "spam judgment"
+  },
+  {
+   "id": "apple.guideline.4.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Extensions Apps hosting or containing extensions must comply with the App Extension Progra",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.4.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Keyboard extensions have some additional rules. They must: Provide keyboard input function",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.4.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Safari extensions must run on the current version of Safari on the relevant Apple operatin",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.4.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Intentionally omitted.",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apple Sites and Services",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.5.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps may use approved Apple RSS feeds such as the iTunes Store RSS feed, but may not scrap",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.5.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apple Music (i) MusicKit on iOS lets users play Apple Music and their local music library ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.5.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Do not use Apple Services to spam, phish, or send unsolicited messages to customers, inclu",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.5.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Push Notifications must not be required for the app to function, and should not be used to",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.5.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Only use Game Center Player IDs in a manner approved by the Game Center terms and do not d",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.5.6",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps may use Unicode characters that render as Apple emoji in their app and app metadata. ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.6",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Intentionally omitted.",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.7",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Mini apps, mini games, streaming games, chatbots, plug-ins, and game emulators Apps may of",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.7.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Software offered in apps under this rule must: follow all privacy guidelines, including bu",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.7.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Your app may not extend or expose native platform APIs or technologies to the software wit",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.7.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Your app may not share data or privacy permissions to any individual software offered in y",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.7.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "You must provide an index of software and metadata available in your app. It must include ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.7.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Your app must provide a way for users to identify software that exceeds the app\u2019s age rati",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.8",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Login Services Apps that use a third-party or social login service (such as Facebook Login",
+   "class": "partial",
+   "rules": [
+    "apple.sign_in_with_apple"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.9",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apple Pay Apps using Apple Pay must provide all material purchase information to the user ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.4.10",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Monetizing Built-In Capabilities You may not monetize built-in capabilities provided by th",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.5.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Privacy Protecting user privacy is paramount in the Apple ecosystem, and you should use ca",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.5.1.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Data Collection and Storage (i) Privacy Policies: All apps must include a link to their pr",
+   "class": "partial",
+   "rules": [
+    "apple.usage_strings",
+    "both.privacy_policy",
+    "apple.account_deletion"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.5.1.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Data Use and Sharing (i) Unless otherwise permitted by law, you may not use, transmit, or ",
+   "class": "partial",
+   "rules": [
+    "privacy_draft.tracking"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.5.1.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Health and Health Research Health, fitness, and medical data are especially sensitive and ",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.5.1.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Kids (a) For many reasons, it is critical to use care when dealing with personal data from",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.5.1.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Location Services Use Location Services in your app only when it is directly relevant to t",
+   "class": "partial",
+   "rules": [
+    "apple.usage_strings"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.5.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Intellectual Property Make sure your app only includes content that you created or that yo",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "intellectual property: legal judgment"
+  },
+  {
+   "id": "apple.guideline.5.2.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Generally: Don\u2019t use protected third-party material such as trademarks, copyrighted works,",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "intellectual property: legal judgment"
+  },
+  {
+   "id": "apple.guideline.5.2.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Third-Party Sites/Services: If your app uses, accesses, monetizes access to, or displays c",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "intellectual property: legal judgment"
+  },
+  {
+   "id": "apple.guideline.5.2.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Audio/Video Downloading: Apps should not facilitate illegal file sharing or include the ab",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "intellectual property: legal judgment"
+  },
+  {
+   "id": "apple.guideline.5.2.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apple Endorsements: (a) Don\u2019t suggest or imply that Apple is a source or supplier of the A",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "intellectual property: legal judgment"
+  },
+  {
+   "id": "apple.guideline.5.2.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apple Products: Don\u2019t create an app that appears confusingly similar to an existing Apple ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "intellectual property: legal judgment"
+  },
+  {
+   "id": "apple.guideline.5.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Gaming, Gambling, and Lotteries Gaming, gambling, and lotteries can be tricky to manage an",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "gambling and legal compliance"
+  },
+  {
+   "id": "apple.guideline.5.3.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Sweepstakes and contests must be sponsored by the developer of the app.",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "gambling and legal compliance"
+  },
+  {
+   "id": "apple.guideline.5.3.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Official rules for sweepstakes, contests, and raffles must be presented in the app and mak",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "gambling and legal compliance"
+  },
+  {
+   "id": "apple.guideline.5.3.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps may not use in-app purchase to purchase credit or currency for use in conjunction wit",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "gambling and legal compliance"
+  },
+  {
+   "id": "apple.guideline.5.3.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Apps that offer real money gaming (such as sports betting, poker, casino games, horse raci",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "gambling and legal compliance"
+  },
+  {
+   "id": "apple.guideline.5.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "VPN Apps Apps offering VPN services must utilize the NEVPNManager API and may only be offe",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.5.5",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Mobile Device Management Mobile Device Management Apps that offer Mobile Device Management",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.guideline.5.6",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Developer Code of Conduct Please treat everyone with respect, whether in your responses to",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "developer code of conduct"
+  },
+  {
+   "id": "apple.guideline.5.6.1",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "App Store Reviews App Store customer reviews can be an integral part of the app experience",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "developer code of conduct"
+  },
+  {
+   "id": "apple.guideline.5.6.2",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Developer Identity Providing verifiable information to Apple and customers is critical to ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "developer code of conduct"
+  },
+  {
+   "id": "apple.guideline.5.6.3",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "Discovery Fraud Participating in the App Store requires integrity and a commitment to buil",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "developer code of conduct"
+  },
+  {
+   "id": "apple.guideline.5.6.4",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "App Quality Customers expect the highest quality from the App Store, and maintaining high ",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "developer code of conduct"
+  },
+  {
+   "id": "google.target_api",
+   "store": "google",
+   "source": "https://developer.android.com/google/play/requirements/target-sdk",
+   "title": "Target API level",
+   "class": "automated",
+   "rules": [
+    "play.target_sdk",
+    "play.target_sdk_unknown"
+   ],
+   "reason": "source Gradle files, version catalogs, Expo/Unity/Cordova config, and built APK/AAB manifests (a missing target equals minSdk; for bundles only the base module is compared, an assumption)"
+  },
+  {
+   "id": "google.app_bundle",
+   "store": "google",
+   "source": "https://developer.android.com/guide/app-bundle",
+   "title": "App Bundle format",
+   "class": "partial",
+   "rules": [
+    "play.aab"
+   ],
+   "reason": "checks that an AAB accompanies an APK; cannot see what is uploaded to the Play Console"
+  },
+  {
+   "id": "google.page_size_16kb",
+   "store": "google",
+   "source": "https://developer.android.com/guide/practices/page-sizes",
+   "title": "16 KB page sizes",
+   "class": "partial",
+   "rules": [
+    "play.16kb"
+   ],
+   "reason": "APK, AAB and repo native libraries (arm64-v8a and x86_64); other ABIs are not required"
+  },
+  {
+   "id": "google.exported",
+   "store": "google",
+   "source": "https://developer.android.com/about/versions/12/behavior-changes-12",
+   "title": "Explicit android:exported (Android 12+)",
+   "class": "partial",
+   "rules": [
+    "play.exported_missing"
+   ],
+   "reason": "complete for built APK and AAB manifests; a source-only scan misses components merged in from libraries"
+  },
+  {
+   "id": "google.fgs_types",
+   "store": "google",
+   "source": "https://developer.android.com/about/versions/14/changes/fgs-types-required",
+   "title": "Foreground service types (Android 14)",
+   "class": "partial",
+   "rules": [
+    "play.fgs_type"
+   ],
+   "reason": "heuristic: cannot tell which services run in the foreground"
+  },
+  {
+   "id": "google.signing",
+   "store": "google",
+   "source": "https://developer.android.com/studio/publish/app-signing",
+   "title": "Release signing (not the debug key)",
+   "class": "partial",
+   "rules": [
+    "play.release_debug_signing"
+   ],
+   "reason": "debug-key check only"
+  },
+  {
+   "id": "google.debuggable",
+   "store": "google",
+   "source": "https://developer.android.com/studio/publish/preparing",
+   "title": "Non-debuggable release build",
+   "class": "partial",
+   "rules": [
+    "play.debuggable"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "google.restricted_permissions",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9888170",
+   "title": "Restricted and sensitive permissions",
+   "class": "partial",
+   "rules": [
+    "play.sensitive_permissions"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "google.data_safety",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10787469",
+   "title": "Data safety form",
+   "class": "partial",
+   "rules": [
+    "privacy_draft"
+   ],
+   "reason": "draft only; 11 of 26 SDK groups verified"
+  },
+  {
+   "id": "google.privacy_policy",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Privacy policy in listing and in app",
+   "class": "partial",
+   "rules": [
+    "both.privacy_policy"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "google.account_deletion",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/13327111",
+   "title": "Account deletion path and web link",
+   "class": "partial",
+   "rules": [
+    "play.account_deletion"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "google.payments",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9858738",
+   "title": "Play Billing for digital goods",
+   "class": "partial",
+   "rules": [
+    "both.payments_iap"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "google.ugc",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9876937",
+   "title": "User-generated content moderation",
+   "class": "partial",
+   "rules": [
+    "both.ugc_moderation"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "google.listing_text",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9859152",
+   "title": "Store listing text limits",
+   "class": "partial",
+   "rules": [
+    "listing.play_text_limits"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "google.listing_screenshots",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9859152",
+   "title": "Phone screenshots (2 to 8)",
+   "class": "partial",
+   "rules": [
+    "listing.play_screenshots"
+   ],
+   "reason": "count only; pixel sizes not checked"
+  },
+  {
+   "id": "google.content_rating",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9859655",
+   "title": "Content rating questionnaire (IARC)",
+   "class": "partial",
+   "rules": [
+    "rating_hints"
+   ],
+   "reason": "hints only; questionnaire wording not read"
+  },
+  {
+   "id": "google.cleartext",
+   "store": "google",
+   "source": "https://developer.android.com/guide/topics/manifest/application-element",
+   "title": "Cleartext traffic",
+   "class": "partial",
+   "rules": [
+    "play.cleartext"
+   ],
+   "reason": "manifest attribute only; network security config not read"
+  },
+  {
+   "id": "google.ads",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Ads policy",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "google.families",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Families policy and target audience",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "google.sdk_policy",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Use of SDKs in apps (Play SDK Index)",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "google.mobile_unwanted_software",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Mobile unwanted software",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "needs dynamic analysis"
+  },
+  {
+   "id": "google.malware",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Malware",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "needs dynamic analysis"
+  },
+  {
+   "id": "google.impersonation",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Impersonation",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "identity judgment"
+  },
+  {
+   "id": "google.intellectual_property",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Intellectual property",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "legal judgment"
+  },
+  {
+   "id": "google.restricted_content",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Restricted content",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "content judgment"
+  },
+  {
+   "id": "google.deceptive_behavior",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Deceptive behavior",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "needs human review"
+  },
+  {
+   "id": "google.spam_min_functionality",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Spam, functionality and user experience",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "google.enforcement",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Enforcement and account standing",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "process, not code"
+  },
+  {
+   "id": "google.developer_verification",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
+   "title": "Developer account and identity verification",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "Play Console process, not code"
+  },
+  {
+   "id": "apple.privacy_manifest",
+   "store": "apple",
+   "source": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files",
+   "title": "Privacy manifest and required-reason APIs",
+   "class": "partial",
+   "rules": [
+    "apple.privacy_manifest"
+   ],
+   "reason": "presence only; required-reason API use is not scanned"
+  },
+  {
+   "id": "apple.required_reason_api",
+   "store": "apple",
+   "source": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files",
+   "title": "Required-reason API declarations match code",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.third_party_sdk_manifests",
+   "store": "apple",
+   "source": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files",
+   "title": "Third-party SDK privacy manifests and signatures",
+   "class": "unmapped",
+   "rules": [],
+   "reason": ""
+  },
+  {
+   "id": "apple.privacy_labels",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/app-privacy-details/",
+   "title": "App Privacy answers (nutrition label)",
+   "class": "partial",
+   "rules": [
+    "privacy_draft"
+   ],
+   "reason": "draft only; 11 of 26 SDK groups verified"
+  },
+  {
+   "id": "apple.usage_strings",
+   "store": "apple",
+   "source": "https://developer.apple.com/documentation/bundleresources/protected-resources",
+   "title": "Purpose strings for protected resources",
+   "class": "partial",
+   "rules": [
+    "apple.usage_strings"
+   ],
+   "reason": "text heuristics for what the code uses"
+  },
+  {
+   "id": "apple.ats",
+   "store": "apple",
+   "source": "https://developer.apple.com/documentation/bundleresources/information-property-list/nsapptransportsecurity/nsallowsarbitraryloads",
+   "title": "App Transport Security exceptions",
+   "class": "automated",
+   "rules": [
+    "apple.ats"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.export_compliance",
+   "store": "apple",
+   "source": "https://developer.apple.com/documentation/bundleresources/information-property-list/itsappusesnonexemptencryption",
+   "title": "Export compliance key",
+   "class": "automated",
+   "rules": [
+    "apple.export_compliance"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.version_keys",
+   "store": "apple",
+   "source": "https://developer.apple.com/documentation/bundleresources/information-property-list/cfbundleversion",
+   "title": "Bundle version keys",
+   "class": "automated",
+   "rules": [
+    "apple.version_keys"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.app_icon",
+   "store": "apple",
+   "source": "https://developer.apple.com/design/human-interface-guidelines/app-icons",
+   "title": "App icon 1024x1024",
+   "class": "partial",
+   "rules": [
+    "apple.app_icon"
+   ],
+   "reason": "size only"
+  },
+  {
+   "id": "apple.launch_screen",
+   "store": "apple",
+   "source": "https://developer.apple.com/documentation/bundleresources/information-property-list/uilaunchscreen",
+   "title": "Launch screen",
+   "class": "partial",
+   "rules": [
+    "apple.launch_screen"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.deployment_target",
+   "store": "apple",
+   "source": "https://developer.apple.com/news/upcoming-requirements/",
+   "title": "Minimum iOS deployment target",
+   "class": "automated",
+   "rules": [
+    "apple.deployment_target"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.xcode_version",
+   "store": "apple",
+   "source": "https://developer.apple.com/news/upcoming-requirements/",
+   "title": "Xcode and SDK version for uploads",
+   "class": "partial",
+   "rules": [
+    "apple.xcode_version"
+   ],
+   "reason": "only when the version appears in CI config"
+  },
+  {
+   "id": "apple.push_entitlement",
+   "store": "apple",
+   "source": "https://developer.apple.com/documentation/bundleresources/entitlements/aps-environment",
+   "title": "Push entitlement",
+   "class": "partial",
+   "rules": [
+    "apple.push_entitlement"
+   ],
+   "reason": ""
+  },
+  {
+   "id": "apple.age_rating",
+   "store": "apple",
+   "source": "https://developer.apple.com/help/app-store-connect/reference/app-information/age-ratings-values-and-definitions",
+   "title": "Age rating answers",
+   "class": "partial",
+   "rules": [
+    "rating_hints"
+   ],
+   "reason": "hints only"
+  },
+  {
+   "id": "apple.screenshots",
+   "store": "apple",
+   "source": "https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications",
+   "title": "Screenshot sizes and count",
+   "class": "partial",
+   "rules": [
+    "listing.apple_screenshots"
+   ],
+   "reason": "fastlane folders only"
+  },
+  {
+   "id": "apple.metadata_limits",
+   "store": "apple",
+   "source": "https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information",
+   "title": "Name, subtitle, keywords, description limits",
+   "class": "partial",
+   "rules": [
+    "listing.apple_text_limits"
+   ],
+   "reason": "fastlane folders only"
+  },
+  {
+   "id": "apple.privacy_policy_url",
+   "store": "apple",
+   "source": "https://developer.apple.com/help/app-store-connect/reference/app-information/app-information",
+   "title": "Privacy Policy URL",
+   "class": "partial",
+   "rules": [
+    "both.privacy_policy"
+   ],
+   "reason": "cannot see the URL entered in App Store Connect"
+  },
+  {
+   "id": "apple.dsa_trader_status",
+   "store": "apple",
+   "source": "https://developer.apple.com/news/upcoming-requirements/",
+   "title": "EU trader status",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "App Store Connect account setting"
+  },
+  {
+   "id": "apple.in_app_purchase_setup",
+   "store": "apple",
+   "source": "https://developer.apple.com/app-store/review/guidelines/",
+   "title": "In-app purchase products configured",
+   "class": "not_checkable",
+   "rules": [],
+   "reason": "App Store Connect configuration"
+  }
+ ]
+}

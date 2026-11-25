@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import fixes, llm, privacy, report
+from . import checklist, fixes, llm, privacy, report
 from .engine import scan, to_json
 
 
@@ -17,6 +17,8 @@ def main(argv=None) -> int:
     ap.add_argument("--rules-dir", type=Path, help="extra rules directory (JSON)")
     ap.add_argument("--privacy-draft", action="store_true",
                     help="print a Data safety / App Privacy label draft instead of the scan report")
+    ap.add_argument("--checklist", action="store_true",
+                    help="print the manual checklist: what storecheck cannot decide or does not check yet")
     ap.add_argument("--fix-plan", metavar="FILE",
                     help="write a unified diff of safe fixes to FILE ('-' for stdout); never edits your files")
     ap.add_argument("--explain", action="store_true", help="add advisory notes from a local LLM")
@@ -24,13 +26,16 @@ def main(argv=None) -> int:
     ap.add_argument("--model", default="qwen2.5-coder:14b")
     a = ap.parse_args(argv)
     project, findings = scan(a.path, a.store, a.rules_dir)
+    if a.checklist:
+        print(checklist.to_markdown(checklist.build_checklist(project)))
+        return 0
     if a.fix_plan:
         ed, skipped = fixes.build_fixes(project, findings)
         patch = fixes.to_patch(ed)
         if a.fix_plan == "-":
             print(patch)
         else:
-            Path(a.fix_plan).write_text(patch)
+            Path(a.fix_plan).write_bytes(patch.encode("utf-8"))   # bytes: no newline translation on Windows
             n = len([r for r in ed.text if ed.text[r] != ed.orig[r]])
             print(f"Wrote {a.fix_plan}: {n} file(s) changed. Review, then apply with: git apply {a.fix_plan}")
         if skipped:
