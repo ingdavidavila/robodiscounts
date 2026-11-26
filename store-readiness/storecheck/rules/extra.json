@@ -825,6 +825,40 @@
    "fix": "Google Play removes apps with the sensitive JavaScript interface vulnerability: an object added with addJavascriptInterface that untrusted web content can reach. Load only content you own into that WebView, or remove the interface (removeJavascriptInterface) before untrusted content loads.",
    "source": "https://support.google.com/googleplay/android-developer/answer/10768383",
    "verified": "2026-11-26"
+  },
+  {
+   "id": "apple.crypto_wallet_mining",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "Cryptocurrency features: guideline 3.1.5 applies",
+   "check": {
+    "type": "ios_signal_note",
+    "pattern": "(?i)xmrig|cpuminer|stratum\\+tcp|bitcoinj|web3swift|WalletConnect|ethers(?:js)?\\b|@solana/web3\\.js|web3\\.dart",
+    "what": "cryptocurrency code found",
+    "skip_platform_dirs": true
+   },
+   "fix": "Guideline 3.1.5: wallets must be offered by a developer enrolled as an organization; apps may not mine cryptocurrency on device (cloud mining only); exchanges need licensing in each country where offered; ICOs and crypto-securities trading must come from approved financial institutions.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#cryptocurrencies",
+   "verified": "2026-11-26"
+  },
+  {
+   "id": "apple.keyboard_extension",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "Keyboard extension: guideline 4.4.1 applies",
+   "check": {
+    "type": "ios_signal_note",
+    "pattern": "com\\.apple\\.keyboard-service",
+    "suffixes": [
+     ".plist"
+    ],
+    "what": "keyboard extension found"
+   },
+   "fix": "Guideline 4.4.1: a keyboard extension must provide keyboard input, a way to switch to the next keyboard, and remain functional without full network access and without requiring full access; it may collect activity only to improve the keyboard, may not launch apps other than Settings, and may not repurpose keyboard buttons.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#extensions",
+   "verified": "2026-11-26"
   }
  ]
 }

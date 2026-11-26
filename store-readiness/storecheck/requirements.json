@@ -49,7 +49,7 @@
    "id": "apple.guideline.1.1.4",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Overtly sexual or pornographic material, defined as \u201cexplicit descriptions or displays of ",
+   "title": "Overtly sexual or pornographic material, defined as “explicit descriptions or displays of ",
    "class": "not_checkable",
    "rules": [],
    "reason": "content judgment: needs a human reviewer"
@@ -96,7 +96,7 @@
    "id": "apple.guideline.1.2.1",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Creator Content Apps which feature content from a specific community of users called \u201ccrea",
+   "title": "Creator Content Apps which feature content from a specific community of users called “crea",
    "class": "partial",
    "rules": [
     "both.ugc_moderation"
@@ -211,7 +211,7 @@
    "id": "apple.guideline.2.2",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Beta Testing Demos, betas, and trial versions of your app don\u2019t belong on the App Store \u2013 ",
+   "title": "Beta Testing Demos, betas, and trial versions of your app don’t belong on the App Store – ",
    "class": "not_checkable",
    "rules": [],
    "reason": "beta-testing policy"
@@ -220,7 +220,7 @@
    "id": "apple.guideline.2.3",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Accurate Metadata Customers should know what they\u2019re getting when they download or buy you",
+   "title": "Accurate Metadata Customers should know what they’re getting when they download or buy you",
    "class": "not_checkable",
    "rules": [],
    "reason": "metadata truthfulness needs human review"
@@ -278,7 +278,7 @@
    "id": "apple.guideline.2.3.7",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Choose a unique app name, assign keywords that accurately describe your app, and don\u2019t try",
+   "title": "Choose a unique app name, assign keywords that accurately describe your app, and don’t try",
    "class": "partial",
    "rules": [
     "listing.apple_text_limits"
@@ -325,7 +325,7 @@
    "id": "apple.guideline.2.3.12",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Apps must clearly describe new features and product changes in their \u201cWhat\u2019s New\u201d text. Si",
+   "title": "Apps must clearly describe new features and product changes in their “What’s New” text. Si",
    "class": "not_checkable",
    "rules": [],
    "reason": "metadata truthfulness needs human review"
@@ -569,7 +569,7 @@
    "id": "apple.guideline.2.5.17",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Apps that support Matter must use Apple\u2019s support framework for Matter to initiate pairing",
+   "title": "Apps that support Matter must use Apple’s support framework for Matter to initiate pairing",
    "class": "unmapped",
    "rules": [],
    "reason": ""
@@ -589,7 +589,7 @@
    "id": "apple.guideline.2.5.19",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Don\u2019t include any hidden, dormant, or undocumented features in your app; your app\u2019s functi",
+   "title": "Don’t include any hidden, dormant, or undocumented features in your app; your app’s functi",
    "class": "unmapped",
    "rules": [],
    "reason": ""
@@ -647,9 +647,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Cryptocurrencies: (i) Wallets: Apps may facilitate virtual currency storage, provided they",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.crypto_wallet_mining"
+   ],
+   "reason": "detects wallet/mining code and states the obligations; cannot check organization enrollment, licensing or whether mining runs on device"
   },
   {
    "id": "apple.guideline.3.2",
@@ -711,7 +713,7 @@
    "id": "apple.guideline.4.2.2",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Other than catalogs, apps shouldn\u2019t primarily be marketing materials, advertisements, web ",
+   "title": "Other than catalogs, apps shouldn’t primarily be marketing materials, advertisements, web ",
    "class": "partial",
    "rules": [
     "both.remote_web_content"
@@ -758,7 +760,7 @@
    "id": "apple.guideline.4.3",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Spam (a) Don\u2019t create multiple Bundle IDs of the same app (for example, submitting a separ",
+   "title": "Spam (a) Don’t create multiple Bundle IDs of the same app (for example, submitting a separ",
    "class": "not_checkable",
    "rules": [],
    "reason": "spam judgment"
@@ -777,9 +779,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Keyboard extensions have some additional rules. They must: Provide keyboard input function",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.keyboard_extension"
+   ],
+   "reason": "detects a keyboard extension and states the obligations; cannot verify full-access independence or button behavior"
   },
   {
    "id": "apple.guideline.4.4.2",
@@ -822,9 +826,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Apple Music (i) MusicKit on iOS lets users play Apple Music and their local music library ",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.usage_strings"
+   ],
+   "reason": "only the Info.plist usage string for media-library access is checked; the no-payment and user-initiated-playback rules need human review"
   },
   {
    "id": "apple.guideline.4.5.3",
@@ -920,7 +926,7 @@
    "id": "apple.guideline.4.7.5",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Your app must provide a way for users to identify software that exceeds the app\u2019s age rati",
+   "title": "Your app must provide a way for users to identify software that exceeds the app’s age rati",
    "class": "unmapped",
    "rules": [],
    "reason": ""
@@ -1033,7 +1039,7 @@
    "id": "apple.guideline.5.2.1",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Generally: Don\u2019t use protected third-party material such as trademarks, copyrighted works,",
+   "title": "Generally: Don’t use protected third-party material such as trademarks, copyrighted works,",
    "class": "not_checkable",
    "rules": [],
    "reason": "intellectual property: legal judgment"
@@ -1060,7 +1066,7 @@
    "id": "apple.guideline.5.2.4",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Apple Endorsements: (a) Don\u2019t suggest or imply that Apple is a source or supplier of the A",
+   "title": "Apple Endorsements: (a) Don’t suggest or imply that Apple is a source or supplier of the A",
    "class": "not_checkable",
    "rules": [],
    "reason": "intellectual property: legal judgment"
@@ -1069,7 +1075,7 @@
    "id": "apple.guideline.5.2.5",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Apple Products: Don\u2019t create an app that appears confusingly similar to an existing Apple ",
+   "title": "Apple Products: Don’t create an app that appears confusingly similar to an existing Apple ",
    "class": "not_checkable",
    "rules": [],
    "reason": "intellectual property: legal judgment"

@@ -111,6 +111,8 @@ class Project:
 _TEST_DIR_RX = re.compile(r"(?i)(^|/)(tests?|__tests__|__mocks__|mocks?|androidtest|unittests?|uitests?|e2e|fixtures)(/|$)"
                           r"|[^/]*tests?(/|$)|(^|/)(mock|fake)[^/]*$")
 _TEST_FILE_RX = re.compile(r"[a-z]Tests?\.[A-Za-z]+$|[._-](test|tests|spec)\.[A-Za-z]+$")
+# translation/vector/data files never hold code signals; skipping them is the biggest scan-time saving
+_DATA_SUFFIXES = {".strings", ".stringsdict", ".xcstrings", ".pdf", ".svg", ".po", ".xliff", ".csv"}
 _DOC_SUFFIXES = {".md", ".markdown", ".txt", ".rst", ".adoc"}
 _LOCK_NAMES = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "pubspec.lock", "podfile.lock",
                "cargo.lock", "gemfile.lock", "package.resolved", "composer.lock", "bun.lockb"}
@@ -279,7 +281,7 @@ def _walk(root: Path):
 
 def _maybe_read_text(proj: Project, f: Path, rel: str) -> None:
     low = f.name.lower()
-    if f.suffix.lower() in _DOC_SUFFIXES or _is_test_rel(rel):
+    if f.suffix.lower() in _DOC_SUFFIXES or f.suffix.lower() in _DATA_SUFFIXES or _is_test_rel(rel):
         return
     if len(proj.texts) >= MAX_TEXT_FILES:
         return

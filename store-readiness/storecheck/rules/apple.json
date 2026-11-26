@@ -52,6 +52,11 @@
       "what": "App Tracking use",
       "key": "NSUserTrackingUsageDescription",
       "pattern": "ATTrackingManager|AppTrackingTransparency"
+     },
+     {
+      "what": "Media library / Apple Music use",
+      "key": "NSAppleMusicUsageDescription",
+      "pattern": "MusicAuthorization|MPMediaLibrary|MPMusicPlayerController|SKCloudServiceController|ApplicationMusicPlayer"
      }
     ]
    },

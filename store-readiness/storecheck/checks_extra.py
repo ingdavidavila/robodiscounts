@@ -518,6 +518,21 @@ def apple_screen_recording_consent(p: Project, a: dict):
     return [(hit, "screen recording code found")] if hit else []
 
 
+def ios_signal_note(p: Project, a: dict):
+    """Generic informational check: a pattern (optionally limited to file suffixes) marks a policy area that applies."""
+    if not p.has_ios:
+        return []
+    if a.get("suffixes"):
+        hits = p.find_in_files(a["pattern"], tuple(a["suffixes"]), limit=1)
+        hit = hits[0] if hits else None
+    elif a.get("skip_platform_dirs"):
+        hits = p.find_in_files(a["pattern"], None, limit=1, skip_platform_dirs=True)
+        hit = hits[0] if hits else None
+    else:
+        hit = p.find_signal(a["pattern"])
+    return [(hit, a["what"])] if hit else []
+
+
 _LOCAL = re.compile(r"^https?://(?:localhost|127\.|10\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.|[^/]*\.local\b)", re.I)
 
 
@@ -558,7 +573,7 @@ CHECKS_EXTRA = {f.__name__: f for f in (
     apple_ads_in_extensions, apple_health_data_ads, both_kids_third_party_sdks, apple_vpn_app,
     apple_screen_recording_consent, both_remote_web_content, play_webview_js_interface,
     apple_required_reason_api, apple_third_party_sdk_manifest, apple_private_api, apple_web_engine,
-    apple_ipad_support, apple_iap_restore,
+    apple_ipad_support, apple_iap_restore, ios_signal_note,
     android_exported_missing, android_fgs_type_missing, android_release_debug_signing, ios_app_icon,
     ios_launch_screen, ios_deployment_target, ios_xcode_version, ios_push_entitlement, ios_background_modes,
     payments_without_iap, listing_limits, listing_screenshots, privacy_policy, ugc_without_moderation)}

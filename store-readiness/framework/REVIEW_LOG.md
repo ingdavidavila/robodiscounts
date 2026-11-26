@@ -30,3 +30,11 @@ Overall 76.5%. Framework re-evaluation: Real-app triage found and fixed 5 false 
 ## 2026-11-26T16:52Z @ a6f0c16: Requirement coverage batch 2 (policy-conflict checks, each verified from the official page): ads in extension targets (2.5.18), health data with ad SDKs (5.1.3), third-party SDKs in child-directed apps (1.3, 5.1.4, Google Families), VPN apps (5.4), screen recording consent (2.5.14), remote-website wrapper apps (Apple 4.2/4.2.2, Play Spam policy), WebView JavaScript interface (Play). 7 rules, 13 benchmark cases, 10 catalog items to partial, 1 new Google item.
 
 Overall 76.9%. Framework re-evaluation: Honest caveat: on the 14 real apps only one of the 7 new rules fires (NewPipe addJavascriptInterface), so six rules are verified on synthetic cases only and their real-world false-positive rate is unknown. The framework counts a rule toward D1 once it has a benchmark case and a source, but nothing measures how often it fires in the real world; considering a 'rules exercised by the real corpus' sub-metric. Also: D4 falls as rules are added without new automatic fixes, which pulls against D1; recorded as a known tension, not changed. Catalog gained one Google item (WebView JS interface) with its source.
+
+## 2026-11-26T20:10Z @ 5f5482c: Perf: skip translation/vector/data suffixes (.strings,.svg,.pdf,...) when loading signal text; slowest real scan was 9.8s of 10s
+
+Overall 77.0%. Framework re-evaluation: Framework still fits. D8 gain expected; D2 must not move (watch for lost findings). Next: D1 remaining items.
+
+## 2026-11-26T20:12Z @ 5f5482c: Requirement coverage batch 3: MusicKit usage key (4.5.2, added to usage-strings rule, key doc verified via DocC), crypto wallet/mining note (3.1.5), keyboard extension note (4.4.1); text verified from guidelines page; 7 synthetic cases; new generic ios_signal_note check
+
+Overall 77.2%. Framework re-evaluation: Framework fits. Still note-style advisory rules: partial credit only. None expected to fire on real corpus; need real-corpus-exercised sub-metric. D4 unchanged.
