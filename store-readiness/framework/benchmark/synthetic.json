@@ -1395,6 +1395,279 @@
 "must_not": [
 "apple.iap_restore"
 ]
+},
+{
+"id": "apple.ads_in_extensions+",
+"desc": "ad SDK in a Share extension target",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"Podfile": "target 'App' do\n  pod 'Alamofire'\nend\ntarget 'ShareExtension' do\n  pod 'Google-Mobile-Ads-SDK'\nend\n"
+},
+"scan": "apple",
+"must_find": [
+"apple.ads_in_extensions"
+],
+"must_not": []
+},
+{
+"id": "apple.ads_in_extensions-main",
+"desc": "ad SDK only in the main target",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"Podfile": "target 'App' do\n  pod 'Google-Mobile-Ads-SDK'\nend\ntarget 'ShareExtension' do\n  pod 'Alamofire'\nend\n"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.ads_in_extensions"
+]
+},
+{
+"id": "apple.ads_in_extensions-nested",
+"desc": "nested do-blocks do not confuse target tracking",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"Podfile": "target 'App' do\n  [1].each do |x|\n    pod 'Alamofire'\n  end\n  pod 'Google-Mobile-Ads-SDK'\nend\n"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.ads_in_extensions"
+]
+},
+{
+"id": "apple.health_data_ads+",
+"desc": "HealthKit and an ad SDK together",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"pubspec.yaml": "dependencies:\n  health: 1\n  google_mobile_ads: 2\n"
+},
+"scan": "apple",
+"must_find": [
+"apple.health_data_ads"
+],
+"must_not": []
+},
+{
+"id": "apple.health_data_ads-healthonly",
+"desc": "HealthKit without ads",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/H.swift": "let s = HKHealthStore()"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.health_data_ads"
+]
+},
+{
+"id": "apple.health_data_ads-adsonly",
+"desc": "ads without health data",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"pubspec.yaml": "dependencies:\n  google_mobile_ads: 2\n"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.health_data_ads"
+]
+},
+{
+"id": "both.kids_third_party_sdks+",
+"desc": "child-directed flag with an analytics SDK",
+"files": {
+"android/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"><application><activity android:name=\".A0\"/></application></manifest>",
+"src/ads.ts": "RequestConfiguration.Builder().setTagForChildDirectedTreatment(1)",
+"package.json": "{\"dependencies\":{\"mixpanel-react-native\":\"3\"}}"
+},
+"scan": "both",
+"must_find": [
+"both.kids_third_party_sdks"
+],
+"must_not": []
+},
+{
+"id": "both.kids_third_party_sdks-noflag",
+"desc": "analytics SDK without any child-directed signal",
+"files": {
+"android/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"><application><activity android:name=\".A0\"/></application></manifest>",
+"package.json": "{\"dependencies\":{\"mixpanel-react-native\":\"3\"}}"
+},
+"scan": "both",
+"must_find": [],
+"must_not": [
+"both.kids_third_party_sdks"
+]
+},
+{
+"id": "both.kids_third_party_sdks-nosdk",
+"desc": "child-directed flag without third-party SDKs",
+"files": {
+"android/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"><application><activity android:name=\".A0\"/></application></manifest>",
+"src/a.ts": "const COPPA = true; // tagForChildDirectedTreatment"
+},
+"scan": "both",
+"must_find": [],
+"must_not": [
+"both.kids_third_party_sdks"
+]
+},
+{
+"id": "apple.vpn_app+",
+"desc": "packet tunnel provider",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"Tunnel/P.swift": "class P: NEPacketTunnelProvider {}"
+},
+"scan": "apple",
+"must_find": [
+"apple.vpn_app"
+],
+"must_not": []
+},
+{
+"id": "apple.vpn_app-",
+"desc": "no VPN code",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/A.swift": "print(1)"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.vpn_app"
+]
+},
+{
+"id": "apple.screen_recording_consent+",
+"desc": "ReplayKit recording",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/R.swift": "RPScreenRecorder.shared().startRecording { _ in }"
+},
+"scan": "apple",
+"must_find": [
+"apple.screen_recording_consent"
+],
+"must_not": []
+},
+{
+"id": "apple.screen_recording_consent-",
+"desc": "no screen recording",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/R.swift": "let c = AVCaptureSession()"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.screen_recording_consent"
+]
+},
+{
+"id": "both.remote_web_content+capacitor",
+"desc": "Capacitor loads a remote site",
+"files": {
+"capacitor.config.json": "{\"appId\":\"a.b\",\"server\":{\"url\":\"https://shop.example.com\"}}",
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>"
+},
+"scan": "both",
+"must_find": [
+"both.remote_web_content"
+],
+"must_not": []
+},
+{
+"id": "both.remote_web_content-capacitor-dev",
+"desc": "Capacitor dev server on the LAN",
+"files": {
+"capacitor.config.json": "{\"appId\":\"a.b\",\"server\":{\"url\":\"http://192.168.1.5:8100\",\"cleartext\":true}}",
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>"
+},
+"scan": "both",
+"must_find": [],
+"must_not": [
+"both.remote_web_content"
+]
+},
+{
+"id": "both.remote_web_content+cordova",
+"desc": "Cordova content src is a remote site",
+"files": {
+"config.xml": "<widget id=\"a.b\" xmlns=\"http://www.w3.org/ns/widgets\"><content src=\"https://shop.example.com/\"/><platform name=\"ios\"/></widget>"
+},
+"scan": "both",
+"must_find": [
+"both.remote_web_content"
+],
+"must_not": []
+},
+{
+"id": "both.remote_web_content-cordova",
+"desc": "Cordova content src is a local file",
+"files": {
+"config.xml": "<widget id=\"a.b\" xmlns=\"http://www.w3.org/ns/widgets\"><content src=\"index.html\"/><platform name=\"ios\"/></widget>"
+},
+"scan": "both",
+"must_find": [],
+"must_not": [
+"both.remote_web_content"
+]
+},
+{
+"id": "both.remote_web_content+android",
+"desc": "single-activity Android app that only loads a site",
+"files": {
+"app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"><application><activity android:name=\".A0\"/></application></manifest>",
+"app/src/main/java/A.kt": "webView.loadUrl(\"https://shop.example.com\")"
+},
+"scan": "both",
+"must_find": [
+"both.remote_web_content"
+],
+"must_not": []
+},
+{
+"id": "both.remote_web_content-android",
+"desc": "several screens and a web view",
+"files": {
+"app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"><application><activity android:name=\".A0\"/><activity android:name=\".A1\"/><activity android:name=\".A2\"/><activity android:name=\".A3\"/></application></manifest>",
+"app/src/main/java/A.kt": "webView.loadUrl(\"https://shop.example.com\")"
+},
+"scan": "both",
+"must_find": [],
+"must_not": [
+"both.remote_web_content"
+]
+},
+{
+"id": "play.webview_js_interface+",
+"desc": "addJavascriptInterface in app code",
+"files": {
+"app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"><application><activity android:name=\".A0\"/><activity android:name=\".A1\"/></application></manifest>",
+"app/src/main/java/B.kt": "webView.addJavascriptInterface(Bridge(), \"Android\")"
+},
+"scan": "google",
+"must_find": [
+"play.webview_js_interface"
+],
+"must_not": []
+},
+{
+"id": "play.webview_js_interface-",
+"desc": "only in tests or absent",
+"files": {
+"app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"><application><activity android:name=\".A0\"/><activity android:name=\".A1\"/></application></manifest>",
+"app/src/test/java/BTest.kt": "webView.addJavascriptInterface(x, \"a\")",
+"app/src/main/java/B.kt": "webView.loadUrl(\"about:blank\")"
+},
+"scan": "google",
+"must_find": [],
+"must_not": [
+"play.webview_js_interface"
+]
 }
 ]
 }

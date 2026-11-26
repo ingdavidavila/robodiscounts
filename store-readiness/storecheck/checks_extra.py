@@ -450,7 +450,113 @@ def apple_iap_restore(p: Project, a: dict):
     return [(hit, "in-app purchase code found but no restore-purchases code")]
 
 
+_DO_OPEN = re.compile(r"\bdo(?:\s*\|[^|]*\|)?\s*$")
+_TARGET = re.compile(r"^\s*(?:abstract_)?target\s+['\"]([^'\"]+)['\"]\s+do\b")
+
+
+def apple_ads_in_extensions(p: Project, a: dict):
+    """Display advertising belongs in the main app binary, not in extensions, widgets, App Clips or watch apps."""
+    if not p.has_ios:
+        return []
+    ad, ext = re.compile(a["ad_pods"]), re.compile(a["extension_targets"])
+    out = []
+    for name, text, lock in p.texts:
+        if lock or name.replace("\\", "/").rsplit("/", 1)[-1].lower() != "podfile":
+            continue
+        stack: list[str | None] = []
+        for line in text.splitlines():
+            line = line.split("#", 1)[0]
+            m = _TARGET.match(line)
+            if m:
+                stack.append(m.group(1))
+                continue
+            if re.match(r"^\s*end\b", line):
+                if stack:
+                    stack.pop()
+                continue
+            if _DO_OPEN.search(line.rstrip()):
+                stack.append(None)
+                continue
+            pm = re.match(r"^\s*pod\s+['\"]([^'\"]+)['\"]", line)
+            if pm and ad.search(pm.group(1)):
+                targets = [t for t in stack if t]
+                if any(ext.search(t) for t in targets):
+                    out.append((name, f"ad SDK '{pm.group(1)}' is in the extension target '{next(t for t in targets if ext.search(t))}'"))
+    return out
+
+
+def apple_health_data_ads(p: Project, a: dict):
+    if not p.has_ios:
+        return []
+    h, ad = p.find_signal(a["health"]), p.find_signal(a["ads"])
+    return [(h, f"health or fitness data APIs and an ad SDK ({ad}) are both present")] if h and ad else []
+
+
+def both_kids_third_party_sdks(p: Project, a: dict):
+    flag = p.find_signal(a["child_signal"])
+    if not flag:
+        return []
+    from . import privacy
+    names = []
+    for sig in privacy.DATA["signals"]:
+        if sig["id"] in a["sdk_ids"]:
+            hits = [h for h in p.find_signals(sig["pattern"], limit=400) if privacy._evidence_ok(h)]
+            if hits:
+                names.append(sig["name"])
+    if not names:
+        return []
+    return [(flag, "child-directed signals found together with third-party analytics/ad SDKs: " + ", ".join(names))]
+
+
+def apple_vpn_app(p: Project, a: dict):
+    hit = p.find_signal(a["pattern"]) if p.has_ios else None
+    return [(hit, "VPN code found")] if hit else []
+
+
+def apple_screen_recording_consent(p: Project, a: dict):
+    hit = p.find_signal(a["pattern"]) if p.has_ios else None
+    return [(hit, "screen recording code found")] if hit else []
+
+
+_LOCAL = re.compile(r"^https?://(?:localhost|127\.|10\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.|[^/]*\.local\b)", re.I)
+
+
+def both_remote_web_content(p: Project, a: dict):
+    """Apps whose main content is a remote website: Apple 4.2 / 4.2.2 and Google Play's Spam policy (web views)."""
+    out = []
+    for name, text, lock in p.texts:
+        base = name.replace("\\", "/").rsplit("/", 1)[-1].lower()
+        if re.fullmatch(r"capacitor\.config\.(json|ts|js)", base):
+            m = re.search(r"server['\"]?\s*:\s*\{[^}]*?url['\"]?\s*:\s*['\"](https?://[^'\"]+)", text, re.S)
+            if m and not _LOCAL.match(m.group(1)):
+                out.append((name, f"Capacitor loads a remote site as the app: {m.group(1)[:60]}"))
+        elif base == "config.xml":
+            m = re.search(r"<content\s+[^>]*src\s*=\s*['\"](https?://[^'\"]+)", text)
+            if m and not _LOCAL.match(m.group(1)):
+                out.append((name, f"Cordova content src is a remote site: {m.group(1)[:60]}"))
+    if not out:
+        acts = 0
+        for _, root in _manifest_roots(p):
+            app = root.find("application")
+            acts += len([x for x in (app if app is not None else []) if x.tag == "activity"
+                         and x.get(TOOLS + "node") != "remove"])
+        if acts == 1:
+            hit = p.find_in_files(a["load_url"], (".kt", ".java"), 1)
+            if hit:
+                out.append((hit[0], "the app's only activity loads a remote website in a web view"))
+    return out
+
+
+def play_webview_js_interface(p: Project, a: dict):
+    if not p.has_android:
+        return []
+    return [(h, "exposes an object to web content with addJavascriptInterface")
+            for h in p.find_in_files(a["pattern"], (".kt", ".java"), 3)]
+
+
 CHECKS_EXTRA = {f.__name__: f for f in (
+    apple_ads_in_extensions, apple_health_data_ads, both_kids_third_party_sdks, apple_vpn_app,
+    apple_screen_recording_consent, both_remote_web_content, play_webview_js_interface,
     apple_required_reason_api, apple_third_party_sdk_manifest, apple_private_api, apple_web_engine,
     apple_ipad_support, apple_iap_restore,
     android_exported_missing, android_fgs_type_missing, android_release_debug_signing, ios_app_icon,

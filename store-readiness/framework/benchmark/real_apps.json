@@ -72,6 +72,12 @@
      "loc": "iosApp/",
      "verdict": "tp",
      "note": "plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "play.webview_js_interface",
+     "loc": "PoTokenWeb",
+     "verdict": "tp",
+     "note": "PoTokenWebView calls addJavascriptInterface; whether the loaded content is trusted is for the developer to confirm"
     }
    ],
    "must_find": [

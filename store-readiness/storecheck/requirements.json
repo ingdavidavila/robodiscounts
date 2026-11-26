@@ -108,9 +108,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Kids Category The Kids Category is a great way for people to easily find apps that are des",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "both.kids_third_party_sdks"
+   ],
+   "reason": "child-directed signals plus known analytics/ad SDKs; the Kids Category itself is chosen in App Store Connect"
   },
   {
    "id": "apple.guideline.1.4",
@@ -539,9 +541,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Apps must request explicit user consent and provide a clear visual and/or audible indicati",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.screen_recording_consent"
+   ],
+   "reason": "detects screen recording code only"
   },
   {
    "id": "apple.guideline.2.5.15",
@@ -575,9 +579,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Display advertising should be limited to your main app binary, and should not be included ",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.ads_in_extensions"
+   ],
+   "reason": "CocoaPods Podfile targets only"
   },
   {
    "id": "apple.guideline.2.5.19",
@@ -686,9 +692,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Minimum Functionality Your app should include features, content, and UI that elevate it be",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "both.remote_web_content"
+   ],
+   "reason": "detects remote-website apps (Capacitor, Cordova, single-activity web view) only"
   },
   {
    "id": "apple.guideline.4.2.1",
@@ -704,9 +712,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Other than catalogs, apps shouldn\u2019t primarily be marketing materials, advertisements, web ",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "both.remote_web_content"
+   ],
+   "reason": "same detection as 4.2"
   },
   {
    "id": "apple.guideline.4.2.4",
@@ -982,18 +992,22 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Health and Health Research Health, fitness, and medical data are especially sensitive and ",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.health_data_ads"
+   ],
+   "reason": "detects health APIs next to an ad SDK; cannot see what data reaches it"
   },
   {
    "id": "apple.guideline.5.1.4",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Kids (a) For many reasons, it is critical to use care when dealing with personal data from",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "both.kids_third_party_sdks"
+   ],
+   "reason": "same detection as 1.3"
   },
   {
    "id": "apple.guideline.5.1.5",
@@ -1110,9 +1124,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "VPN Apps Apps offering VPN services must utilize the NEVPNManager API and may only be offe",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.vpn_app"
+   ],
+   "reason": "detects VPN code and states the obligations; cannot check account type or declarations"
   },
   {
    "id": "apple.guideline.5.5",
@@ -1370,9 +1386,11 @@
    "store": "google",
    "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
    "title": "Families policy and target audience",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "both.kids_third_party_sdks"
+   ],
+   "reason": "child-directed signals plus known analytics/ad SDKs; cannot check Families certification"
   },
   {
    "id": "google.sdk_policy",
@@ -1442,9 +1460,11 @@
    "store": "google",
    "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
    "title": "Spam, functionality and user experience",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "both.remote_web_content"
+   ],
+   "reason": "web-view wrapper detection only; spam and repetitive content need human review"
   },
   {
    "id": "google.enforcement",
@@ -1668,6 +1688,17 @@
    "class": "not_checkable",
    "rules": [],
    "reason": "App Store Connect configuration"
+  },
+  {
+   "id": "google.webview_js_interface",
+   "store": "google",
+   "source": "https://support.google.com/googleplay/android-developer/answer/10768383",
+   "title": "WebView JavaScript interface (Device and Network Abuse)",
+   "class": "partial",
+   "rules": [
+    "play.webview_js_interface"
+   ],
+   "reason": "detects addJavascriptInterface only; whether the WebView loads untrusted content needs a human"
   }
  ]
 }
