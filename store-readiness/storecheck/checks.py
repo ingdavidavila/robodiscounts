@@ -112,7 +112,8 @@ def android_target_sdk_unknown(p: Project, a: dict):
     if not (p.gradle_files or p.android_manifests or p.android_hint or p.archive_manifests):
         return []
     return [("(project)", "no numeric targetSdk found; it may be inherited from Flutter, React Native, "
-                          "Expo, a version catalog, or Unity's 'Automatic (highest installed)' setting")]
+                          "Expo, a version catalog, Unity's 'Automatic (highest installed)' setting, "
+                          ".NET MAUI's or Godot's default API level")]
 
 
 def plist_value(p: Project, a: dict):

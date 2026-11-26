@@ -81,6 +81,8 @@ def _add_synthetic(proj: Project, label: str, keys: dict, note: str) -> None:
 
 
 def apply(proj: Project) -> None:
+    # Mac Catalyst plists describe a macOS app, not the iOS build (e.g. .NET MAUI Platforms/MacCatalyst)
+    proj.plists = [(l, d) for l, d in proj.plists if "/maccatalyst/" not in "/" + l.lower().replace("\\", "/")]
     _xcode(proj)
     if proj.localized_plist_keys:   # keys localized in InfoPlist.strings count as present
         proj.plists = [(label, {**{k: "localized" for k in proj.localized_plist_keys}, **d})
@@ -89,6 +91,9 @@ def apply(proj: Project) -> None:
     _expo(proj, real_plists)
     _unity(proj, real_plists)
     _cordova(proj, real_plists)
+    _maui(proj)
+    _godot(proj)
+    _kmp(proj)
 
 
 # --- Xcode-generated Info.plist -----------------------------------------------------------
@@ -218,6 +223,8 @@ def _cordova(proj: Project, real_plists: bool) -> None:
         if "<widget" not in text or ("cordova" not in text and "<platform" not in text):
             continue
         rel = _rel(proj, f)
+        if rel.endswith("src/main/res/xml/config.xml"):
+            continue   # Capacitor/Cordova-generated Android resource, not the app's own config
         proj.frameworks.add("cordova")
         has_android = bool(re.search(r"<(platform|engine)\s+name=\"android\"", text))
         has_ios = bool(re.search(r"<(platform|engine)\s+name=\"ios\"", text))
@@ -236,8 +243,100 @@ def _cordova(proj: Project, real_plists: bool) -> None:
                 keys[k] = "set"
             if _ITS.search(text):
                 keys["ITSAppUsesNonExemptEncryption"] = False
+            # cordova-plugin-geolocation 2.x ships its own NSLocationWhenInUseUsageDescription (checked in
+            # its plugin.xml for 2.0.0-2.4.3; absent from 3.0.0 on)
+            g = re.search(r"name=\"cordova-plugin-geolocation\"[^>]*spec=\"[~^>=\s]*(\d+)\.", text)
+            if g and int(g.group(1)) <= 2:
+                keys["NSLocationWhenInUseUsageDescription"] = "plugin default"
             for var, plist_key in CORDOVA_VARIABLE_KEYS.items():
                 if var in text:
                     keys[plist_key] = "set"
             _add_synthetic(proj, f"{rel} (Cordova)", keys,
                            "Cordova generates Info.plist from config.xml and plugin variables")
+
+
+# --- .NET MAUI -----------------------------------------------------------------------------
+_MAUI_TFM = re.compile(r"net\d+\.\d+-android(\d+(?:\.\d+)?)?")
+_MAUI_NOTE = ("MAUI generates the version keys and launch screen at build time from the .csproj "
+              "(ApplicationDisplayVersion, ApplicationVersion, MauiSplashScreen)")
+
+
+def _maui(proj: Project) -> None:
+    maui_dirs = []
+    for f in proj.config_files:
+        if f.suffix != ".csproj":
+            continue
+        text = _read(f)
+        if not re.search(r"<UseMaui>\s*true", text, re.I):
+            continue
+        proj.frameworks.add("dotnet-maui")
+        rel = _rel(proj, f)
+        maui_dirs.append(rel.rsplit("/", 1)[0] + "/" if "/" in rel else "")
+        for m in _MAUI_TFM.finditer(text):
+            proj.android_hint = True
+            if m.group(1):   # net8.0-android34.0: the number after "android" is the target API level
+                proj.sdk_sources.append((rel, f"targetSdkVersion = {int(float(m.group(1)))}"))
+    for i, (label, d) in enumerate(proj.plists):
+        norm = label.replace("\\", "/")
+        if "/platforms/ios/" in "/" + norm.lower() and any(norm.startswith(x) for x in maui_dirs):
+            filled = {"CFBundleShortVersionString": "maui", "CFBundleVersion": "maui",
+                      "UILaunchScreen": {}, **d}
+            proj.plists[i] = (label, filled)
+            proj.synthetic_plists[label] = _MAUI_NOTE
+
+
+# --- Godot ---------------------------------------------------------------------------------
+# Godot privacy/* export options that become Info.plist usage strings. Names read from real
+# export_presets.cfg files; the Info.plist key each one writes is NOT yet verified against Godot's source.
+GODOT_IOS_KEYS = {
+    "microphone_usage_description": "NSMicrophoneUsageDescription",
+    "camera_usage_description": "NSCameraUsageDescription",
+    "location_usage_description": "NSLocationWhenInUseUsageDescription",
+    "address_book_usage_description": "NSContactsUsageDescription",
+    "calendar_usage_description": "NSCalendarsUsageDescription",
+    "photos_library_usage_description": "NSPhotoLibraryUsageDescription",
+}
+
+
+def _godot(proj: Project) -> None:
+    for f in proj.config_files:
+        if f.name != "export_presets.cfg":
+            continue
+        rel = _rel(proj, f)
+        text = _read(f)
+        proj.frameworks.add("godot")
+        # split into [preset.N] / [preset.N.options] blocks; the platform is in the first, options in the second
+        platform = None
+        for block in re.split(r"(?m)^\[preset\.\d+(?:\.options)?\]\s*$", text):
+            m = re.search(r'(?m)^platform="([^"]+)"', block)
+            if m:
+                platform = m.group(1)
+                continue
+            if platform == "Android":
+                proj.android_hint = True
+                t = re.search(r'(?m)^gradle_build/target_sdk="(\d+)"', block)
+                if t:
+                    proj.sdk_sources.append((rel, f"targetSdkVersion = {t.group(1)}"))
+                for pm in re.finditer(r"(?m)^permissions/([a-z_0-9]+)=true", block):
+                    proj.extra_permissions.append((rel, pm.group(1).upper()))
+            elif platform == "iOS" and not any(l.startswith(rel) for l, _ in proj.plists):
+                bid = re.search(r'(?m)^application/bundle_identifier="([^"]+)"', block)
+                keys = {"CFBundleIdentifier": bid.group(1) if bid else "godot.app",
+                        "CFBundleShortVersionString": "godot", "CFBundleVersion": "godot",
+                        "UILaunchScreen": {}}
+                for opt, plist_key in GODOT_IOS_KEYS.items():
+                    v = re.search(r'(?m)^privacy/' + opt + r'="(.+)"', block)
+                    if v:
+                        keys[plist_key] = "set"
+                proj.has_ios_project = True
+                _add_synthetic(proj, f"{rel} (Godot iOS)", keys,
+                               "Godot writes Info.plist at export time from these preset options")
+
+
+# --- Kotlin Multiplatform --------------------------------------------------------------------
+def _kmp(proj: Project) -> None:
+    for _, text in proj.sdk_sources:
+        if re.search(r"kotlin\(\"multiplatform\"\)|org\.jetbrains\.kotlin\.multiplatform|kotlin-multiplatform|kotlinMultiplatform",
+                     text):
+            proj.frameworks.add("kotlin-multiplatform")
+            return

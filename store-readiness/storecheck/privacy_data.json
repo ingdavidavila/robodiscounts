@@ -428,7 +428,7 @@
   {
    "id": "product_analytics_other",
    "name": "Product analytics (Amplitude/Segment/PostHog)",
-   "pattern": "(?i)amplitude|segment[_-]analytics|analytics-react-native|posthog",
+   "pattern": "(?i)@amplitude/|com\\.amplitude|amplitude[_-](?:flutter|js|analytics|swift|ios|android|react-native)|import Amplitude|Amplitude\\.(?:instance|getInstance|shared)\\b|pod\\s+[\\\"']Amplitude|AmplitudeSwift|Amplitude-iOS|segment[_-]analytics|analytics-react-native|posthog",
    "kind": "sdk",
    "transmits": true,
    "data": [

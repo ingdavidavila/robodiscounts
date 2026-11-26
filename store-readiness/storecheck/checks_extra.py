@@ -151,6 +151,11 @@ def ios_app_icon(p: Project, a: dict):
             continue
         path = cj.parent / fn
         size = image_size(path) if path.exists() else None
+        if size is None and path.exists() and path.stat().st_size < 1024 and \
+                path.read_bytes()[:24].startswith(b"version https://git-lfs"):
+            out.append((label, f"{fn} is a Git LFS pointer, not the image; fetch the LFS files and scan again",
+                        "advisory"))
+            continue
         if size is None:
             out.append((label, f"{fn} is missing or not a readable PNG/JPEG"))
         elif size != (want, want):
@@ -176,10 +181,57 @@ def _as_tuple(v: str):
     return tuple(int(x) for x in re.findall(r"\d+", v)[:2] or [0])
 
 
+_PBX_CFG = re.compile(r"(\w{24})\s*/\*\s*([^*]*?)\s*\*/\s*=\s*\{\s*isa = XCBuildConfiguration;(.*?)\n\t\t\};", re.S)
+_PBX_LIST = re.compile(r"(\w{24})\s*/\*[^*]*\*/\s*=\s*\{\s*isa = XCConfigurationList;\s*buildConfigurations = \((.*?)\);", re.S)
+_PBX_TARGET = re.compile(r"isa = PBXNativeTarget;(.*?)\n\t\t\};", re.S)
+_PBX_PROJECT = re.compile(r"isa = PBXProject;(.*?)\n\t\t\};", re.S)
+_IOS_DT = re.compile(r"IPHONEOS_DEPLOYMENT_TARGET\s*=\s*\"?([0-9.]+)")
+_NOT_IOS = re.compile(r"SDKROOT\s*=\s*\"?(watchos|macosx|appletvos|xros)|(WATCHOS|TVOS|MACOSX|XROS)_DEPLOYMENT_TARGET")
+
+
+def _pbx_effective_ios_targets(text: str):
+    """Deployment targets that actually apply: each iOS native target's own value, else the project-level
+    one for the same configuration. A project-level default that every target overrides is not reported.
+    None when the file cannot be parsed this way (the caller falls back to listing every value)."""
+    cfgs = {m.group(1): (m.group(2), m.group(3)) for m in _PBX_CFG.finditer(text)}
+    lists = {m.group(1): re.findall(r"(\w{24})", m.group(2)) for m in _PBX_LIST.finditer(text)}
+    proj = _PBX_PROJECT.search(text)
+    targets = [m.group(1) for m in _PBX_TARGET.finditer(text)]
+    if not cfgs or not proj or not targets:
+        return None
+    pl = re.search(r"buildConfigurationList = (\w{24})", proj.group(1))
+    project_by_name = {}
+    for cid in lists.get(pl.group(1), []) if pl else []:
+        if cid in cfgs:
+            m = _IOS_DT.search(cfgs[cid][1])
+            project_by_name[cfgs[cid][0]] = m.group(1) if m else None
+    out = []
+    for body in targets:
+        tl = re.search(r"buildConfigurationList = (\w{24})", body)
+        for cid in lists.get(tl.group(1), []) if tl else []:
+            if cid not in cfgs:
+                continue
+            name, cbody = cfgs[cid]
+            m = _IOS_DT.search(cbody)
+            if m:
+                out.append(m.group(1))
+            elif not _NOT_IOS.search(cbody) and project_by_name.get(name):
+                out.append(project_by_name[name])
+    return out
+
+
 def ios_deployment_target(p: Project, a: dict):
     minimum = tuple(a["min_version"])
     sources = []
     for f in p.config_files:
+        if f.name == "project.pbxproj":
+            ptxt = f.read_text(encoding="utf-8", errors="ignore")
+            eff = _pbx_effective_ios_targets(ptxt)
+            if eff is not None:
+                label = f.relative_to(p.root).as_posix()
+                sources.append((label, " ".join(f"IPHONEOS_DEPLOYMENT_TARGET = {v};" for v in eff),
+                                r"IPHONEOS_DEPLOYMENT_TARGET\s*=\s*\"?([0-9.]+)"))
+                continue
         if f.name == "project.pbxproj" or f.suffix == ".xcconfig":
             sources.append((f.relative_to(p.root).as_posix(), f.read_text(encoding="utf-8", errors="ignore"),
                             r"IPHONEOS_DEPLOYMENT_TARGET\s*=\s*\"?([0-9.]+)"))
@@ -220,7 +272,12 @@ def ios_xcode_version(p: Project, a: dict):
         for rx in rxs:
             for m in re.finditer(rx, text, re.M):
                 if int(m.group(1)) < minimum:
-                    out.append((name, f"CI builds with Xcode {m.group(1)}; uploads need Xcode {minimum} or later"))
+                    if re.search(r"(?i)archive|testflight|upload|app[_-]?store|\bpilot\b|\bdeliver\b|\bgym\b|build_app|altool|"
+                                 r"exportArchive", text):
+                        out.append((name, f"CI builds with Xcode {m.group(1)}; uploads need Xcode {minimum} or later"))
+                    else:   # tests/lint jobs are not uploads: mention, but do not claim a blocked upload
+                        out.append((name, f"CI selects Xcode {m.group(1)} (no archive or upload step in this file); "
+                                          f"uploads need Xcode {minimum} or later", "advisory"))
                     break
     return out
 

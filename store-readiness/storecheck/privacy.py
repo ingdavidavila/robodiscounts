@@ -21,13 +21,17 @@ GOOGLE_PURPOSES = ["App functionality", "Analytics", "Developer communications",
 
 
 _NOT_EVIDENCE_SUFFIXES = {".unity", ".asset", ".prefab", ".mat", ".anim", ".controller", ".meta", ".svg", ".arb",
-                          ".strings", ".po", ".csv", ".tsv", ".ttf", ".otf", ".lottie", ".txt"}
+                          ".strings", ".po", ".csv", ".tsv", ".ttf", ".otf", ".lottie", ".txt",
+                          ".hlsl", ".glsl", ".shader", ".cginc", ".compute", ".gdshader"}
+_NOT_EVIDENCE_NAMES = {".gitignore", ".gitattributes", ".dockerignore", ".npmignore", ".editorconfig", "codeowners"}
 _CONFIG_JSON = {"package.json", "app.json", "manifest.json", "google-services.json", "composer.json"}
 
 
 def _evidence_ok(name: str) -> bool:
     """SDK evidence must come from code, manifests or dependency files, not art, scenes or translations."""
     base = name.replace("\\", "/").rsplit("/", 1)[-1].lower()
+    if base in _NOT_EVIDENCE_NAMES:
+        return False
     if base in _CONFIG_JSON:
         return True
     suffix = "." + base.rsplit(".", 1)[-1] if "." in base else ""

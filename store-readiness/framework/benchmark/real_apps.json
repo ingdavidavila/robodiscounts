@@ -47,7 +47,7 @@
    "name": "NewPipe",
    "repo": "TeamNewPipe/NewPipe",
    "commit": "2f295de28266e214f6011dbb27eacf90a0ed943d",
-   "stack": "kotlin-multiplatform",
+   "stack": "android-native",
    "labels": [
     {
      "rule": "play.target_sdk",
@@ -573,6 +573,851 @@
     }
    ],
    "must_find": [],
+   "must_not": []
+  },
+  {
+   "name": "PeopleInSpace",
+   "repo": "joreilly/PeopleInSpace",
+   "commit": "2db46a039837989b3a9337a56bab832318c05fa4",
+   "stack": "kotlin-multiplatform",
+   "labels": [
+    {
+     "rule": "apple.app_icon",
+     "loc": "PeopleInSpaceSwiftUI/PeopleInSpaceSwiftUI/Assets.xcassets/AppIcon.appiconset/Con",
+     "verdict": "tp",
+     "note": "Contents.json 1024 slot has no filename"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no PrivacyInfo.xcprivacy in repo"
+    },
+    {
+     "rule": "play.release_debug_signing",
+     "loc": "wearApp/build.gradle.kts",
+     "verdict": "tp",
+     "note": "wearApp release signingConfig = debug, commented 'temporary hack'"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "PeopleInSpaceSwiftUI/PeopleInSpaceSwiftUI/Info.plist",
+     "verdict": "tp",
+     "note": "plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "play.cleartext",
+     "loc": "app/src/main/AndroidManifest.xml",
+     "verdict": "tp",
+     "note": "usesCleartextTraffic=true in app manifest"
+    }
+   ],
+   "must_find": [],
+   "must_not": [
+    {
+     "rule": "both.privacy_policy",
+     "loc": "",
+     "why": "'crashlytics' appeared only in .gitignore"
+    }
+   ]
+  },
+  {
+   "name": "KaMPKit",
+   "repo": "touchlab/KaMPKit",
+   "commit": "4af02006be4be589e6848f097a92d97539300821",
+   "stack": "kotlin-multiplatform",
+   "labels": [
+    {
+     "rule": "play.target_sdk",
+     "loc": "gradle/libs.versions.toml",
+     "verdict": "tp",
+     "note": "targetSdk 35 in gradle/libs.versions.toml"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "ios/KaMPKitiOS/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "Contents.json 1024 slot has no filename"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no PrivacyInfo.xcprivacy"
+    },
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "ios/KaMPKitiOS/Koin.swift",
+     "verdict": "tp",
+     "note": "Koin.swift: UserDefaults(suiteName:) and no privacy manifest"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "ios/KaMPKitiOS/Info.plist",
+     "verdict": "tp",
+     "note": "plist has no ITSAppUsesNonExemptEncryption"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "play.target_sdk",
+     "loc": "libs.versions.toml"
+    }
+   ],
+   "must_not": []
+  },
+  {
+   "name": "isowords",
+   "repo": "pointfreeco/isowords",
+   "commit": "c727d3a7c49cf0c98f2fa4f24c562f81e30165f7",
+   "stack": "ios-swiftui",
+   "labels": [
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/Previews/CubeCorePreview/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/Previews/CubePreviewPreview/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/Previews/GameOverPreview/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/Previews/HomeFeaturePreview/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/Previews/LeaderboardsPreview/Assets.xcassets/AppIcon.appiconset/Contents.jso",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/Previews/OnboardingPreview/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/Previews/SettingsPreview/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/Previews/TrailerPreview/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/Previews/UpgradeInterstitialPreview/Assets.xcassets/AppIcon.appiconset/Conte",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no PrivacyInfo.xcprivacy"
+    },
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "Sources/UserDefaultsClient/LiveKey.swift",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/AppClip/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "App/iOS/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "icon PNGs are Git LFS pointers in this clone (131 bytes); Preview apps have no icon file"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "App/AppClip/Info.plist",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "App/Previews/CubeCorePreview/Info.plist",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "App/Previews/CubePreviewPreview/Info.plist",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "App/Previews/GameOverPreview/Info.plist",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "App/Previews/HomeFeaturePreview/Info.plist",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "App/Previews/LeaderboardsPreview/Info.plist",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "App/Previews/OnboardingPreview/Info.plist",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "App/Previews/SettingsPreview/Info.plist",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "App/Previews/TrailerPreview/Info.plist",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "App/Previews/UpgradeInterstitialPreview/Info.plist",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.xcode_version",
+     "loc": ".github/workflows/ci.yml",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.xcode_version",
+     "loc": ".github/workflows/format.yml",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    }
+   ],
+   "must_find": [],
+   "must_not": []
+  },
+  {
+   "name": "clean-architecture-swiftui",
+   "repo": "nalexn/clean-architecture-swiftui",
+   "commit": "9eca97b8cfff96a14084b564b1fefd949c93d232",
+   "stack": "ios-swiftui",
+   "labels": [
+    {
+     "rule": "apple.app_icon",
+     "loc": "CountriesSwiftUI/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "Contents.json 1024 slot has no filename"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "project.pbxproj (generated Info.plist)",
+     "verdict": "tp",
+     "note": "no ITSAppUsesNonExemptEncryption in generated plist settings"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacy manifest"
+    }
+   ],
+   "must_find": [],
+   "must_not": []
+  },
+  {
+   "name": "Rocket.Chat.ReactNative",
+   "repo": "RocketChat/Rocket.Chat.ReactNative",
+   "commit": "fb99c2c9fcc2bf4b5169bea245b29fbc56ac5a4e",
+   "stack": "react-native-bare",
+   "labels": [
+    {
+     "rule": "apple.background_modes",
+     "loc": "ios/RocketChatRN/Info.plist",
+     "verdict": "tp",
+     "note": "UIBackgroundModes lists fetch; no fetch handler or background-fetch library in the repo"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "ios/Podfile.lock",
+     "verdict": "tp",
+     "note": "Podfile.lock lists Firebase pods from Apple's list"
+    },
+    {
+     "rule": "play.fgs_type",
+     "loc": "android/app/src/main/AndroidManifest.xml",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    }
+   ],
+   "must_find": [],
+   "must_not": [
+    {
+     "rule": "apple.deployment_target",
+     "loc": "",
+     "why": "project-level 11.0 default is overridden by every iOS target (16.4)"
+    }
+   ]
+  },
+  {
+   "name": "xBull-Wallet",
+   "repo": "Creit-Tech/xBull-Wallet",
+   "commit": "8308875557be12f25aac9b984152c822d2ff1989",
+   "stack": "capacitor",
+   "labels": [
+    {
+     "rule": "play.target_sdk",
+     "loc": "android/variables.gradle",
+     "verdict": "tp",
+     "note": "targetSdk 34 in android/variables.gradle"
+    },
+    {
+     "rule": "apple.crypto_wallet_mining",
+     "loc": "package.json",
+     "verdict": "tp",
+     "note": "Stellar wallet: package.json depends on wallet libraries"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "ios/App/App/Info.plist",
+     "verdict": "tp",
+     "note": "plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.ipad_support",
+     "loc": "ios/App/App.xcodeproj/project.pbxproj",
+     "verdict": "tp",
+     "note": "TARGETED_DEVICE_FAMILY = 1"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "package.json",
+     "verdict": "tp",
+     "note": "Capacitor and Cordova are on Apple's list"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "play.target_sdk",
+     "loc": "variables.gradle"
+    }
+   ],
+   "must_not": []
+  },
+  {
+   "name": "ionic-geofence",
+   "repo": "cowbell/ionic-geofence",
+   "commit": "4f0c7b513c29f75172dbabc5a484b54754a7fbb2",
+   "stack": "cordova",
+   "labels": [
+    {
+     "rule": "apple.export_compliance",
+     "loc": "config.xml (Cordova)",
+     "verdict": "tp",
+     "note": "config.xml has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacy manifest"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "package.json",
+     "verdict": "tp",
+     "note": "Cordova is on Apple's list"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "config.xml sets no android-targetSdkVersion"
+    }
+   ],
+   "must_find": [],
+   "must_not": [
+    {
+     "rule": "apple.usage_strings",
+     "loc": "",
+     "why": "cordova-plugin-geolocation 2.1.0 plugin.xml supplies NSLocationWhenInUseUsageDescription (checked)"
+    }
+   ]
+  },
+  {
+   "name": "audio-streaming-app",
+   "repo": "24hourkirtan/audio-streaming-app",
+   "commit": "f9a3eaba5453abd7f1c0154af7331f7e0b02aa8c",
+   "stack": "cordova",
+   "labels": [
+    {
+     "rule": "play.target_sdk",
+     "loc": "config.xml",
+     "verdict": "tp",
+     "note": "config.xml android-targetSdkVersion 23"
+    },
+    {
+     "rule": "apple.usage_strings",
+     "loc": "config.xml",
+     "verdict": "tp",
+     "note": "cordova-plugin-media 5.0.1 plugin.xml adds no NSMicrophoneUsageDescription (checked)"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "config.xml (Cordova)",
+     "verdict": "tp",
+     "note": "config.xml has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacy manifest"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "package.json",
+     "verdict": "tp",
+     "note": "Cordova is on Apple's list"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "apple.usage_strings",
+     "loc": "config.xml"
+    }
+   ],
+   "must_not": [
+    {
+     "rule": "both.ugc_moderation",
+     "loc": "",
+     "why": "only match was inside a vendored ionic.bundle.min.js"
+    }
+   ]
+  },
+  {
+   "name": "BoatAttack",
+   "repo": "Unity-Technologies/BoatAttack",
+   "commit": "6acf5f773a440030489cb5e2b3c009fb5fe1e8ce",
+   "stack": "unity",
+   "labels": [
+    {
+     "rule": "apple.export_compliance",
+     "loc": "ProjectSettings/ProjectSettings.asset (Unity)",
+     "verdict": "tp",
+     "note": "ProjectSettings has no export compliance key"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacy manifest"
+    },
+    {
+     "rule": "both.privacy_policy",
+     "loc": "(project)",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "Unity AndroidTargetSdkVersion is automatic"
+    }
+   ],
+   "must_find": [],
+   "must_not": [
+    {
+     "rule": "both.privacy_policy",
+     "loc": "",
+     "why": "'amplitude' was a shader variable in GerstnerWaves.hlsl"
+    }
+   ]
+  },
+  {
+   "name": "dotnet-maui-workshop",
+   "repo": "dotnet-presentations/dotnet-maui-workshop",
+   "commit": "4ee39d54476c83f7aa08bfba19c40058ff21119c",
+   "stack": "dotnet-maui",
+   "labels": [
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Community Modules/XAML/Part 1 - Fundamentals/Finish/MonkeyFinder/Platforms/iOS/I",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Community Modules/XAML/Part 2 - Responsibility/Finish/MonkeyFinder/Platforms/iOS",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Community Modules/XAML/Part 3 - Magic Values/Finish/MonkeyFinder/Platforms/iOS/I",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Community Modules/XAML/Part 4 - Naming/Finish/MonkeyFinder/Platforms/iOS/Info.pl",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Community Modules/XAML/Part 5 - Custom Types/Finish/MonkeyFinder/Platforms/iOS/I",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Finish/MonkeyFinder/Platforms/iOS/Info.plist",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Part 1 - Displaying Data/MonkeyFinder/Platforms/iOS/Info.plist",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Part 2 - MVVM/MonkeyFinder/Platforms/iOS/Info.plist",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Part 3 - Navigation/MonkeyFinder/Platforms/iOS/Info.plist",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Part 4 - Platform Features/MonkeyFinder/Platforms/iOS/Info.plist",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Part 5 - CollectionView/MonkeyFinder/Platforms/iOS/Info.plist",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Part 6 - AppThemes/MonkeyFinder/Platforms/iOS/Info.plist",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacy manifest"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "TargetFramework net8.0-android has no API number"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Platforms/iOS/Info.plist"
+    }
+   ],
+   "must_not": [
+    {
+     "rule": "apple.version_keys",
+     "loc": "",
+     "why": "MAUI generates version keys from the csproj; MacCatalyst plists are macOS"
+    }
+   ]
+  },
+  {
+   "name": "MauiFinance",
+   "repo": "cemahseri/MauiFinance",
+   "commit": "2845c5eb04aa95ed85e24b89cad4c08f7b1698b9",
+   "stack": "dotnet-maui",
+   "labels": [
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Platforms/iOS/Info.plist",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacy manifest"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    }
+   ],
+   "must_find": [],
+   "must_not": []
+  },
+  {
+   "name": "ecommerce_maui",
+   "repo": "exendahal/ecommerce_maui",
+   "commit": "fa71a1c340631b37f92e4af8d4e18ed39cc29962",
+   "stack": "dotnet-maui",
+   "labels": [
+    {
+     "rule": "apple.account_deletion",
+     "loc": "ViewModel/LoginViewModel.cs",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "Platforms/iOS/Info.plist",
+     "verdict": "tp",
+     "note": "Platforms/iOS/Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacy manifest"
+    },
+    {
+     "rule": "play.account_deletion",
+     "loc": "ViewModel/LoginViewModel.cs",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    }
+   ],
+   "must_find": [],
+   "must_not": []
+  },
+  {
+   "name": "sourceofmana",
+   "repo": "sourceofmana/sourceofmana",
+   "commit": "14af69cbf069854c32a6d711f66ee923ae4c7b1c",
+   "stack": "godot",
+   "labels": [
+    {
+     "rule": "apple.export_compliance",
+     "loc": "export_presets.cfg (Godot iOS)",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacy manifest"
+    },
+    {
+     "rule": "both.privacy_policy",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "Sentry addon in Monitoring.gd; no privacy policy link found"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "gradle_build/target_sdk is empty (engine default)"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "apple.export_compliance",
+     "loc": "export_presets.cfg"
+    }
+   ],
+   "must_not": [
+    {
+     "rule": "play.16kb",
+     "loc": "",
+     "why": "desktop x86_64 plugin libraries never ship in an APK"
+    },
+    {
+     "rule": "apple.version_keys",
+     "loc": "",
+     "why": "xcframework container plists are not apps"
+    }
+   ]
+  },
+  {
+   "name": "godot-tiny-mmo",
+   "repo": "SlayHorizon/godot-tiny-mmo",
+   "commit": "f4ed04f20963c3285117e58b1149fa1117658d3c",
+   "stack": "godot",
+   "labels": [
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "gradle_build/target_sdk is empty (engine default)"
+    }
+   ],
+   "must_find": [],
+   "must_not": [
+    {
+     "rule": "both.privacy_policy",
+     "loc": "",
+     "why": "'amplitude' in a GDScript file is not an analytics SDK"
+    }
+   ]
+  },
+  {
+   "name": "GodSVG",
+   "repo": "MewPurPur/GodSVG",
+   "commit": "adb33da236ab5bcd19996ea4a381a3d47aa3f59f",
+   "stack": "godot",
+   "labels": [
+    {
+     "rule": "play.sensitive_permissions",
+     "loc": "export_presets.cfg",
+     "verdict": "tp",
+     "note": "export_presets.cfg enables permissions/manage_external_storage"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "gradle_build/target_sdk is empty (engine default)"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "play.sensitive_permissions",
+     "loc": "export_presets.cfg"
+    }
+   ],
+   "must_not": []
+  },
+  {
+   "name": "sample-Groceries",
+   "repo": "NativeScript/sample-Groceries",
+   "commit": "7b0cca917754dcc5f121529aad531d7c5d63b5a8",
+   "stack": "nativescript",
+   "labels": [
+    {
+     "rule": "play.exported_missing",
+     "loc": "app/App_Resources/Android/src/main/AndroidManifest.xml",
+     "verdict": "tp",
+     "note": "NativeScriptActivity has an intent-filter and no android:exported"
+    },
+    {
+     "rule": "apple.app_icon",
+     "loc": "app/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/Contents.json",
+     "verdict": "tp",
+     "note": "icon set has no 1024x1024 entry"
+    },
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacy manifest"
+    },
+    {
+     "rule": "apple.account_deletion",
+     "loc": "app/login/login.component.ts",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "apple.export_compliance",
+     "loc": "app/App_Resources/iOS/Info.plist",
+     "verdict": "tp",
+     "note": "Info.plist has no ITSAppUsesNonExemptEncryption"
+    },
+    {
+     "rule": "play.account_deletion",
+     "loc": "app/login/login.component.ts",
+     "verdict": "unverified",
+     "note": "not checked by hand"
+    },
+    {
+     "rule": "play.target_sdk_unknown",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "App_Resources app.gradle sets no targetSdkVersion"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "play.exported_missing",
+     "loc": "App_Resources"
+    }
+   ],
+   "must_not": []
+  },
+  {
+   "name": "IITC-Prime",
+   "repo": "IITC-CE/IITC-Prime",
+   "commit": "6c8432747301d85e677595ebfa67d73a41b4fc99",
+   "stack": "nativescript",
+   "labels": [
+    {
+     "rule": "apple.privacy_manifest",
+     "loc": "(project)",
+     "verdict": "tp",
+     "note": "no privacy manifest"
+    },
+    {
+     "rule": "play.cleartext",
+     "loc": "App_Resources/Android/src/main/AndroidManifest.xml",
+     "verdict": "tp",
+     "note": "usesCleartextTraffic=true in AndroidManifest"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "play.cleartext",
+     "loc": "App_Resources"
+    }
+   ],
    "must_not": []
   }
  ]

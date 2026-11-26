@@ -112,7 +112,7 @@ _TEST_DIR_RX = re.compile(r"(?i)(^|/)(tests?|__tests__|__mocks__|mocks?|androidt
                           r"|[^/]*tests?(/|$)|(^|/)(mock|fake)[^/]*$")
 _TEST_FILE_RX = re.compile(r"[a-z]Tests?\.[A-Za-z]+$|[._-](test|tests|spec)\.[A-Za-z]+$")
 # translation/vector/data files never hold code signals; skipping them is the biggest scan-time saving
-_DATA_SUFFIXES = {".strings", ".stringsdict", ".xcstrings", ".pdf", ".svg", ".po", ".xliff", ".csv"}
+_DATA_SUFFIXES = {".map", ".strings", ".stringsdict", ".xcstrings", ".pdf", ".svg", ".po", ".xliff", ".csv"}
 _DOC_SUFFIXES = {".md", ".markdown", ".txt", ".rst", ".adoc"}
 _LOCK_NAMES = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "pubspec.lock", "podfile.lock",
                "cargo.lock", "gemfile.lock", "package.resolved", "composer.lock", "bun.lockb"}
@@ -121,9 +121,10 @@ _INFO_PLIST_RX = re.compile(r"(?i)^(.*[-_.])?info([-_.].*)?\.plist$")
 LISTING_NAMES = {"name.txt", "subtitle.txt", "description.txt", "keywords.txt", "promotional_text.txt",
                  "title.txt", "short_description.txt", "full_description.txt", "privacy_url.txt"}
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg"}
-_CONFIG_NAMES = {"project.pbxproj", "app.json", "config.xml", "ProjectSettings.asset"}
-_APP_CONFIG_RX = re.compile(r"app\.config\.(js|ts|json|mjs|cjs)$")
-_SDK_NAMES = {"build.gradle", "build.gradle.kts", "variables.gradle", "gradle.properties", "libs.versions.toml"}
+_CONFIG_NAMES = {"project.pbxproj", "app.json", "config.xml", "ProjectSettings.asset", "export_presets.cfg"}
+_APP_CONFIG_RX = re.compile(r"(app\.config\.(js|ts|json|mjs|cjs)|nativescript\.config\.(js|ts|json)|[^/]+\.csproj)$")
+_SDK_NAMES = {"build.gradle", "build.gradle.kts", "variables.gradle", "gradle.properties", "libs.versions.toml",
+              "app.gradle"}   # app.gradle: NativeScript App_Resources/Android
 
 
 def _is_ci_path(rel: str) -> bool:
@@ -154,11 +155,25 @@ def _load_plist(data: bytes) -> dict | None:
 _FIREBASE_KEYS = {"GCM_SENDER_ID", "GOOGLE_APP_ID", "BUNDLE_ID", "PROJECT_ID", "API_KEY", "CLIENT_ID"}
 
 
+_NON_ANDROID_LIB = re.compile(r"(?i)(^|[/._-])(linux|windows|win32|win64|macos|osx|darwin|ios|wasm|web)([/._-]|$)")
+_ANDROID_LIB = re.compile(r"(?i)jnilibs|android|arm64-v8a|armeabi|/lib/x86(_64)?/")
+
+
+def _is_android_lib_path(rel: str) -> bool:
+    """A source-tree .so counts as an Android library only if its path says so; desktop plugin
+    binaries (addons/.../linux/x86_64/*.so) are x86-64 ELF too but never ship in an APK."""
+    low = "/" + rel.lower()
+    if _ANDROID_LIB.search(low) and not re.search(r"(?i)/(linux|windows|macos|osx|darwin)/", low):
+        return True
+    return not _NON_ANDROID_LIB.search(low) and "/lib/" in low and "arm64-v8a" in low
+
+
 def _is_app_plist(d: dict) -> bool:
     """An app's Info.plist, not a framework, test bundle, app extension or Firebase config.
 
     Generated-plist projects keep only a few extra keys in the file (or none), so no particular key is required."""
     return ("NSExtension" not in d
+            and "AvailableLibraries" not in d      # .xcframework container, not an app
             and d.get("CFBundlePackageType") not in ("FMWK", "BNDL")
             and not (_FIREBASE_KEYS & set(d)))
 
@@ -190,7 +205,7 @@ def discover(path: str | Path) -> Project:
         elif suffix in (".apk", ".aab", ".ipa"):
             proj.artifacts.append(f)
             _scan_archive(proj, f)
-        elif suffix == ".so":
+        elif suffix == ".so" and _is_android_lib_path(rel):
             with open(f, "rb") as fh:
                 proj.native_libs.append((rel, fh.read(ELF_HEAD)))
         _collect_store_assets(proj, f, rel, name, suffix)
@@ -281,7 +296,8 @@ def _walk(root: Path):
 
 def _maybe_read_text(proj: Project, f: Path, rel: str) -> None:
     low = f.name.lower()
-    if f.suffix.lower() in _DOC_SUFFIXES or f.suffix.lower() in _DATA_SUFFIXES or _is_test_rel(rel):
+    if f.suffix.lower() in _DOC_SUFFIXES or f.suffix.lower() in _DATA_SUFFIXES or _is_test_rel(rel) \
+            or low.endswith((".min.js", ".min.css")):   # minified third-party bundles only add false signals
         return
     if len(proj.texts) >= MAX_TEXT_FILES:
         return
@@ -349,8 +365,14 @@ def _detect_frameworks(proj: Project, root: Path) -> None:
     for fw, marker in markers.items():
         if (root / marker).exists():
             proj.frameworks.add(fw)
+    if any((root / f"capacitor.config.{x}").exists() for x in ("ts", "js")):
+        proj.frameworks.add("capacitor")
     pkg = root / "package.json"
-    if pkg.exists() and "react-native" in pkg.read_text(encoding="utf-8", errors="ignore"):
-        proj.frameworks.add("react-native")
+    if pkg.exists():
+        txt = pkg.read_text(encoding="utf-8", errors="ignore")
+        if "react-native" in txt:
+            proj.frameworks.add("react-native")
+        if re.search(r"@nativescript/core|tns-core-modules|\"nativescript\"\s*:", txt):
+            proj.frameworks.add("nativescript")
     if (root / "Cargo.toml").exists():
         proj.frameworks.add("rust")

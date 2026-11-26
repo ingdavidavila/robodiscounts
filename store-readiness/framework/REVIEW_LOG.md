@@ -38,3 +38,11 @@ Overall 77.0%. Framework re-evaluation: Framework still fits. D8 gain expected; 
 ## 2026-11-26T20:12Z @ 5f5482c: Requirement coverage batch 3: MusicKit usage key (4.5.2, added to usage-strings rule, key doc verified via DocC), crypto wallet/mining note (3.1.5), keyboard extension note (4.4.1); text verified from guidelines page; 7 synthetic cases; new generic ios_signal_note check
 
 Overall 77.2%. Framework re-evaluation: Framework fits. Still note-style advisory rules: partial credit only. None expected to fire on real corpus; need real-corpus-exercised sub-metric. D4 unchanged.
+
+## 2026-11-26T23:00Z @ 23706f0: D5 stack reach: 17 new real apps (KMP, SwiftUI, RN, Capacitor, Cordova, Unity, MAUI, Godot, NativeScript); new readers for .NET MAUI (TFM target API, MacCatalyst ignored, generated plist keys), Godot (export_presets.cfg: target sdk, permissions, iOS plist), NativeScript, KMP, Capacitor ts config. Defects found by scanning and fixed: desktop x86_64 .so flagged as Android 16KB, xcframework plists as apps, Amplitude pattern matched shader/GDScript words, .gitignore as SDK evidence, minified bundles trigger UGC, project-level deployment target overridden by targets, Cordova geolocation 2.x default key, Xcode CI lint jobs claimed blocked uploads, LFS pointer icons. NewPipe relabelled android-native (it is not KMP).
+
+Overall 81.6%. Framework re-evaluation: Stack reach is now broad but shallow: new apps mostly yield advisory findings, and 2 of the 3 unmeasured-before stacks have only my reader assumptions (Godot plist key names, MAUI manifest-vs-TFM precedence). Record these as unverified. Labels are single-reviewer. Next: verify those assumptions against vendor docs or source, and real-corpus-exercised sub-metric.
+
+## 2026-11-26T23:02Z @ 23706f0: Fix: Amplitude pattern no longer matches a quoted property name (BoatAttack WaterSurfaceDataEditor.cs); matches only dependency declarations and SDK API names
+
+Overall 81.7%. Framework re-evaluation: Benchmark must_not caught the miss from the first pattern tightening, as intended. Fix the tool not the label.
