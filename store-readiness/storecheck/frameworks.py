@@ -155,6 +155,7 @@ def _expo(proj: Project, real_plists: bool) -> None:
             proj.android_hint = True
         if re.search(r"privacyManifests", text):
             proj.has_privacy_manifest = True
+            proj.declared_privacy_apis.update(re.findall(r"NSPrivacyAccessedAPICategory\w+", text))
         if has_ios and not real_plists:
             keys = {"CFBundleIdentifier": "expo.app", "CFBundleShortVersionString": "expo",
                     "CFBundleVersion": "expo"}

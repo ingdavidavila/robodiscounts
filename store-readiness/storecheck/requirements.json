@@ -360,9 +360,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "To ensure people get the most out of your app, iPhone apps should run on iPad whenever pos",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.ipad_support"
+   ],
+   "reason": "device-family setting only"
   },
   {
    "id": "apple.guideline.2.4.2",
@@ -414,9 +416,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Apps may only use public APIs and must run on the currently shipping OS. Learn more about ",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.private_api"
+   ],
+   "reason": "detects references to PrivateFrameworks only"
   },
   {
    "id": "apple.guideline.2.5.2",
@@ -461,9 +465,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Apps that browse the web must use the appropriate WebKit framework and WebKit JavaScript. ",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.web_engine"
+   ],
+   "reason": "detects known alternative engines only"
   },
   {
    "id": "apple.guideline.2.5.7",
@@ -598,7 +604,8 @@
    "title": "In-App Purchase: If you want to unlock features or functionality within your app, (by way ",
    "class": "partial",
    "rules": [
-    "both.payments_iap"
+    "both.payments_iap",
+    "apple.iap_restore"
    ],
    "reason": ""
   },
@@ -1473,18 +1480,22 @@
    "store": "apple",
    "source": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files",
    "title": "Required-reason API declarations match code",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.required_reason_api"
+   ],
+   "reason": "text search of the app's own native iOS code against Apple's official API lists; third-party SDK code, frameworks and per-target manifests are not separated"
   },
   {
    "id": "apple.third_party_sdk_manifests",
    "store": "apple",
    "source": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files",
    "title": "Third-party SDK privacy manifests and signatures",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.third_party_sdk_manifest"
+   ],
+   "reason": "detects SDKs from Apple's list in dependency files; cannot see versions, manifests or signatures"
   },
   {
    "id": "apple.privacy_labels",

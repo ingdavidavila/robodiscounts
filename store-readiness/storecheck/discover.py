@@ -15,6 +15,8 @@ from pathlib import Path
 SKIP_DIRS = {".git", "node_modules", ".gradle", "build", "Pods", "DerivedData",
              ".dart_tool", ".idea", "__pycache__", "venv", ".venv", "dist", "out",
              "target", ".next"}
+VENDORED = ("/pods/", "/carthage/", "/thirdparty/", "/third_party/", "/third-party/", "/vendor/", "/external/")
+OTHER_PLATFORM_DIRS = ("macos", "osx", "linux", "windows", "android", "web")
 BUILD_ARTIFACT_DIRS = ("outputs", "ios/ipa", "app/outputs")
 MAX_TEXT_BYTES = 512 * 1024
 MAX_TEXT_FILES = 20000
@@ -42,6 +44,8 @@ class Project:
         self.android_hint = False                     # Android configured in a config file
         self.archive_manifests: list[tuple[str, "ET.Element"]] = []   # decoded APK manifests
         self.entitlements: list[tuple[str, dict]] = []                 # *.entitlements plists
+        self.privacy_manifests: list[tuple[str, dict]] = []            # parsed PrivacyInfo.xcprivacy files
+        self.declared_privacy_apis: set[str] = set()                   # categories declared in config (Expo)
         self.appicon_sets: list[Path] = []                             # Contents.json of *.appiconset
         self.has_icon_composer = False                                 # Xcode 26 *.icon bundle
         self.listing_files: list[Path] = []                            # fastlane / F-Droid store text files
@@ -66,6 +70,25 @@ class Project:
         out = []
         for name, text, is_lock in self.texts:
             if (is_lock and not locks) or _is_ci_path(name):
+                continue
+            if rx.search(text):
+                out.append(name)
+                if len(out) >= limit:
+                    break
+        return out
+
+    def find_in_files(self, pattern: str, suffixes: tuple[str, ...] | None = None, limit: int = 3,
+                      skip_platform_dirs: bool = False) -> list[str]:
+        """Files (not lockfiles, tests, docs, CI or vendored dirs) whose text matches, optionally by file suffix."""
+        rx = re.compile(pattern)
+        out = []
+        for name, text, is_lock in self.texts:
+            low = "/" + name.replace("\\", "/").lower()
+            if is_lock or _is_ci_path(name) or any(x in low for x in VENDORED):
+                continue
+            if suffixes and not low.endswith(suffixes):
+                continue
+            if skip_platform_dirs and any(f"/{d}/" in low for d in OTHER_PLATFORM_DIRS):
                 continue
             if rx.search(text):
                 out.append(name)
@@ -104,7 +127,7 @@ _SDK_NAMES = {"build.gradle", "build.gradle.kts", "variables.gradle", "gradle.pr
 def _is_ci_path(rel: str) -> bool:
     """CI and repo-automation files (GitHub Actions scripts and so on) are not app code."""
     low = "/" + rel.replace("\\", "/").lower()
-    return any(x in low for x in ("/.github/", "/.circleci/", "/.gitlab/", "/.buildkite/"))
+    return any(x in low for x in ("/.github/", "/.circleci/", "/.gitlab/", "/.buildkite/", "/fastlane/"))
 
 
 def _is_test_path(p: Path) -> bool:
@@ -157,6 +180,9 @@ def discover(path: str | Path) -> Project:
                 proj.plists.append((rel, d))
         elif name == "PrivacyInfo.xcprivacy":
             proj.has_privacy_manifest = True
+            d = _load_plist(f.read_bytes())
+            if d is not None:
+                proj.privacy_manifests.append((rel, d))
         elif suffix in (".xcodeproj", ".xcworkspace") or name in ("Podfile", "Package.swift"):
             proj.has_ios_project = True
         elif suffix in (".apk", ".aab", ".ipa"):

@@ -1049,6 +1049,352 @@
 "max_count": {
 "play.target_sdk": 1
 }
+},
+{
+"id": "apple.required_reason_api+",
+"desc": "UserDefaults used, manifest declares nothing",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/A.swift": "let v = UserDefaults.standard.string(forKey: \"k\")",
+"App/PrivacyInfo.xcprivacy": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>NSPrivacyAccessedAPITypes</key><array></array></dict></plist>"
+},
+"scan": "apple",
+"must_find": [
+"apple.required_reason_api"
+],
+"must_not": []
+},
+{
+"id": "apple.required_reason_api+nomanifest",
+"desc": "disk space API with no manifest at all",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/D.swift": "let k = URLResourceKey.volumeAvailableCapacityForImportantUsageKey"
+},
+"scan": "apple",
+"must_find": [
+"apple.required_reason_api"
+],
+"must_not": []
+},
+{
+"id": "apple.required_reason_api+objc",
+"desc": "ObjC file timestamp key, other category declared",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/F.m": "[a objectForKey:NSFileModificationDate];",
+"App/PrivacyInfo.xcprivacy": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>NSPrivacyAccessedAPITypes</key><array><dict><key>NSPrivacyAccessedAPIType</key><string>NSPrivacyAccessedAPICategoryUserDefaults</string><key>NSPrivacyAccessedAPITypeReasons</key><array><string>CA92.1</string></array></dict></array></dict></plist>"
+},
+"scan": "apple",
+"must_find": [
+"apple.required_reason_api"
+],
+"must_not": []
+},
+{
+"id": "apple.required_reason_api-",
+"desc": "declared categories cover the APIs used",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/A.swift": "UserDefaults.standard; ProcessInfo.processInfo.systemUptime",
+"App/PrivacyInfo.xcprivacy": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>NSPrivacyAccessedAPITypes</key><array><dict><key>NSPrivacyAccessedAPIType</key><string>NSPrivacyAccessedAPICategoryUserDefaults</string><key>NSPrivacyAccessedAPITypeReasons</key><array><string>CA92.1</string></array></dict><dict><key>NSPrivacyAccessedAPIType</key><string>NSPrivacyAccessedAPICategorySystemBootTime</string><key>NSPrivacyAccessedAPITypeReasons</key><array><string>CA92.1</string></array></dict></array></dict></plist>"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.required_reason_api"
+]
+},
+{
+"id": "apple.required_reason_api-pods",
+"desc": "API use only in vendored Pods and tests",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"Pods/Lib/L.swift": "UserDefaults.standard",
+"AppTests/T.swift": "UserDefaults.standard",
+"README.md": "UserDefaults"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.required_reason_api"
+]
+},
+{
+"id": "apple.required_reason_api-names",
+"desc": "generic names are not the API",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/M.swift": "let creationDate = model.creationDate; func stat() {}; obj.stat(x)"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.required_reason_api"
+]
+},
+{
+"id": "apple.third_party_sdk_manifest+",
+"desc": "SDKs from Apple's list in Podfile.lock",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"Podfile.lock": "PODS:\n  - Alamofire (5.8.0)\n  - FirebaseCore (10.0.0)\n  - SomethingElse (1.0)\n"
+},
+"scan": "apple",
+"must_find": [
+"apple.third_party_sdk_manifest"
+],
+"must_not": []
+},
+{
+"id": "apple.third_party_sdk_manifest+flutter",
+"desc": "Flutter plugin from the list in pubspec.lock",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"pubspec.lock": "packages:\n  shared_preferences_ios:\n    dependency: transitive\n"
+},
+"scan": "apple",
+"must_find": [
+"apple.third_party_sdk_manifest"
+],
+"must_not": []
+},
+{
+"id": "apple.third_party_sdk_manifest-",
+"desc": "SDKs not on the list",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"Podfile.lock": "PODS:\n  - SomethingElse (1.0)\n  - AnotherPod (2.0)\n"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.third_party_sdk_manifest"
+]
+},
+{
+"id": "apple.private_api+",
+"desc": "PrivateFrameworks path",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/P.m": "dlopen(\"/System/Library/PrivateFrameworks/Foo.framework/Foo\", 1);"
+},
+"scan": "apple",
+"must_find": [
+"apple.private_api"
+],
+"must_not": []
+},
+{
+"id": "apple.private_api-",
+"desc": "no private framework use",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/P.m": "dlopen(\"/usr/lib/libz.dylib\", 1);"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.private_api"
+]
+},
+{
+"id": "apple.web_engine+",
+"desc": "embeds GeckoView",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"Podfile": "pod 'GeckoView'\n",
+"App/B.swift": "let s = GeckoSession()"
+},
+"scan": "apple",
+"must_find": [
+"apple.web_engine"
+],
+"must_not": []
+},
+{
+"id": "apple.web_engine-",
+"desc": "WebKit only",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/B.swift": "let v = WKWebView()"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.web_engine"
+]
+},
+{
+"id": "apple.web_engine-entitlement",
+"desc": "alternative engine entitlement present",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/B.swift": "let s = GeckoSession()",
+"App/A.entitlements": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>com.apple.developer.web-browser-engine.host</key><true/></dict></plist>"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.web_engine"
+]
+},
+{
+"id": "apple.ipad_support+",
+"desc": "iPhone-only device family",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/><key>UIDeviceFamily</key><array><integer>1</integer></array></dict></plist>"
+},
+"scan": "apple",
+"must_find": [
+"apple.ipad_support"
+],
+"must_not": []
+},
+{
+"id": "apple.ipad_support-",
+"desc": "iPhone and iPad",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/><key>UIDeviceFamily</key><array><integer>1</integer><integer>2</integer></array></dict></plist>"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.ipad_support"
+]
+},
+{
+"id": "apple.ipad_support+pbx",
+"desc": "every target is iPhone only in the project file",
+"files": {
+"App.xcodeproj/project.pbxproj": "TARGETED_DEVICE_FAMILY = 1;\nTARGETED_DEVICE_FAMILY = \"1\";\n",
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>"
+},
+"scan": "apple",
+"must_find": [
+"apple.ipad_support"
+],
+"must_not": []
+},
+{
+"id": "apple.ipad_support-pbx",
+"desc": "universal in the project file",
+"files": {
+"App.xcodeproj/project.pbxproj": "TARGETED_DEVICE_FAMILY = \"1,2\";\n",
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.ipad_support"
+]
+},
+{
+"id": "apple.iap_restore+",
+"desc": "StoreKit without restore",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/S.swift": "import StoreKit\nSKPaymentQueue.default().add(p)"
+},
+"scan": "apple",
+"must_find": [
+"apple.iap_restore"
+],
+"must_not": []
+},
+{
+"id": "apple.iap_restore-",
+"desc": "restore present",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/S.swift": "import StoreKit\nSKPaymentQueue.default().add(p)\nSKPaymentQueue.default().restoreCompletedTransactions()"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.iap_restore"
+]
+},
+{
+"id": "apple.iap_restore-sk2",
+"desc": "StoreKit 2 AppStore.sync",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/S.swift": "import StoreKit\ntry await AppStore.sync()\nfor await t in Transaction.currentEntitlements {}"
+},
+"scan": "apple",
+"must_find": [],
+"must_not": [
+"apple.iap_restore"
+]
+},
+{
+"id": "apple.required_reason_api-macos",
+"desc": "macOS, Linux and Android code is not iOS code",
+"scan": "apple",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"macos/Share/S.swift": "UserDefaults.standard",
+"linux/app.cc": "struct stat s; stat(p, &s);",
+"android/A.m": "UserDefaults"
+},
+"must_find": [],
+"must_not": [
+"apple.required_reason_api"
+]
+},
+{
+"id": "apple.required_reason_api-funcstat",
+"desc": "defining a function named stat is not calling stat",
+"scan": "apple",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/A.swift": "func stat() {}"
+},
+"must_find": [],
+"must_not": [
+"apple.required_reason_api"
+]
+},
+{
+"id": "apple.required_reason_api-expoconfig",
+"desc": "Expo declares the category in app.config.js privacyManifests",
+"scan": "apple",
+"files": {
+"package.json": "{\"dependencies\":{\"expo\":\"~52\"}}",
+"app.config.js": "export default { expo: { ios: { bundleIdentifier: 'a.b', privacyManifests: { NSPrivacyAccessedAPITypes: [{ NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryUserDefaults', NSPrivacyAccessedAPITypeReasons: ['CA92.1'] }] } } } };",
+"modules/m/ios/P.swift": "UserDefaults.standard"
+},
+"must_find": [],
+"must_not": [
+"apple.required_reason_api"
+]
+},
+{
+"id": "apple.iap_restore-skoverlay",
+"desc": "StoreKit imported only for SKOverlay is not in-app purchase",
+"scan": "apple",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"App/C.swift": "import StoreKit\nlet o = SKOverlay(configuration: c)"
+},
+"must_find": [],
+"must_not": [
+"apple.iap_restore"
+]
+},
+{
+"id": "apple.iap_restore-fastlane",
+"desc": "fastlane config mentions in_app_purchases",
+"scan": "apple",
+"files": {
+"App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+"fastlane/Deliverfile": "precheck_include_in_app_purchases false"
+},
+"must_find": [],
+"must_not": [
+"apple.iap_restore"
+]
 }
 ]
 }

@@ -340,7 +340,119 @@ def ugc_without_moderation(p: Project, a: dict):
     return [(hit, "user-generated content features found but no report/block moderation code was found")]
 
 
+NATIVE_IOS = (".swift", ".m", ".mm", ".h", ".c", ".cc", ".cpp")
+
+
+def apple_required_reason_api(p: Project, a: dict):
+    """Required-reason APIs used by the app's own native code must be declared in a privacy manifest."""
+    if not p.has_ios and not p.privacy_manifests:
+        return []
+    declared = set(p.declared_privacy_apis)
+    for _, d in p.privacy_manifests:
+        for e in d.get("NSPrivacyAccessedAPITypes", []) or []:
+            if isinstance(e, dict) and e.get("NSPrivacyAccessedAPIType"):
+                declared.add(e["NSPrivacyAccessedAPIType"])
+    out = []
+    for cat, rx in a["categories"].items():
+        hits = p.find_in_files(rx, NATIVE_IOS, 1, skip_platform_dirs=True)
+        if hits and cat not in declared:
+            out.append((hits[0], f"uses a {cat.replace('NSPrivacyAccessedAPICategory', '')} required-reason API but "
+                                 f"{cat} is not declared in a privacy manifest"))
+    return out
+
+
+def _dependency_names(p: Project) -> dict:
+    """Lowercase dependency name -> file it was found in (Podfile(.lock), Package.*, pubspec.*, package.json)."""
+    found: dict[str, str] = {}
+
+    def add(n, where):
+        n = n.strip().lower()
+        if n:
+            found.setdefault(n, where)
+    for name, text, _lock in p.texts:
+        base = name.replace("\\", "/").rsplit("/", 1)[-1].lower()
+        if base == "podfile.lock":
+            for m in re.finditer(r"(?m)^\s*-\s+\"?([A-Za-z0-9_.+-]+)(?:/[\w.+-]+)?\"?\s*\(", text):
+                add(m.group(1), name)
+        elif base == "podfile":
+            for m in re.finditer(r"pod\s+['\"]([^'\"/]+)", text):
+                add(m.group(1), name)
+        elif base == "package.resolved":
+            for m in re.finditer(r'"identity"\s*:\s*"([^"]+)"', text):
+                add(m.group(1), name)
+        elif base == "package.swift":
+            for m in re.finditer(r'\.package\(\s*url:\s*"[^"]*/([^/"]+?)(?:\.git)?"', text):
+                add(m.group(1), name)
+        elif base in ("pubspec.yaml", "pubspec.lock"):
+            for m in re.finditer(r"(?m)^  ([a-z][a-z0-9_]*):", text):
+                add(m.group(1), name)
+        elif base == "package.json":
+            for m in re.finditer(r'"(@?[\w./-]+)"\s*:\s*"', text):
+                n = m.group(1)
+                add(n, name)
+                if n.startswith("@capacitor/"):
+                    add("capacitor", name)
+                if n.startswith("cordova"):
+                    add("cordova", name)
+    return found
+
+
+def apple_third_party_sdk_manifest(p: Project, a: dict):
+    if not p.has_ios:
+        return []
+    deps = _dependency_names(p)
+    listed = [s for s in a["sdks"] if s.lower() in deps]
+    if not listed:
+        return []
+    return [(deps[listed[0].lower()], "uses SDKs on Apple's privacy-manifest list: " + ", ".join(listed[:12])
+             + (" ..." if len(listed) > 12 else ""))]
+
+
+def apple_private_api(p: Project, a: dict):
+    if not p.has_ios:
+        return []
+    return [(h, "references Apple's private frameworks") for h in p.find_in_files(a["pattern"], None, 3)]
+
+
+def apple_web_engine(p: Project, a: dict):
+    if not p.has_ios:
+        return []
+    if any(k.startswith("com.apple.developer.web-browser-engine") for _, d in p.entitlements for k in d):
+        return []
+    hit = p.find_signal(a["pattern"])
+    return [(hit, "embeds a non-WebKit browser engine")] if hit else []
+
+
+def apple_ipad_support(p: Project, a: dict):
+    out = []
+    for label, d in _real_ios_plists(p):
+        fam = d.get("UIDeviceFamily")
+        if isinstance(fam, list) and fam and all(str(x) == "1" for x in fam):
+            out.append((label, "UIDeviceFamily lists only iPhone"))
+    if out:
+        return out
+    vals, where = [], "(project)"
+    for f in p.config_files:
+        if f.name == "project.pbxproj":
+            vals += re.findall(r"TARGETED_DEVICE_FAMILY\s*=\s*\"?([\d,]+)\"?", f.read_text(encoding="utf-8", errors="ignore"))
+            where = f.relative_to(p.root).as_posix()
+    if vals and all(v == "1" for v in vals):
+        out.append((where, "every target in the project is iPhone only (TARGETED_DEVICE_FAMILY = 1)"))
+    return out
+
+
+def apple_iap_restore(p: Project, a: dict):
+    if not p.has_ios:
+        return []
+    hit = p.find_signal(a["iap"])
+    if not hit or p.find_signal(a["restore"]):
+        return []
+    return [(hit, "in-app purchase code found but no restore-purchases code")]
+
+
 CHECKS_EXTRA = {f.__name__: f for f in (
+    apple_required_reason_api, apple_third_party_sdk_manifest, apple_private_api, apple_web_engine,
+    apple_ipad_support, apple_iap_restore,
     android_exported_missing, android_fgs_type_missing, android_release_debug_signing, ios_app_icon,
     ios_launch_screen, ios_deployment_target, ios_xcode_version, ios_push_entitlement, ios_background_modes,
     payments_without_iap, listing_limits, listing_screenshots, privacy_policy, ugc_without_moderation)}

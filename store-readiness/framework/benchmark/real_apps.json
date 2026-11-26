@@ -112,8 +112,26 @@
    "repo": "wikimedia/wikipedia-ios",
    "commit": "4969cba667833b399bc87ce8fb6ee4009ddc0b35",
    "stack": "ios-native",
-   "labels": [],
-   "must_find": [],
+   "labels": [
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "SharedContainerCache",
+     "verdict": "tp",
+     "note": "uses contentModificationDateKey; the only manifest declares DiskSpace and UserDefaults"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "Package.resolved",
+     "verdict": "tp",
+     "note": "RxSwift and SDWebImage are on Apple's list"
+    }
+   ],
+   "must_find": [
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "SharedContainerCache"
+    }
+   ],
    "must_not": [
     {
      "rule": "apple.usage_strings",
@@ -155,6 +173,12 @@
      "loc": "AndroidManifest.xml",
      "verdict": "unverified",
      "note": "the listed service may not be a foreground service"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "Podfile.lock",
+     "verdict": "tp",
+     "note": "Alamofire, SDWebImage, Starscream, SwiftyJSON are on Apple's list"
     }
    ],
    "must_find": [
@@ -204,6 +228,12 @@
      "loc": "AndroidManifest.xml",
      "verdict": "tp",
      "note": "usesCleartextTraffic is true"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "pubspec.lock",
+     "verdict": "tp",
+     "note": "several Flutter plugins and pods on Apple's list"
     }
    ],
    "must_find": [
@@ -221,6 +251,16 @@
      "rule": "apple.usage_strings",
      "loc": "pubspec.lock",
      "why": "image_picker appears only in a lockfile"
+    },
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "linux/",
+     "why": "a Linux .cc file is not iOS code"
+    },
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "macos/",
+     "why": "macOS code is outside Apple's documented platforms for this requirement"
     }
    ]
   },
@@ -253,6 +293,12 @@
      "loc": "user.service.ts",
      "verdict": "unverified",
      "note": "sign-up code exists; deletion absence not confirmed"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "package.json",
+     "verdict": "tp",
+     "note": "Capacitor is on Apple's list"
     }
    ],
    "must_find": [],
@@ -305,6 +351,12 @@
      "loc": "(project)",
      "verdict": "tp",
      "note": "flutter.targetSdkVersion is inherited"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "pubspec.lock",
+     "verdict": "tp",
+     "note": "Flutter and plugins on Apple's list"
     }
    ],
    "must_find": [
@@ -341,9 +393,20 @@
      "loc": "(project)",
      "verdict": "tp",
      "note": "no PrivacyInfo.xcprivacy"
+    },
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "TimelineCache",
+     "verdict": "tp",
+     "note": "uses UserDefaults and the repo has no PrivacyInfo.xcprivacy"
     }
    ],
-   "must_find": [],
+   "must_find": [
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "TimelineCache"
+    }
+   ],
    "must_not": [
     {
      "rule": "apple.launch_screen",
@@ -363,14 +426,36 @@
      "loc": "(project)",
      "verdict": "tp",
      "note": "no PrivacyInfo.xcprivacy"
+    },
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "WidgetExtension",
+     "verdict": "tp",
+     "note": "uses UserDefaults and the repo has no PrivacyInfo.xcprivacy"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "Package.swift",
+     "verdict": "tp",
+     "note": "Alamofire and SDWebImage are on Apple's list"
     }
    ],
-   "must_find": [],
+   "must_find": [
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "WidgetExtension"
+    }
+   ],
    "must_not": [
     {
      "rule": "apple.usage_strings",
      "loc": "",
      "why": "photo use is add-only; camera key is in InfoPlist.strings"
+    },
+    {
+     "rule": "apple.iap_restore",
+     "loc": "Deliverfile",
+     "why": "a fastlane config mentions in_app_purchases"
     }
    ]
   },
@@ -381,7 +466,18 @@
    "stack": "expo",
    "labels": [],
    "must_find": [],
-   "must_not": []
+   "must_not": [
+    {
+     "rule": "apple.iap_restore",
+     "loc": "BlueskyClip",
+     "why": "StoreKit is imported for SKOverlay, not purchases"
+    },
+    {
+     "rule": "apple.required_reason_api",
+     "loc": "SharedPrefs",
+     "why": "the category is declared in app.config.js privacyManifests"
+    }
+   ]
   },
   {
    "name": "react-native-template-obytes",
@@ -462,6 +558,12 @@
      "loc": "(project)",
      "verdict": "tp",
      "note": "no targetSdk preference"
+    },
+    {
+     "rule": "apple.third_party_sdk_manifest",
+     "loc": "package.json",
+     "verdict": "tp",
+     "note": "Cordova is on Apple's list"
     }
    ],
    "must_find": [],
