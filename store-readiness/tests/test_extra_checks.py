@@ -352,7 +352,7 @@ class FixPatches(Base):
         ed, skipped = fixes.build_fixes(project, findings)
         patch = fixes.to_patch(ed)
         self.assertTrue(patch, "expected a patch")
-        (self.root.parent / (self.root.name + ".patch")).write_text(patch)
+        (self.root.parent / (self.root.name + ".patch")).write_bytes(patch.encode("utf-8"))
         patch_file = self.root.parent / (self.root.name + ".patch")
         r = subprocess.run(["git", "apply", "--check", str(patch_file)], cwd=self.root, capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stderr)
@@ -375,7 +375,7 @@ class FixPatches(Base):
         a = {f.rule_id for f in after}
         self.assertTrue({"play.debuggable", "play.target_sdk", "play.exported_missing"} <= b)
         self.assertEqual(a & {"play.debuggable", "play.target_sdk", "play.exported_missing"}, set())
-        text = (self.root / "app/src/main/AndroidManifest.xml").read_text()
+        text = (self.root / "app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
         self.assertRegex(text, r'<activity android:exported="true" android:name="\.Main"')
         self.assertRegex(text, r'<service android:exported="false" android:name="\.S"')
         self.assertRegex(text, r'android:name="\.L" android:exported="true"')
@@ -388,19 +388,19 @@ class FixPatches(Base):
         before, after, _ = self.apply_and_rescan("apple")
         self.assertTrue({"apple.usage_strings", "apple.deployment_target"} <= {f.rule_id for f in before})
         self.assertEqual({f.rule_id for f in after} & {"apple.usage_strings", "apple.deployment_target"}, set())
-        self.assertIn("TODO", (self.root / "App/Info.plist").read_text())
-        self.assertIn("IPHONEOS_DEPLOYMENT_TARGET = 15.0;", (self.root / "App.xcodeproj/project.pbxproj").read_text())
+        self.assertIn("TODO", (self.root / "App/Info.plist").read_text(encoding="utf-8"))
+        self.assertIn("IPHONEOS_DEPLOYMENT_TARGET = 15.0;", (self.root / "App.xcodeproj/project.pbxproj").read_text(encoding="utf-8"))
 
     def test_never_edits_files_and_reports_what_it_skips(self):
         from storecheck import fixes
         self.w("app/src/main/AndroidManifest.xml", f'<manifest {NS}><application/></manifest>')
         self.w("app/build.gradle.kts", 'android { buildTypes { release { signingConfig = signingConfigs.getByName("debug") } } }')
-        before = (self.root / "app/build.gradle.kts").read_text()
+        before = (self.root / "app/build.gradle.kts").read_text(encoding="utf-8")
         project, findings = scan(str(self.root), "google")
         ed, skipped = fixes.build_fixes(project, findings)
         self.assertEqual(fixes.to_patch(ed), "")
         self.assertTrue(any("release_debug_signing" in s for s in skipped))
-        self.assertEqual((self.root / "app/build.gradle.kts").read_text(), before)
+        self.assertEqual((self.root / "app/build.gradle.kts").read_text(encoding="utf-8"), before)
 
     def test_cli_writes_patch_file(self):
         import contextlib
@@ -410,7 +410,7 @@ class FixPatches(Base):
         out = self.root.parent / (self.root.name + "-out.patch")
         with contextlib.redirect_stdout(io.StringIO()):
             main([str(self.root), "--fix-plan", str(out)])
-        self.assertIn("debuggable", out.read_text())
+        self.assertIn("debuggable", out.read_text(encoding="utf-8"))
         out.unlink()
 
 
@@ -433,7 +433,7 @@ class ChecklistTests(Base):
     def test_lists_every_not_checkable_item_for_both_stores_and_never_double_lists(self):
         import json as _j
         from storecheck import checklist
-        cat = _j.loads((Path(__file__).parent.parent / "storecheck" / "requirements.json").read_text())["items"]
+        cat = _j.loads((Path(__file__).parent.parent / "storecheck" / "requirements.json").read_text(encoding="utf-8"))["items"]
         cl = checklist.build_checklist(None)
         self.assertEqual(set(cl["ids"]), {i["id"] for i in cat if i["class"] in ("not_checkable", "unmapped")})
         human = {i for g in cl["needs_human"] for i in g["ids"]}

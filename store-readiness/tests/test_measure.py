@@ -26,14 +26,14 @@ class MeasureTests(unittest.TestCase):
         self.assertLessEqual(d1["excluded_share"], 0.6)
 
     def test_not_checkable_items_always_state_a_reason(self):
-        cat = json.loads((measure.ROOT / "storecheck" / "requirements.json").read_text())
+        cat = json.loads((measure.ROOT / "storecheck" / "requirements.json").read_text(encoding="utf-8"))
         for it in cat["items"]:
             if it["class"] == "not_checkable":
                 self.assertTrue(it.get("reason"), it["id"])
             self.assertTrue(it["source"].startswith("https://"), it["id"])
 
     def test_verified_readers_name_a_reference_and_an_existing_test(self):
-        for r in json.loads((measure.FW / "readers.json").read_text())["readers"]:
+        for r in json.loads((measure.FW / "readers.json").read_text(encoding="utf-8"))["readers"]:
             if r["status"] == "verified":
                 self.assertTrue(r["reference"], r["reader"])
                 self.assertTrue((measure.ROOT / r["test"]).exists(), r["reader"])

@@ -358,7 +358,7 @@ def listing_screenshots(p: Project, a: dict):
             groups.setdefault(f.parent, []).append(f)
             size = image_size(f)
             if size and size not in ok:
-                out.append((str(rel), f"{size[0]}x{size[1]} is not an accepted App Store screenshot size"))
+                out.append((rel.as_posix(), f"{size[0]}x{size[1]} is not an accepted App Store screenshot size"))
         for d, files in groups.items():
             if len(files) > a["max"]:
                 out.append((d.relative_to(p.root).as_posix(), f"{len(files)} screenshots, at most {a['max']} per device size"))

@@ -23,12 +23,12 @@ def flat(el, out=None):
 class RealManifests(unittest.TestCase):
     def test_aab_manifests_match_the_official_schema_decoder(self):
         for name in ("aab_install_time_base", "aab_watchface_base"):
-            expected = json.loads((D / f"{name}.expected.json").read_text())["elements"]
+            expected = json.loads((D / f"{name}.expected.json").read_text(encoding="utf-8"))["elements"]
             got = flat(pbxml.decode_proto_manifest((D / f"{name}.pb").read_bytes()))
             self.assertEqual(got, expected, name)
 
     def test_apk_manifest_matches_androguard(self):
-        expected = json.loads((D / "apk_test_app.expected.json").read_text())["elements"]
+        expected = json.loads((D / "apk_test_app.expected.json").read_text(encoding="utf-8"))["elements"]
         got = flat(axml.decode_axml((D / "apk_test_app.axml").read_bytes()))
         self.assertEqual(got, expected)
 
