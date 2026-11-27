@@ -46,3 +46,7 @@ Overall 81.6%. Framework re-evaluation: Stack reach is now broad but shallow: ne
 ## 2026-11-26T23:02Z @ 23706f0: Fix: Amplitude pattern no longer matches a quoted property name (BoatAttack WaterSurfaceDataEditor.cs); matches only dependency declarations and SDK API names
 
 Overall 81.7%. Framework re-evaluation: Benchmark must_not caught the miss from the first pattern tightening, as intended. Fix the tool not the label.
+
+## 2026-11-27T02:14Z @ d3c0c2c: Built both AI jobs: judgment checks (--assess: 4 topics) and drafts/fix notes (--draft-listing, --explain), all behind guardrails (grounded quotes, redaction, local-only, policy-checked listing text); new D9 dimension (weights D1/D2 -5 each), 18 guardrail cases, 10-case live eval set; perf: skip Unity scene YAML in signal text
+
+Overall 81.1%. Framework re-evaluation: D9 is a safety score, not a quality score: no model was reachable here, so the live part is 0 and D9 cannot pass until someone runs the live eval. Overall drops vs. earlier runs because of the reweighting, not regression. Eval labels are single-reviewer. Next: run the live eval on a real model and tune prompts against it; then return to D1.

@@ -25,21 +25,44 @@ report all three:
 
 ## 2. Dimensions
 
-Eight dimensions, each with a metric a script computes, a weight, and a **gate**. The goal is achieved only when
+Nine dimensions, each with a metric a script computes, a weight, and a **gate**. The goal is achieved only when
 **every gate passes**, the real-app corpus was measured, and the last two recorded runs both passed.
 
 | | Dimension | Weight | Gate | Metric |
 |---|---|---|---|---|
-| D1 | Requirement coverage | 25 | 80% | 0.7 x static coverage + 0.3 x checklist coverage of the requirements catalog |
-| D2 | Correctness | 25 | 90% | 0.45 x synthetic benchmark + 0.45 x real-app benchmark + 0.10 x file-format readers verified |
+| D1 | Requirement coverage | 20 | 80% | 0.7 x static coverage + 0.3 x checklist coverage of the requirements catalog |
+| D2 | Correctness | 20 | 90% | 0.45 x synthetic benchmark + 0.45 x real-app benchmark + 0.10 x file-format readers verified |
 | D3 | Verification | 10 | 90% | 0.6 x rules verified + 0.2 x rules fresh + 0.2 x SDK mappings verified |
 | D4 | Actionability | 10 | 80% | 0.5 x rule schema complete + 0.5 x auto-fixable share (target 30% of rules) |
 | D5 | Stack reach | 10 | 75% | stacks validated on at least 2 real apps (1 app counts half) over the target stack list |
 | D6 | Portability and delivery | 10 | 90% | installable package, 3-OS CI, OSes observed passing, GUI test, stdlib-only |
 | D7 | Safety and privacy | 5 | 100% | five static checks: network use, patches never written, GUI local and tokened, URL allowlist, tests |
 | D8 | Robustness | 5 | 90% | no crashes, a note whenever a check is skipped, scan time within 10 s |
+| D9 | AI assistance | 10 | 80% | 0.5 x guardrails hold + 0.2 x planned AI jobs built and covered + 0.3 x live-model accuracy (unmeasured = 0) |
 
 Overall = weighted average. It is a progress indicator; the **gates** decide whether the goal is met.
+
+### D9 AI assistance
+
+The optional local LLM does two jobs, both advisory: **judgment checks** for questions a static rule cannot decide
+(`--assess`: thin website wrapper, listing vs permissions, usage-string purpose, UGC moderation adequacy) and
+**drafts and fix notes** (`--draft-listing`, `--explain`: store listing text, privacy wording, per-finding fixes).
+
+Rules the layer must keep, each enforced in code and tested in `storecheck/llm_selftest.py`:
+
+- the model never adds, removes or changes a scanner finding;
+- a judgment answer is strict JSON; every quote must appear verbatim in the evidence the model was sent, and a
+  "concern" with no grounded quote is shown as "unclear";
+- claims of certainty about approval, invented retention or sharing statements, unsafe commands, over-length or
+  policy-violating listing text are rejected, not shown;
+- evidence is bounded and secrets and emails are redacted before anything is sent;
+- the endpoint must be local unless `--allow-remote-llm` is given.
+
+Guardrails say the layer is safe with *any* model. They do not say a model is *good*; that is the live part
+(`framework/benchmark/llm_eval.json`, 10 cases a careful reviewer labelled), recorded in
+`framework/observations.json` with the model name and date when someone runs
+`python -m storecheck.measure --llm-url URL --llm-model NAME`. Until then it counts as 0, so D9 cannot pass.
+Weights changed 2026-11-27: D9 added at the owner's request, D1 and D2 each gave up 5 points.
 
 ### D1 Requirement coverage
 

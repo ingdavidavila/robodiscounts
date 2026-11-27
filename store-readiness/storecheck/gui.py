@@ -106,10 +106,13 @@ def run_scan(req: dict) -> dict:
         out["fix_patch"] = fixes.to_patch(ed)
         out["fix_skipped"] = skipped
         if req.get("explain"):
-            url_ = req.get("llm_url") or "http://localhost:11434/v1"
-            model = req.get("model") or "qwen2.5-coder:14b"
-            out["ai_findings"] = llm.explain(findings, url_, model)
-            out["ai_privacy"] = llm.privacy_policy_text(draft, url_, model)
+            cfg = llm.LLMConfig(req.get("llm_url") or llm.DEFAULT_URL, req.get("model") or llm.DEFAULT_MODEL)
+            out["ai_findings"] = llm.render_fix_notes(llm.fix_notes(findings, cfg))
+            pt = llm.privacy_policy_text(draft, cfg)
+            out["ai_privacy"] = pt["text"] or f"privacy wording {pt['status']}: {pt.get('note', '')}"
+            out["ai_assessments"] = "\n\n".join(
+                llm.render_assessment(llm.assess(project, t["id"], cfg)) for t in llm.TOPICS if t["kind"] == "judgment")
+            out["ai_listing"] = llm.render_listing(llm.draft_listing(project, cfg))
         return out
     finally:
         if tmp:

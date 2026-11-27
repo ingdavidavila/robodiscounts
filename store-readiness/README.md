@@ -75,6 +75,11 @@ python -m storecheck.measure --corpus <dir> --log "what changed" --review "does 
 `storecheck/rules/*.json`. Each rule has a check type and parameters, a fix, a source URL and a `verified` flag. Store thresholds change often (for example the minimum targetSdk), so each rule carries a `verified` date (empty = not verified) and the report shows it. Verified 2026-11-24: Play target API (36), 16 KB page sizes, AAB requirement, Apple privacy-manifest/required-reason enforcement, Apple privacy type names. Also verified: Play account-deletion rule and Data safety names/purposes. Not yet verified: most of the Play restricted-permission list (only SMS and Call Log confirmed), and Apple ATS and export-compliance pages (returned no content), plus the full text of guidelines 4.8/5.1.1 (only a summary was readable). Add your own rules with `--rules-dir`.
 
 ## Local LLM
+Optional and advisory. Judgment questions: `python -m storecheck path --assess` (or name topics: `--assess min_functionality ugc_moderation`).
+Store listing draft: `--draft-listing`. Findings and privacy wording: `--explain`. Every model answer is checked before it is shown
+(quotes must appear in the evidence sent, listing text must fit the store limits and wording rules, no claims of certainty),
+secrets and emails are redacted from what is sent, and non-local endpoints are refused unless you pass `--allow-remote-llm`.
+Check the guardrails with `python -m storecheck.llm_selftest`; check a model with `python -m storecheck.measure --llm-url ... --llm-model ...`.
 `--explain` sends the findings (not your source code) to any OpenAI-compatible endpoint (default Ollama at `localhost:11434`) for plain-language explanations. It is advisory and never changes findings.
 
 ## Known limits

@@ -1,0 +1,94 @@
+{
+ "note": "Live-model evaluation set. Run with: python -m storecheck.measure --llm-url URL --llm-model NAME ... Each case: scripted files, the topic, and the verdict a careful human reviewer gives. 'valid_draft' means a listing draft that passes the deterministic validator.",
+ "cases": [
+  {
+   "id": "min.concern",
+   "topic": "min_functionality",
+   "expect": "concern",
+   "files": {
+    "README.md": "Acme Shop is a simple wrapper that loads our shop website https://shop.example.com inside an app. There is nothing else in the app.",
+    "capacitor.config.ts": "const config = { appId: 'com.acme.shop', server: { url: 'https://shop.example.com' } }; export default config;"
+   }
+  },
+  {
+   "id": "min.ok",
+   "topic": "min_functionality",
+   "expect": "ok",
+   "files": {
+    "README.md": "Trail Notes records GPS tracks offline, draws them on downloaded vector maps, stores notes in a local database and exports GPX files. It has its own track list, map and settings screens.",
+    "app/src/main/java/Track.kt": "class TrackRecorder { fun start() { locationClient.requestUpdates() ; db.insert(point) } }"
+   }
+  },
+  {
+   "id": "meta.concern",
+   "topic": "metadata_accuracy",
+   "expect": "concern",
+   "files": {
+    "fastlane/metadata/android/en-US/full_description.txt": "A calm notes app. We never collect any data and the app needs no permissions at all.",
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/><uses-permission android:name=\"android.permission.READ_CONTACTS\"/><uses-permission android:name=\"android.permission.RECORD_AUDIO\"/><application/></manifest>"
+   }
+  },
+  {
+   "id": "meta.ok",
+   "topic": "metadata_accuracy",
+   "expect": "ok",
+   "files": {
+    "fastlane/metadata/android/en-US/full_description.txt": "Track your runs with GPS location. The app asks for location access to draw your route.",
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/><application/></manifest>"
+   }
+  },
+  {
+   "id": "perm.concern",
+   "topic": "permission_purpose",
+   "expect": "concern",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>NSCameraUsageDescription</key><string>Camera access</string><key>NSLocationWhenInUseUsageDescription</key><string>TODO</string></dict></plist>",
+    "A.xcodeproj/project.pbxproj": "x"
+   }
+  },
+  {
+   "id": "perm.ok",
+   "topic": "permission_purpose",
+   "expect": "ok",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>NSCameraUsageDescription</key><string>Used to scan receipts so the total is added to your expense report.</string><key>NSLocationWhenInUseUsageDescription</key><string>Used to show nearby stores on the map while you shop.</string></dict></plist>",
+    "A.xcodeproj/project.pbxproj": "x"
+   }
+  },
+  {
+   "id": "ugc.concern",
+   "topic": "ugc_moderation",
+   "expect": "concern",
+   "files": {
+    "app/src/main/java/Chat.kt": "class Chat { fun sendMessage(text: String) { api.postComment(roomId, text) }\n fun showFeed() { list.show(api.messages) } }"
+   }
+  },
+  {
+   "id": "ugc.ok",
+   "topic": "ugc_moderation",
+   "expect": "ok",
+   "files": {
+    "app/src/main/java/Chat.kt": "class Chat { fun sendMessage(text: String) { api.postComment(roomId, profanityFilter.clean(text)) } }",
+    "app/src/main/java/Safety.kt": "class Safety { fun reportContent(id: String) { api.report(id) }\n fun blockUser(id: String) { api.block(id) } }"
+   }
+  },
+  {
+   "id": "listing.a",
+   "topic": "listing_draft",
+   "expect": "valid_draft",
+   "files": {
+    "README.md": "Trail Notes records GPS tracks offline, shows them on downloaded maps and keeps notes in a local database. Export tracks as GPX.",
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/><application/></manifest>"
+   }
+  },
+  {
+   "id": "listing.b",
+   "topic": "listing_draft",
+   "expect": "valid_draft",
+   "files": {
+    "README.md": "Receipt Scanner photographs receipts, reads the total with on-device text recognition and adds it to an expense report you can export as CSV.",
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>NSCameraUsageDescription</key><string>Used to scan receipts.</string></dict></plist>"
+   }
+  }
+ ]
+}

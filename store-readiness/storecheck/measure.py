@@ -27,10 +27,11 @@ FW = ROOT / "framework"
 TODAY = dt.date(2026, 11, 25)
 
 # weights (sum 100) and pass gates are defined in framework/FRAMEWORK.md; change both together, with a log entry
-WEIGHTS = {"D1": 25, "D2": 25, "D3": 10, "D4": 10, "D5": 10, "D6": 10, "D7": 5, "D8": 5}
-GATES = {"D1": 0.80, "D2": 0.90, "D3": 0.90, "D4": 0.80, "D5": 0.75, "D6": 0.90, "D7": 1.00, "D8": 0.90}
+# 2026-11-27: D9 (AI assistance) added at the owner's request; D1 and D2 gave up 5 points each to make room.
+WEIGHTS = {"D1": 20, "D2": 20, "D3": 10, "D4": 10, "D5": 10, "D6": 10, "D7": 5, "D8": 5, "D9": 10}
+GATES = {"D1": 0.80, "D2": 0.90, "D3": 0.90, "D4": 0.80, "D5": 0.75, "D6": 0.90, "D7": 1.00, "D8": 0.90, "D9": 0.80}
 NAMES = {"D1": "Requirement coverage", "D2": "Correctness", "D3": "Verification", "D4": "Actionability",
-         "D5": "Stack reach", "D6": "Portability and delivery", "D7": "Safety and privacy", "D8": "Robustness"}
+         "D5": "Stack reach", "D6": "Portability and delivery", "D7": "Safety and privacy", "D8": "Robustness", "D9": "AI assistance"}
 KNOWN_FEATURES = {"privacy_draft", "rating_hints", "privacy_draft.tracking"}
 FRESH_DAYS = 90
 
@@ -303,6 +304,8 @@ def d7_safety() -> dict:
         "gui_localhost_and_token": "127.0.0.1" in gui and "compare_digest" in gui,
         "github_url_allowlist": "GITHUB_RX" in gui and "https://github.com/" in gui,
         "gui_tests_exist": (ROOT / "tests" / "test_gui.py").exists(),
+        "llm_local_only_by_default": "allow_remote" in (pkg / "llm.py").read_text(encoding="utf-8")
+        and dict(__import__("storecheck.llm_selftest", fromlist=["run"]).run()).get("remote_endpoint_refused_by_default", False),
     }
     return {"score": sum(checks.values()) / len(checks), "checks": checks, "network_modules": sorted(net_modules)}
 
@@ -318,12 +321,62 @@ def d8_robustness(syn: dict, real: dict | None) -> dict:
             "slowest_scan_seconds": slowest, "perf_measured_on": "corpus" if real else "synthetic (corpus not run)"}
 
 
+# ---------------------------------------------------------------------------------------------- D9
+def run_live_eval(url: str, model: str) -> dict:
+    """Ask a real model the benchmark questions. Returns {model, date, correct, total, cases} or raises."""
+    from . import llm
+    from .discover import discover
+    from .llm_selftest import _project
+    cfg = llm.LLMConfig(url, model, timeout=300)
+    cases, correct = [], 0
+    for c in _load("benchmark/llm_eval.json")["cases"]:
+        project = discover(_project(c["files"]))
+        if c["topic"] == "listing_draft":
+            r = llm.draft_listing(project, cfg)
+            got, ok = r["status"], r["status"] == "ok"
+        else:
+            r = llm.assess(project, c["topic"], cfg)
+            got = r["verdict"]
+            ok = r["status"] in ("ok", "partial") and got == c["expect"] and (got != "concern" or bool(r["evidence"]))
+        if r["status"] == "unavailable":
+            raise RuntimeError(f"model not reachable: {r.get('note') or r.get('problems')}")
+        correct += ok
+        cases.append({"id": c["id"], "expect": c["expect"], "got": got, "ok": ok})
+    return {"model": model, "date": TODAY.isoformat(), "correct": correct, "total": len(cases), "cases": cases}
+
+
+def d9_assist() -> dict:
+    """0.5 guardrails hold against misbehaving fake models, 0.2 planned AI jobs built and covered by eval cases,
+    0.3 a recorded live-model evaluation (unmeasured counts as 0). The live part says how good one specific
+    model was on this benchmark; the guardrail part says the layer is safe whichever model is behind it."""
+    from . import llm, llm_selftest
+    guard = llm_selftest.run()
+    g = sum(ok for _, ok in guard) / len(guard)
+    eval_cases = _load("benchmark/llm_eval.json")["cases"]
+    per_topic = {}
+    for c in eval_cases:
+        per_topic[c["topic"]] = per_topic.get(c["topic"], 0) + 1
+    judgment = [t["id"] for t in llm.TOPICS if t["kind"] == "judgment"]
+    built = [t for t in judgment if per_topic.get(t, 0) >= 2] + ["listing_draft"] * (per_topic.get("listing_draft", 0) >= 1)
+    guard_names = {n for n, _ in guard}
+    built += [x for x, key in (("fix_notes", "fix_notes_filtering"), ("privacy_wording", "privacy_text_guards"))
+              if key in guard_names]
+    planned = len(judgment) + 3
+    cov = len(built) / planned
+    live = _load("observations.json").get("llm_live")
+    live_score = live["correct"] / live["total"] if live and live.get("total") else 0.0
+    return {"score": 0.5 * g + 0.2 * cov + 0.3 * live_score, "guardrails": f"{sum(ok for _, ok in guard)}/{len(guard)}",
+            "guardrail_failures": [n for n, ok in guard if not ok], "coverage": f"{len(built)}/{planned}",
+            "live": live if live else "NOT MEASURED (counted as 0; run with --llm-url and --llm-model)"}
+
+
 # ---------------------------------------------------------------------------------------------- run
 def measure(corpus: Path | None = None) -> dict:
     syn = run_synthetic()
     real = run_real(corpus) if corpus else None
     dims = {"D1": d1_coverage(), "D2": d2_correctness(syn, real), "D3": d3_verification(), "D4": d4_actionability(),
-            "D5": d5_reach(), "D6": d6_portability(), "D7": d7_safety(), "D8": d8_robustness(syn, real)}
+            "D5": d5_reach(), "D6": d6_portability(), "D7": d7_safety(), "D8": d8_robustness(syn, real),
+            "D9": d9_assist()}
     overall = sum(WEIGHTS[k] * min(1.0, dims[k]["score"]) for k in WEIGHTS) / sum(WEIGHTS.values())
     gates = {k: dims[k]["score"] >= GATES[k] for k in GATES}
     return {"overall": overall, "dims": dims, "gates": gates, "goal_achieved": all(gates.values())}
@@ -358,6 +411,10 @@ def render(res: dict, prev: dict | None) -> str:
     d2 = res["dims"]["D2"]
     if d2.get("readers", {}).get("unverified"):
         L.append("D2 readers not yet verified against an independent reference: " + ", ".join(d2["readers"]["unverified"]))
+    d9 = res["dims"]["D9"]
+    L.append(f"D9 guardrails {d9['guardrails']}, jobs covered {d9['coverage']}, live model: " +
+             (f"{d9['live']['model']} {d9['live']['correct']}/{d9['live']['total']} on {d9['live']['date']}"
+              if isinstance(d9["live"], dict) else d9["live"]))
     L.append("D2 real corpus: " + ("measured" if d2["real_measured"] else "NOT MEASURED (pass --corpus; counted as 0)"))
     for f in d2["synthetic"]["failures"][:12]:
         L.append("  synthetic failure: " + f)
@@ -374,7 +431,15 @@ def main(argv=None) -> int:
     ap.add_argument("--review", help="framework re-evaluation: does the framework still fit the goal? (required to record)")
     ap.add_argument("--no-history", action="store_true", help="measure without recording")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--llm-url", help="run the live AI evaluation against this OpenAI-compatible endpoint and record it")
+    ap.add_argument("--llm-model", default=None, help="model name for --llm-url")
     a = ap.parse_args(argv)
+    if a.llm_url:
+        live = run_live_eval(a.llm_url, a.llm_model or "qwen2.5-coder:14b")
+        obs = _load("observations.json")
+        obs["llm_live"] = live
+        (FW / "observations.json").write_text(json.dumps(obs, indent=1), encoding="utf-8")
+        print(f"live AI evaluation recorded: {live['model']} {live['correct']}/{live['total']}")
     if not a.no_history and not (a.log and a.review):
         ap.error("--log and --review are required to record a run (or pass --no-history)")
     res = measure(a.corpus)

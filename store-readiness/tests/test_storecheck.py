@@ -125,7 +125,8 @@ class T(unittest.TestCase):
         class H(BaseHTTPRequestHandler):
             def do_POST(self):
                 self.rfile.read(int(self.headers["Content-Length"]))
-                body = json.dumps({"choices": [{"message": {"content": "explained"}}]}).encode()
+                reply = json.dumps({"notes": {"apple.privacy_manifest": {"why": "explained", "fix": "add one"}}})
+                body = json.dumps({"choices": [{"message": {"content": reply}}]}).encode()
                 self.send_response(200)
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()
@@ -137,7 +138,7 @@ class T(unittest.TestCase):
         threading.Thread(target=srv.serve_forever, daemon=True).start()
         self.w("App/Info.plist", plist())
         _, f = scan(str(self.root), "apple")
-        self.assertEqual(llm.explain(f, f"http://127.0.0.1:{srv.server_port}/v1"), "explained")
+        self.assertIn("explained", llm.explain(f, f"http://127.0.0.1:{srv.server_port}/v1"))
         srv.shutdown()
         self.assertIn("unavailable", llm.explain(f, "http://127.0.0.1:1/v1", timeout=2))
 

@@ -1,0 +1,115 @@
+{
+ "topics": [
+  {
+   "id": "min_functionality",
+   "kind": "judgment",
+   "store": "both",
+   "catalog": [
+    "apple.guideline.4.2",
+    "google.spam_min_functionality"
+   ],
+   "source": "https://developer.apple.com/app-store/review/guidelines/#minimum-functionality",
+   "question": "Is this app mainly a thin wrapper around a website or a repackaged template, with little functionality of its own?",
+   "rubric": "Answer concern only if the evidence shows the app's main content is loaded from a remote site, or that it is a template with no app-specific features. Answer ok if the evidence describes app-specific features such as offline data, device APIs or its own screens.",
+   "evidence": [
+    {
+     "kind": "readme",
+     "max_chars": 2500
+    },
+    {
+     "kind": "files",
+     "name": "(^|/)(capacitor\\.config\\.(json|ts|js)|config\\.xml|nativescript\\.config\\.(ts|js))$",
+     "max_files": 2,
+     "max_chars": 1500
+    },
+    {
+     "kind": "signal",
+     "pattern": "loadUrl\\(\\s*\"https?://|WKWebView|webView\\.load|server\\s*:\\s*\\{",
+     "max_files": 2
+    }
+   ]
+  },
+  {
+   "id": "metadata_accuracy",
+   "kind": "judgment",
+   "store": "both",
+   "catalog": [
+    "apple.guideline.2.3"
+   ],
+   "source": "https://developer.apple.com/app-store/review/guidelines/#accurate-metadata",
+   "question": "Does the store listing text promise features or claims that the app's declared permissions and code do not support, or hide a sensitive capability the app uses?",
+   "rubric": "Answer concern only if a specific listing sentence conflicts with the permissions and usage strings shown, for example a 'no data collected' claim next to location and contacts permissions. Answer ok if the listing and permissions are consistent.",
+   "evidence": [
+    {
+     "kind": "listing",
+     "max_files": 6
+    },
+    {
+     "kind": "permissions"
+    }
+   ]
+  },
+  {
+   "id": "permission_purpose",
+   "kind": "judgment",
+   "store": "apple",
+   "catalog": [
+    "apple.guideline.5.1.1"
+   ],
+   "source": "https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage",
+   "question": "Do the permission usage strings explain a clear, specific purpose for each permission?",
+   "rubric": "Answer concern only if a usage string is generic, empty, a placeholder such as 'Camera access' or 'TODO', or does not say what the data is used for. Answer ok if each string names the feature that needs it.",
+   "evidence": [
+    {
+     "kind": "permissions"
+    }
+   ]
+  },
+  {
+   "id": "ugc_moderation",
+   "kind": "judgment",
+   "store": "both",
+   "catalog": [
+    "apple.guideline.1.2",
+    "google.ugc"
+   ],
+   "source": "https://developer.apple.com/app-store/review/guidelines/#user-generated-content",
+   "question": "The app lets users post content to other users. Does the code show a way to report content, block users and filter objectionable material?",
+   "rubric": "Answer concern only if the excerpts show posting features and no report, block or filter code. Answer ok if all three exist. Answer unclear if the excerpts are insufficient.",
+   "evidence": [
+    {
+     "kind": "signal",
+     "pattern": "(?i)(post|submit|publish|upload)[A-Za-z]*(comment|message|review|status|content)|createComment|sendMessage",
+     "max_files": 3
+    },
+    {
+     "kind": "signal",
+     "pattern": "(?i)(report|flag)[A-Za-z]*(content|user|post|abuse)|blockUser|block_user|muteUser|profanity|moderat",
+     "max_files": 3
+    }
+   ]
+  },
+  {
+   "id": "listing_draft",
+   "kind": "draft",
+   "store": "google",
+   "catalog": [],
+   "source": "https://support.google.com/googleplay/android-developer/answer/9898842",
+   "question": "Draft a store listing title, short description and full description for this app.",
+   "rubric": "Use plain factual language. No rankings or awards, no price or promotion text, no emoji, no user or download counts, no claims the evidence does not show.",
+   "evidence": [
+    {
+     "kind": "readme",
+     "max_chars": 2500
+    },
+    {
+     "kind": "listing",
+     "max_files": 4
+    },
+    {
+     "kind": "permissions"
+    }
+   ]
+  }
+ ]
+}

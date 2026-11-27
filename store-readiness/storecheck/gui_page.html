@@ -144,7 +144,9 @@ function render(d){
   var hasAi=d.ai_findings!==undefined;$("t-ai").classList.toggle("hidden",!hasAi);
   if(hasAi){var a=$("p-ai");a.textContent="";a.appendChild(el("p","k","Advisory only, written by a local model. It can be wrong."));
     a.appendChild(el("h3","","About the findings"));a.appendChild(el("pre","",d.ai_findings||"(nothing to explain)"));
-    a.appendChild(el("h3","","Draft privacy policy wording"));a.appendChild(el("pre","",d.ai_privacy||"(no data types detected)"))}
+    a.appendChild(el("h3","","Draft privacy policy wording"));a.appendChild(el("pre","",d.ai_privacy||"(no data types detected)"));
+    a.appendChild(el("h3","","Judgment questions (advisory; quotes are checked against the evidence)"));a.appendChild(el("pre","",d.ai_assessments||""));
+    a.appendChild(el("h3","","Draft store listing"));a.appendChild(el("pre","",d.ai_listing||""))}
   $("dl-patch").disabled=!d.fix_patch;$("dl-patch").title=d.fix_patch?"Review, then apply with git apply":"No safe automatic fixes for these findings";
   if(d.fix_skipped&&d.fix_skipped.length){p.appendChild(el("p","k","Not fixed automatically: "+d.fix_skipped.slice(0,8).join("; ")))}
   tab("find");$("result").classList.remove("hidden");
