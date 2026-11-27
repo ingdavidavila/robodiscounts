@@ -429,9 +429,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Apps should be self-contained in their bundles, and may not read or write data outside the",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.downloaded_code"
+   ],
+   "reason": "detects over-the-air code update libraries; cannot tell whether downloaded code changes the app's features, and cannot check data written outside the container"
   },
   {
    "id": "apple.guideline.2.5.3",
@@ -570,9 +572,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Apps that support Matter must use Apple’s support framework for Matter to initiate pairing",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.matter_sdk"
+   ],
+   "reason": "detects non-Apple Matter components; cannot check pairing flow or CSA certification"
   },
   {
    "id": "apple.guideline.2.5.18",
@@ -743,18 +747,22 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Apps created from a commercialized template or app generation service will be rejected unl",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.template_service"
+   ],
+   "reason": "detects references to known app-builder services; cannot tell who submits the app"
   },
   {
    "id": "apple.guideline.4.2.7",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Remote Desktop Clients: If your remote desktop app acts as a mirror of specific software o",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.remote_desktop"
+   ],
+   "reason": "detects remote-desktop code and states the conditions; cannot check network scope or storefront behavior"
   },
   {
    "id": "apple.guideline.4.3",
@@ -790,9 +798,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Safari extensions must run on the current version of Safari on the relevant Apple operatin",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.safari_extension"
+   ],
+   "reason": "detects a Safari extension and states the conditions; cannot test behavior in Safari"
   },
   {
    "id": "apple.guideline.4.4.3",
@@ -882,9 +892,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Mini apps, mini games, streaming games, chatbots, plug-ins, and game emulators Apps may of",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.emulator_or_mini_apps"
+   ],
+   "reason": "detects emulator libraries and states the conditions; the sub-rules 4.7.1 to 4.7.5 need review"
   },
   {
    "id": "apple.guideline.4.7.1",
@@ -947,9 +959,11 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Apple Pay Apps using Apple Pay must provide all material purchase information to the user ",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "apple.apple_pay_entitlement"
+   ],
+   "reason": "entitlement presence for Apple Pay code is checked; the disclosure and branding requirements need review"
   },
   {
    "id": "apple.guideline.4.10",

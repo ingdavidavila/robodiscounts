@@ -112,7 +112,8 @@ _TEST_DIR_RX = re.compile(r"(?i)(^|/)(tests?|__tests__|__mocks__|mocks?|androidt
                           r"|[^/]*tests?(/|$)|(^|/)(mock|fake)[^/]*$")
 _TEST_FILE_RX = re.compile(r"[a-z]Tests?\.[A-Za-z]+$|[._-](test|tests|spec)\.[A-Za-z]+$")
 # translation/vector/data files never hold code signals; skipping them is the biggest scan-time saving
-_DATA_SUFFIXES = {".unity", ".prefab", ".meta", ".asset", ".mat", ".anim", ".controller", ".shadergraph",
+_DATA_SUFFIXES = {".tmx", ".tmj", ".tscn", ".tres", ".import", ".gdshader", ".shader", ".glsl", ".hlsl", ".cginc",
+                  ".compute", ".unity", ".prefab", ".meta", ".asset", ".mat", ".anim", ".controller", ".shadergraph",
                   ".shadersubgraph", ".physicmaterial", ".playable", ".lighting", ".flare", ".map", ".strings", ".stringsdict", ".xcstrings", ".pdf", ".svg", ".po", ".xliff", ".csv"}
 _DOC_SUFFIXES = {".md", ".markdown", ".txt", ".rst", ".adoc"}
 _LOCK_NAMES = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "pubspec.lock", "podfile.lock",

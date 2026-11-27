@@ -50,3 +50,11 @@ Overall 81.7%. Framework re-evaluation: Benchmark must_not caught the miss from 
 ## 2026-11-27T02:14Z @ d3c0c2c: Built both AI jobs: judgment checks (--assess: 4 topics) and drafts/fix notes (--draft-listing, --explain), all behind guardrails (grounded quotes, redaction, local-only, policy-checked listing text); new D9 dimension (weights D1/D2 -5 each), 18 guardrail cases, 10-case live eval set; perf: skip Unity scene YAML in signal text
 
 Overall 81.1%. Framework re-evaluation: D9 is a safety score, not a quality score: no model was reachable here, so the live part is 0 and D9 cannot pass until someone runs the live eval. Overall drops vs. earlier runs because of the reweighting, not regression. Eval labels are single-reviewer. Next: run the live eval on a real model and tune prompts against it; then return to D1.
+
+## 2026-11-27T06:20Z @ b5278cf: Requirement coverage batch 4: Apple Pay entitlement (4.9, verified entitlement name via DocC), OTA code updates (2.5.2), Matter (2.5.17), template services (4.2.6), remote desktop (4.2.7), emulators/mini apps (4.7), Safari extensions (4.4.2); 7 rules, 15 benchmark cases, 7 items to partial; guideline text read from Apple's page
+
+Overall 76.5%. Framework re-evaluation: Framework fits. Same caveat as batches 2-3: most new rules are note-style (partial credit) and fire on none of the real corpus, so D1 gains are from synthetic evidence only. The apple_pay entitlement rule is the one real static check. Next: separate logged catalog correction for 'Intentionally omitted' items, then Android-side gaps.
+
+## 2026-11-27T06:24Z @ b5278cf: Batch 4 fixes: remote-desktop pattern matched 'NoVNC' inside base64 (localsend cert.rs); emulator pattern matched a libretro URL in a shader comment (sourceofmana); skip Tiled/Godot scene and shader files (8 MB of .tmx pushed a scan to 11 s); social-app expo-updates labelled tp
+
+Overall 81.3%. Framework re-evaluation: Real-corpus run caught two false positives from the new note rules within minutes of adding them; this is the benchmark doing its job. Keep running the corpus after every rule batch.

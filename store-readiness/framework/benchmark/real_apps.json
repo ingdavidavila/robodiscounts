@@ -267,6 +267,11 @@
      "rule": "apple.required_reason_api",
      "loc": "macos/",
      "why": "macOS code is outside Apple's documented platforms for this requirement"
+    },
+    {
+     "rule": "apple.remote_desktop",
+     "loc": "",
+     "why": "'noVNC' matched inside base64 certificate text"
     }
    ]
   },
@@ -470,7 +475,14 @@
    "repo": "bluesky-social/social-app",
    "commit": "b4a27408716013275f9b0d84004f1dc93096ddae",
    "stack": "expo",
-   "labels": [],
+   "labels": [
+    {
+     "rule": "apple.downloaded_code",
+     "loc": "package.json",
+     "verdict": "tp",
+     "note": "expo-updates dependency: over-the-air updates"
+    }
+   ],
    "must_find": [],
    "must_not": [
     {
@@ -1284,6 +1296,11 @@
      "rule": "apple.version_keys",
      "loc": "",
      "why": "xcframework container plists are not apps"
+    },
+    {
+     "rule": "apple.emulator_or_mini_apps",
+     "loc": "",
+     "why": "only a libretro URL in a shader file comment"
     }
    ]
   },

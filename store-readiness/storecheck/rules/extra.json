@@ -859,6 +859,119 @@
    "fix": "Guideline 4.4.1: a keyboard extension must provide keyboard input, a way to switch to the next keyboard, and remain functional without full network access and without requiring full access; it may collect activity only to improve the keyboard, may not launch apps other than Settings, and may not repurpose keyboard buttons.",
    "source": "https://developer.apple.com/app-store/review/guidelines/#extensions",
    "verified": "2026-11-26"
+  },
+  {
+   "id": "apple.apple_pay_entitlement",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "likely",
+   "title": "Apple Pay code without the merchant entitlement",
+   "check": {
+    "type": "apple_pay_entitlement",
+    "pattern": "PKPaymentRequest|PKPaymentAuthorizationViewController|PKPaymentAuthorizationController",
+    "entitlement": "com.apple.developer.in-app-payments"
+   },
+   "fix": "Add the Apple Pay capability (entitlement com.apple.developer.in-app-payments, a list of your merchant IDs). Guideline 4.9: show all material purchase information before the sale, use Apple Pay branding and interface elements correctly, and for recurring payments disclose the renewal term, what is provided, the price and how to cancel.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#apple-pay",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "apple.downloaded_code",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "Over-the-air code updates: guideline 2.5.2 applies",
+   "check": {
+    "type": "ios_signal_note",
+    "pattern": "react-native-code-push|CodePush|expo-updates|shorebird|capacitor-updater|@capgo/capacitor|cordova-plugin-code-push|cordova-plugin-ionic",
+    "what": "over-the-air code update library found",
+    "skip_platform_dirs": true
+   },
+   "fix": "Guideline 2.5.2: apps must be self-contained and may not download, install or execute code that introduces or changes features or functionality of the app. Updates to interpreted code are governed by the Apple Developer Program License Agreement; keep over-the-air updates to fixes that do not change what the app is for, and check the agreement's current wording.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#software-requirements",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "apple.matter_sdk",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "Matter support: guideline 2.5.17 applies",
+   "check": {
+    "type": "ios_signal_note",
+    "pattern": "connectedhomeip|CHIPDeviceController|chip-tool|react-native-matter|matter_sdk",
+    "what": "non-Apple Matter component found",
+    "skip_platform_dirs": true
+   },
+   "fix": "Guideline 2.5.17: apps that support Matter must use Apple's support framework for Matter to initiate pairing, and any Matter software component other than Apple's Matter SDK must be certified by the Connectivity Standards Alliance for the platform it runs on.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#software-requirements",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "apple.template_service",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "App-builder template: guideline 4.2.6 applies",
+   "check": {
+    "type": "ios_signal_note",
+    "pattern": "(?i)appypie|buildfire|goodbarber|appmysite|appsgeyser|mobiloud|thunkable|andromo",
+    "what": "app-builder service reference found",
+    "skip_platform_dirs": true
+   },
+   "fix": "Guideline 4.2.6: apps created from a commercialized template or app generation service are rejected unless submitted directly by the provider of the app's content. Submit under the content owner's own developer account and make the app clearly its own.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#minimum-functionality",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "apple.remote_desktop",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "Remote desktop client: guideline 4.2.7 applies",
+   "check": {
+    "type": "ios_signal_note",
+    "pattern": "(?i:libvncclient|RoyalVNC|FreeRDP|guacamole-common|react-native-vnc|rdp-client)|\\bnoVNC\\b|\\blibvnc\\b",
+    "what": "remote desktop code found",
+    "skip_platform_dirs": true
+   },
+   "fix": "Guideline 4.2.7: a remote desktop app that mirrors specific software or services must connect only to a user-owned personal computer or game console on the same local network, must not show a store or storefront, and must not offer purchasing outside in-app purchase.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#minimum-functionality",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "apple.emulator_or_mini_apps",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "Emulator or downloadable software: guideline 4.7 applies",
+   "check": {
+    "type": "ios_signal_note",
+    "pattern": "libretro|RetroArch|PPSSPP|mGBA|DOSBox|ScummVM",
+    "what": "emulator or mini-app host code found",
+    "skip_platform_dirs": true
+   },
+   "fix": "Guideline 4.7: apps may offer downloadable HTML5/JavaScript mini apps and games, streaming games, chatbots, plug-ins, and (for retro console and PC emulators) downloadable games. You are responsible for that software following all guidelines; it must follow the privacy rules, not expose native platform APIs to it, provide an index of the software, and let users identify software above the app's age rating.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#software-requirements",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "apple.safari_extension",
+   "store": "apple",
+   "applies_to": "ios",
+   "severity": "advisory",
+   "title": "Safari extension: guideline 4.4.2 applies",
+   "check": {
+    "type": "ios_signal_note",
+    "pattern": "com\\.apple\\.Safari\\.(web-)?extension",
+    "what": "Safari extension found",
+    "suffixes": [
+     ".plist"
+    ]
+   },
+   "fix": "Guideline 4.4.2: Safari extensions must run on the current version of Safari on the relevant Apple operating system, must not interfere with System or Safari UI elements, and must never include malicious or misleading content or code.",
+   "source": "https://developer.apple.com/app-store/review/guidelines/#extensions",
+   "verified": "2026-11-27"
   }
  ]
 }

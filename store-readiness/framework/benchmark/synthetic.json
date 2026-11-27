@@ -1759,6 +1759,216 @@
    "must_not": [
     "apple.keyboard_extension"
    ]
+  },
+  {
+   "id": "apple.apple_pay_entitlement+",
+   "desc": "Apple Pay code, no entitlement",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "App/Pay.swift": "let r = PKPaymentRequest()"
+   },
+   "scan": "apple",
+   "must_find": [
+    "apple.apple_pay_entitlement"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "apple.apple_pay_entitlement-",
+   "desc": "Apple Pay code with entitlement",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "App/A.entitlements": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>com.apple.developer.in-app-payments</key><array><string>merchant.x</string></array></dict></plist>",
+    "App/Pay.swift": "let r = PKPaymentRequest()"
+   },
+   "scan": "apple",
+   "must_find": [],
+   "must_not": [
+    "apple.apple_pay_entitlement"
+   ]
+  },
+  {
+   "id": "apple.apple_pay_entitlement-none",
+   "desc": "no Apple Pay code",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "App/A.swift": "print(1)"
+   },
+   "scan": "apple",
+   "must_find": [],
+   "must_not": [
+    "apple.apple_pay_entitlement"
+   ]
+  },
+  {
+   "id": "apple.downloaded_code+",
+   "desc": "code push dependency",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "package.json": "{\"dependencies\":{\"react-native-code-push\":\"8\"}}",
+    "Podfile": "x"
+   },
+   "scan": "apple",
+   "must_find": [
+    "apple.downloaded_code"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "apple.downloaded_code-",
+   "desc": "no OTA library",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "package.json": "{\"dependencies\":{\"react\":\"18\"}}",
+    "Podfile": "x"
+   },
+   "scan": "apple",
+   "must_find": [],
+   "must_not": [
+    "apple.downloaded_code"
+   ]
+  },
+  {
+   "id": "apple.matter_sdk+",
+   "desc": "connectedhomeip in Podfile",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "Podfile": "pod 'connectedhomeip'"
+   },
+   "scan": "apple",
+   "must_find": [
+    "apple.matter_sdk"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "apple.matter_sdk-",
+   "desc": "no matter",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "Podfile": "pod 'Alamofire'"
+   },
+   "scan": "apple",
+   "must_find": [],
+   "must_not": [
+    "apple.matter_sdk"
+   ]
+  },
+  {
+   "id": "apple.template_service+",
+   "desc": "app builder reference",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "config.json": "{\"builder\":\"appypie\"}"
+   },
+   "scan": "apple",
+   "must_find": [
+    "apple.template_service"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "apple.template_service-",
+   "desc": "plain app",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "config.json": "{\"builder\":\"xcode\"}"
+   },
+   "scan": "apple",
+   "must_find": [],
+   "must_not": [
+    "apple.template_service"
+   ]
+  },
+  {
+   "id": "apple.remote_desktop+",
+   "desc": "FreeRDP dependency",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "Podfile": "pod 'FreeRDP'"
+   },
+   "scan": "apple",
+   "must_find": [
+    "apple.remote_desktop"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "apple.remote_desktop-",
+   "desc": "no remote desktop",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "Podfile": "pod 'Alamofire'"
+   },
+   "scan": "apple",
+   "must_find": [],
+   "must_not": [
+    "apple.remote_desktop"
+   ]
+  },
+  {
+   "id": "apple.emulator_or_mini_apps+",
+   "desc": "libretro",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "Podfile": "pod 'libretro-core'"
+   },
+   "scan": "apple",
+   "must_find": [
+    "apple.emulator_or_mini_apps"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "apple.emulator_or_mini_apps-",
+   "desc": "no emulator",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "Podfile": "pod 'Alamofire'"
+   },
+   "scan": "apple",
+   "must_find": [],
+   "must_not": [
+    "apple.emulator_or_mini_apps"
+   ]
+  },
+  {
+   "id": "apple.safari_extension+",
+   "desc": "Safari web extension plist",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "Ext/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>NSExtension</key><dict><key>NSExtensionPointIdentifier</key><string>com.apple.Safari.web-extension</string></dict></dict></plist>"
+   },
+   "scan": "apple",
+   "must_find": [
+    "apple.safari_extension"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "apple.safari_extension-",
+   "desc": "no Safari extension",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>"
+   },
+   "scan": "apple",
+   "must_find": [],
+   "must_not": [
+    "apple.safari_extension"
+   ]
+  },
+  {
+   "id": "apple.remote_desktop-base64",
+   "desc": "noVNC inside base64 text is not a VNC library",
+   "files": {
+    "App/Info.plist": "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>a.b</string><key>UILaunchScreen</key><dict/></dict></plist>",
+    "core/cert.rs": "const C: &str = \"I2WlFZwzXd8CnDR X2/mKq6FWHCDR6RTh1yMLfD+NoVNcswxwMFq8ILC\";"
+   },
+   "scan": "apple",
+   "must_find": [],
+   "must_not": [
+    "apple.remote_desktop"
+   ]
   }
  ]
 }
