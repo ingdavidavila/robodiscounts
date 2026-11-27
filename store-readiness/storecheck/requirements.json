@@ -476,15 +476,6 @@
    "reason": "detects known alternative engines only"
   },
   {
-   "id": "apple.guideline.2.5.7",
-   "store": "apple",
-   "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Intentionally omitted.",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
-  },
-  {
    "id": "apple.guideline.2.5.8",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
@@ -498,15 +489,6 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Apps that alter or disable the functions of standard switches, such as the Volume Up/Down ",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
-  },
-  {
-   "id": "apple.guideline.2.5.10",
-   "store": "apple",
-   "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Intentionally omitted.",
    "class": "unmapped",
    "rules": [],
    "reason": ""
@@ -725,24 +707,6 @@
    "reason": "same detection as 4.2"
   },
   {
-   "id": "apple.guideline.4.2.4",
-   "store": "apple",
-   "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Intentionally omitted.",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
-  },
-  {
-   "id": "apple.guideline.4.2.5",
-   "store": "apple",
-   "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Intentionally omitted.",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
-  },
-  {
    "id": "apple.guideline.4.2.6",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
@@ -805,15 +769,6 @@
    "reason": "detects a Safari extension and states the conditions; cannot test behavior in Safari"
   },
   {
-   "id": "apple.guideline.4.4.3",
-   "store": "apple",
-   "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Intentionally omitted.",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
-  },
-  {
    "id": "apple.guideline.4.5",
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
@@ -874,15 +829,6 @@
    "store": "apple",
    "source": "https://developer.apple.com/app-store/review/guidelines/",
    "title": "Apps may use Unicode characters that render as Apple emoji in their app and app metadata. ",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
-  },
-  {
-   "id": "apple.guideline.4.6",
-   "store": "apple",
-   "source": "https://developer.apple.com/app-store/review/guidelines/",
-   "title": "Intentionally omitted.",
    "class": "unmapped",
    "rules": [],
    "reason": ""

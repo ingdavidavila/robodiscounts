@@ -58,3 +58,7 @@ Overall 76.5%. Framework re-evaluation: Framework fits. Same caveat as batches 2
 ## 2026-11-27T06:24Z @ b5278cf: Batch 4 fixes: remote-desktop pattern matched 'NoVNC' inside base64 (localsend cert.rs); emulator pattern matched a libretro URL in a shader comment (sourceofmana); skip Tiled/Godot scene and shader files (8 MB of .tmx pushed a scan to 11 s); social-app expo-updates labelled tp
 
 Overall 81.3%. Framework re-evaluation: Real-corpus run caught two false positives from the new note rules within minutes of adding them; this is the benchmark doing its job. Keep running the corpus after every rule batch.
+
+## 2026-11-27T06:26Z @ db25865: CATALOG CORRECTION (not tool progress): removed the 6 Apple guideline numbers whose own text is 'Intentionally omitted' (2.5.7, 2.5.10, 4.2.4, 4.2.5, 4.4.3, 4.6). They are numbering gaps, not requirements, so they never could be checked. Catalog 174 -> 168 items.
+
+Overall 81.7%. Framework re-evaluation: This raises D1 by shrinking the denominator, so the gain is not product progress; reported separately. Heading-only parents (2.4, 2.5, 3.1, 4.5) were left in; removing them would be a second, arguable correction and needs its own decision.
