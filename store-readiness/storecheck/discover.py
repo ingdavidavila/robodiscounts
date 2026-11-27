@@ -24,6 +24,38 @@ ELF_HEAD = 8192
 from struct import error as struct_error
 
 
+_META = re.compile(r"[\[\](){}*+?^$|]")
+
+
+def _literals(pattern: str):
+    """(literals, case_insensitive) when `pattern` is a plain alternation of literal strings, else None.
+    A substring test is far faster than a regex alternation, so it is used to skip files that cannot match."""
+    ci = pattern.startswith("(?i)")
+    body = pattern[4:] if ci else pattern
+    lits = []
+    for alt in body.split("|"):
+        alt = alt.replace("\\b", "")
+        alt = re.sub(r"\\([.\-_/:@])", r"\1", alt)
+        if not alt or _META.search(alt) or "\\" in alt:
+            return None
+        lits.append(alt.lower() if ci else alt)
+    return lits, ci
+
+
+class _Matcher:
+    def __init__(self, pattern: str):
+        self.rx = re.compile(pattern)
+        self.lit = _literals(pattern)
+
+    def search(self, text: str, lower) -> bool:
+        if self.lit:
+            lits, ci = self.lit
+            hay = lower() if ci else text
+            if not any(x in hay for x in lits):
+                return False
+        return bool(self.rx.search(text))
+
+
 class Project:
     def __init__(self, root: Path):
         self.root = root
@@ -53,6 +85,7 @@ class Project:
         self.localized_plist_keys: set[str] = set()   # usage keys found in InfoPlist.strings
         self.passed: list[tuple[str, str]] = []
         self._search_cache: dict[tuple, str | None] = {}
+        self._lower: dict[int, str] = {}
 
     # --- platform footprint -------------------------------------------------
     @property
@@ -65,13 +98,19 @@ class Project:
         return self.has_ios_project or bool(self.plists) or \
             any(a.suffix == ".ipa" for a in self.artifacts)
 
+    def _lowered(self, i: int, text: str) -> str:
+        v = self._lower.get(i)
+        if v is None:
+            v = self._lower[i] = text.lower()
+        return v
+
     def find_signals(self, pattern: str, limit: int = 3, locks: bool = True) -> list[str]:
-        rx = re.compile(pattern)
+        rx = _Matcher(pattern)
         out = []
-        for name, text, is_lock in self.texts:
+        for i, (name, text, is_lock) in enumerate(self.texts):
             if (is_lock and not locks) or _is_ci_path(name):
                 continue
-            if rx.search(text):
+            if rx.search(text, lambda i=i, text=text: self._lowered(i, text)):
                 out.append(name)
                 if len(out) >= limit:
                     break
@@ -80,9 +119,12 @@ class Project:
     def find_in_files(self, pattern: str, suffixes: tuple[str, ...] | None = None, limit: int = 3,
                       skip_platform_dirs: bool = False) -> list[str]:
         """Files (not lockfiles, tests, docs, CI or vendored dirs) whose text matches, optionally by file suffix."""
-        rx = re.compile(pattern)
+        key = ("files", pattern, suffixes, limit, skip_platform_dirs)
+        if key in self._search_cache:
+            return list(self._search_cache[key])
+        rx = _Matcher(pattern)
         out = []
-        for name, text, is_lock in self.texts:
+        for i, (name, text, is_lock) in enumerate(self.texts):
             low = "/" + name.replace("\\", "/").lower()
             if is_lock or _is_ci_path(name) or any(x in low for x in VENDORED):
                 continue
@@ -90,10 +132,11 @@ class Project:
                 continue
             if skip_platform_dirs and any(f"/{d}/" in low for d in OTHER_PLATFORM_DIRS):
                 continue
-            if rx.search(text):
+            if rx.search(text, lambda i=i, text=text: self._lowered(i, text)):
                 out.append(name)
                 if len(out) >= limit:
                     break
+        self._search_cache[key] = list(out)
         return out
 
     # --- text signal search (any language) ---------------------------------
@@ -101,10 +144,11 @@ class Project:
         """First file whose text matches `pattern` (lockfiles only if locks=True), else None."""
         key = (pattern, locks)
         if key not in self._search_cache:
-            rx = re.compile(pattern)
+            rx = _Matcher(pattern)
             self._search_cache[key] = next(
-                (name for name, text, is_lock in self.texts
-                 if (locks or not is_lock) and not _is_ci_path(name) and rx.search(text)), None)
+                (name for i, (name, text, is_lock) in enumerate(self.texts)
+                 if (locks or not is_lock) and not _is_ci_path(name)
+                 and rx.search(text, lambda i=i, text=text: self._lowered(i, text))), None)
         return self._search_cache[key]
 
 

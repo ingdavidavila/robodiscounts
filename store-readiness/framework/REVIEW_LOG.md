@@ -62,3 +62,11 @@ Overall 81.3%. Framework re-evaluation: Real-corpus run caught two false positiv
 ## 2026-11-27T06:26Z @ db25865: CATALOG CORRECTION (not tool progress): removed the 6 Apple guideline numbers whose own text is 'Intentionally omitted' (2.5.7, 2.5.10, 4.2.4, 4.2.5, 4.4.3, 4.6). They are numbering gaps, not requirements, so they never could be checked. Catalog 174 -> 168 items.
 
 Overall 81.7%. Framework re-evaluation: This raises D1 by shrinking the denominator, so the gain is not product progress; reported separately. Heading-only parents (2.4, 2.5, 3.1, 4.5) were left in; removing them would be a second, arguable correction and needs its own decision.
+
+## 2026-11-27T06:48Z @ b4bf2e2: Requirement coverage batch 5 (Google): Play Ads policy (location only for ads, lock-screen ads, overlay ads, persistent ids next to ad SDK, advertising-ID opt-out) and SDK requirements (IMEI/IMSI/SIM serial); 6 rules, 14 benchmark cases, google.ads and google.sdk_policy to partial; policy text read from the Play pages (Ads 9857753, SDK Requirements 13323374)
+
+Overall 80.9%. Framework re-evaluation: First run: corpus caught an ad-SDK false positive from an iOS Fabric.framework header in Rocket.Chat (fixed: ad evidence limited to Android-capable files, iOS frameworks excluded) before any score was recorded. Checks are combinations of facts, so partial credit. The two Ads-policy areas that matter most (interstitial timing, deceptive ads) are not statically checkable and stay on the checklist.
+
+## 2026-11-27T06:53Z @ b4bf2e2: Perf: substring prefilter for literal-alternation patterns and cached file searches (scans were creeping to 11-12 s as rules were added; slowest now 7 s). Verified behavior unchanged: 127 tests and the real corpus labels.
+
+Overall 81.7%. Framework re-evaluation: Rule growth is linear in scan time because each rule re-reads all text. The prefilter buys headroom; a single-pass multi-pattern index is the structural fix if D8 slips again.

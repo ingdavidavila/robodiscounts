@@ -590,6 +590,64 @@ def ios_signal_note(p: Project, a: dict):
     return [(hit, a["what"])] if hit else []
 
 
+AD_SDK_RX = (r"(?i)play-services-ads|com\.google\.android\.gms\.ads|google_mobile_ads|react-native-google-mobile-ads|"
+             r"applovin|com\.unity3d\.ads|unity-ads|ironsource|vungle|chartboost|adcolony|com\.facebook\.ads|"
+             r"audience-network|com\.mbridge|com\.inmobi|com\.startapp|pangle|com\.bytedance\.sdk\.openadsdk|"
+             r"tapjoy|smaato|mopub")
+
+
+def _declared_permissions(p: Project) -> set:
+    from .checks import ANDROID, TOOLS, _manifest_roots
+    out = {short for _, short in p.extra_permissions}
+    for _, root in _manifest_roots(p):
+        for el in list(root.iter("uses-permission")) + list(root.iter("uses-permission-sdk-23")):
+            if el.get(TOOLS + "node") != "remove":
+                out.add(el.get(ANDROID + "name", "").rsplit(".", 1)[-1])
+    return out
+
+
+_ANDROID_DEP_SUFFIXES = (".gradle", ".kts", ".toml", ".json", ".yaml", ".yml", ".xml", ".kt", ".java", ".dart", ".cs",
+                         ".csproj", ".js", ".ts", ".tsx", ".jsx", ".properties", ".cfg", ".gd", ".lua")
+_IOS_ONLY_PATH = re.compile(r"(?i)\.framework/|\.xcframework/|/pods/|\.xcodeproj/|(^|/)ios/(?!.*\.(gradle|kts)$)")
+
+
+def _android_dep_hit(p: Project, pattern: str):
+    """First file that is plausibly part of the Android build (dependency files and Android-capable source),
+    not an iOS framework header or Pods copy that merely mentions an SDK name."""
+    hits = p.find_in_files(pattern, _ANDROID_DEP_SUFFIXES, limit=40)
+    return next((h for h in hits if not _IOS_ONLY_PATH.search(h.replace("\\", "/"))), None)
+
+
+def android_ads_combo(p: Project, a: dict):
+    """Google Play Ads / SDK policy conflicts that show up as a combination of facts in the project.
+
+    Optional parameters, all of which must hold for a hit: `ads` (an ad SDK is a dependency), `permissions`
+    (one of these is declared), `pattern` (code or config matches), `absent_pattern` (no code matches this)."""
+    if not (p.has_android):
+        return []
+    ad_hit = None
+    if a.get("ads"):
+        ad_hit = _android_dep_hit(p, AD_SDK_RX)
+        if not ad_hit:
+            return []
+    perm_hit = None
+    if a.get("permissions"):
+        declared = _declared_permissions(p) & set(a["permissions"])
+        if not declared:
+            return []
+        perm_hit = sorted(declared)[0]
+    where = None
+    if a.get("pattern"):
+        hits = p.find_in_files(a["pattern"], None, limit=1)
+        if not hits:
+            return []
+        where = hits[0]
+    if a.get("absent_pattern") and p.find_in_files(a["absent_pattern"], None, limit=1):
+        return []
+    detail = a["what"].format(ad=ad_hit or "", perm=perm_hit or "")
+    return [(where or ad_hit or "(project)", detail)]
+
+
 def apple_pay_entitlement(p: Project, a: dict):
     """Apple Pay code needs the merchant-ID entitlement; the missing-entitlement case is statically decidable."""
     if not p.has_ios_project and not p.plists:
@@ -643,7 +701,7 @@ CHECKS_EXTRA = {f.__name__: f for f in (
     apple_ads_in_extensions, apple_health_data_ads, both_kids_third_party_sdks, apple_vpn_app,
     apple_screen_recording_consent, both_remote_web_content, play_webview_js_interface,
     apple_required_reason_api, apple_third_party_sdk_manifest, apple_private_api, apple_web_engine,
-    apple_ipad_support, apple_iap_restore, ios_signal_note, apple_pay_entitlement,
+    apple_ipad_support, apple_iap_restore, ios_signal_note, apple_pay_entitlement, android_ads_combo,
     android_exported_missing, android_fgs_type_missing, android_release_debug_signing, ios_app_icon,
     ios_launch_screen, ios_deployment_target, ios_xcode_version, ios_push_entitlement, ios_background_modes,
     payments_without_iap, listing_limits, listing_screenshots, privacy_policy, ugc_without_moderation)}

@@ -1969,6 +1969,195 @@
    "must_not": [
     "apple.remote_desktop"
    ]
+  },
+  {
+   "id": "play.ads_location_only+",
+   "desc": "location permission, ad SDK, no location code",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/><application android:label=\"x\"/></manifest>",
+    "app/build.gradle": "dependencies { implementation 'com.google.android.gms:play-services-ads:23.0.0' }",
+    "app/src/main/java/A.kt": "class A"
+   },
+   "scan": "google",
+   "must_find": [
+    "play.ads_location_only"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "play.ads_location_only-code",
+   "desc": "location code exists",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/><application android:label=\"x\"/></manifest>",
+    "app/build.gradle": "dependencies { implementation 'com.google.android.gms:play-services-ads:23.0.0' }",
+    "app/src/main/java/A.kt": "val c = LocationServices.getFusedLocationProviderClient(this)"
+   },
+   "scan": "google",
+   "must_find": [],
+   "must_not": [
+    "play.ads_location_only"
+   ]
+  },
+  {
+   "id": "play.ads_location_only-noads",
+   "desc": "no ad SDK",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/><application android:label=\"x\"/></manifest>",
+    "app/build.gradle": "dependencies { }",
+    "app/src/main/java/A.kt": "class A"
+   },
+   "scan": "google",
+   "must_find": [],
+   "must_not": [
+    "play.ads_location_only"
+   ]
+  },
+  {
+   "id": "play.ads_lockscreen+",
+   "desc": "lock screen flag with ads",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><application android:label=\"x\"/></manifest>",
+    "app/build.gradle": "dependencies { implementation 'com.google.android.gms:play-services-ads:23.0.0' }",
+    "app/src/main/java/L.kt": "window.addFlags(FLAG_SHOW_WHEN_LOCKED)"
+   },
+   "scan": "google",
+   "must_find": [
+    "play.ads_lockscreen"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "play.ads_lockscreen-",
+   "desc": "ads, no lock screen",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><application android:label=\"x\"/></manifest>",
+    "app/build.gradle": "dependencies { implementation 'com.google.android.gms:play-services-ads:23.0.0' }",
+    "app/src/main/java/L.kt": "class L"
+   },
+   "scan": "google",
+   "must_find": [],
+   "must_not": [
+    "play.ads_lockscreen"
+   ]
+  },
+  {
+   "id": "play.ads_overlay+",
+   "desc": "overlay permission with ads",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><uses-permission android:name=\"android.permission.SYSTEM_ALERT_WINDOW\"/><application android:label=\"x\"/></manifest>",
+    "app/build.gradle": "dependencies { implementation 'com.google.android.gms:play-services-ads:23.0.0' }"
+   },
+   "scan": "google",
+   "must_find": [
+    "play.ads_overlay"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "play.ads_overlay-",
+   "desc": "overlay without ads",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><uses-permission android:name=\"android.permission.SYSTEM_ALERT_WINDOW\"/><application android:label=\"x\"/></manifest>",
+    "app/build.gradle": "dependencies { }"
+   },
+   "scan": "google",
+   "must_find": [],
+   "must_not": [
+    "play.ads_overlay"
+   ]
+  },
+  {
+   "id": "play.ads_persistent_ids+",
+   "desc": "ANDROID_ID with ads",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><application android:label=\"x\"/></manifest>",
+    "app/build.gradle": "dependencies { implementation 'com.google.android.gms:play-services-ads:23.0.0' }",
+    "app/src/main/java/I.kt": "val id = Settings.Secure.getString(r, Settings.Secure.ANDROID_ID)"
+   },
+   "scan": "google",
+   "must_find": [
+    "play.ads_persistent_ids"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "play.ads_persistent_ids-",
+   "desc": "ANDROID_ID without ads",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><application android:label=\"x\"/></manifest>",
+    "app/build.gradle": "dependencies { }",
+    "app/src/main/java/I.kt": "val id = Settings.Secure.getString(r, Settings.Secure.ANDROID_ID)"
+   },
+   "scan": "google",
+   "must_find": [],
+   "must_not": [
+    "play.ads_persistent_ids"
+   ]
+  },
+  {
+   "id": "play.aaid_opt_out+",
+   "desc": "AAID read, no opt-out check",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><application android:label=\"x\"/></manifest>",
+    "app/src/main/java/I.kt": "val i = AdvertisingIdClient.getAdvertisingIdInfo(ctx); send(i.id)"
+   },
+   "scan": "google",
+   "must_find": [
+    "play.aaid_opt_out"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "play.aaid_opt_out-",
+   "desc": "AAID read with opt-out check",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><application android:label=\"x\"/></manifest>",
+    "app/src/main/java/I.kt": "val i = AdvertisingIdClient.getAdvertisingIdInfo(ctx); if (!i.isLimitAdTrackingEnabled) send(i.id)"
+   },
+   "scan": "google",
+   "must_find": [],
+   "must_not": [
+    "play.aaid_opt_out"
+   ]
+  },
+  {
+   "id": "play.persistent_device_ids+",
+   "desc": "getImei",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><application android:label=\"x\"/></manifest>",
+    "app/src/main/java/I.kt": "val imei = tm.getImei()"
+   },
+   "scan": "google",
+   "must_find": [
+    "play.persistent_device_ids"
+   ],
+   "must_not": []
+  },
+  {
+   "id": "play.persistent_device_ids-",
+   "desc": "no identifiers",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><application android:label=\"x\"/></manifest>",
+    "app/src/main/java/I.kt": "class I"
+   },
+   "scan": "google",
+   "must_find": [],
+   "must_not": [
+    "play.persistent_device_ids"
+   ]
+  },
+  {
+   "id": "play.ads_overlay-ios-header",
+   "desc": "an iOS framework header that names MoPub is not an Android ad SDK",
+   "files": {
+    "app/src/main/AndroidManifest.xml": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"a.b\"><uses-permission android:name=\"android.permission.SYSTEM_ALERT_WINDOW\"/><application android:label=\"x\"/></manifest>",
+    "ios/Fabric.framework/Headers/Fabric.h": " * [Twitter class], [MoPub class]"
+   },
+   "scan": "google",
+   "must_find": [],
+   "must_not": [
+    "play.ads_overlay"
+   ]
   }
  ]
 }

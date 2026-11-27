@@ -972,6 +972,107 @@
    "fix": "Guideline 4.4.2: Safari extensions must run on the current version of Safari on the relevant Apple operating system, must not interfere with System or Safari UI elements, and must never include malicious or misleading content or code.",
    "source": "https://developer.apple.com/app-store/review/guidelines/#extensions",
    "verified": "2026-11-27"
+  },
+  {
+   "id": "play.ads_location_only",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "likely",
+   "title": "Location permission with ads but no location feature",
+   "check": {
+    "type": "android_ads_combo",
+    "ads": true,
+    "permissions": [
+     "ACCESS_FINE_LOCATION",
+     "ACCESS_COARSE_LOCATION"
+    ],
+    "absent_pattern": "LocationManager|FusedLocationProviderClient|requestLocationUpdates|getLastKnownLocation|geolocator|expo-location|react-native-geolocation|@capacitor/geolocation|cordova-plugin-geolocation|LocationServices",
+    "what": "declares {perm} and includes an ad SDK ({ad}), but no code that uses the location was found"
+   },
+   "fix": "Google Play's Ads policy: location permissions may only be requested to implement current features or services in your app, not solely for the use of ads. Remove the permission, or add the feature that uses it. If location is used for ads, say so in the privacy policy and link the ad networks' policies.",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9857753",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "play.ads_lockscreen",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "advisory",
+   "title": "Ads with lock-screen features",
+   "check": {
+    "type": "android_ads_combo",
+    "ads": true,
+    "pattern": "setShowWhenLocked|FLAG_SHOW_WHEN_LOCKED|android:showWhenLocked\\s*=\\s*\"true\"|ACTION_SCREEN_OFF|KeyguardManager",
+    "what": "ad SDK ({ad}) together with lock-screen code"
+   },
+   "fix": "Google Play's Ads policy: unless the exclusive purpose of the app is a lock screen, apps may not introduce ads or features that monetize the locked display of a device. Keep ads off lock-screen activities and widgets.",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9857753",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "play.ads_overlay",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "advisory",
+   "title": "Ads with a draw-over-other-apps permission",
+   "check": {
+    "type": "android_ads_combo",
+    "ads": true,
+    "permissions": [
+     "SYSTEM_ALERT_WINDOW"
+    ],
+    "what": "ad SDK ({ad}) together with {perm}"
+   },
+   "fix": "Google Play's Ads policy: ads may only be displayed inside the app serving them and must not interfere with other apps, the home screen or device buttons, including through overlays, companion functionality and widgetized ad units. Do not show ads in overlays.",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9857753",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "play.ads_persistent_ids",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "likely",
+   "title": "Persistent device identifier read next to an ad SDK",
+   "check": {
+    "type": "android_ads_combo",
+    "ads": true,
+    "pattern": "getImei\\(|getMeid\\(|getDeviceId\\(|getSubscriberId\\(|getSimSerialNumber\\(|Settings\\.Secure\\.ANDROID_ID|getMacAddress\\(",
+    "what": "ad SDK ({ad}) and code that reads a persistent device identifier"
+   },
+   "fix": "Google Play's Ads policy: the advertising ID may not be connected to persistent device identifiers (SSAID, MAC address, IMEI) for any advertising purpose, and apps must use the advertising ID in lieu of any other device identifier for advertising. Remove the identifier read or keep it fully separate from ads.",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9857753",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "play.aaid_opt_out",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "likely",
+   "title": "Advertising ID read without checking the opt-out",
+   "check": {
+    "type": "signal_without",
+    "signal": "getAdvertisingIdInfo|AdvertisingIdClient\\.",
+    "unless": "isLimitAdTrackingEnabled|isLimitAdTracking|limitAdTracking|LimitAdTracking",
+    "what": "reads the Android advertising ID but never checks the user's opt-out setting"
+   },
+   "fix": "Google Play's Ads policy: the status of the 'Opt out of Interest-based Advertising' or 'Opt out of Ads Personalization' setting must be verified on each access of the advertising ID, and a user who has opted out may not be profiled or targeted with personalized ads. Check AdvertisingIdClient.Info.isLimitAdTrackingEnabled each time.",
+   "source": "https://support.google.com/googleplay/android-developer/answer/9857753",
+   "verified": "2026-11-27"
+  },
+  {
+   "id": "play.persistent_device_ids",
+   "store": "google",
+   "applies_to": "android",
+   "severity": "likely",
+   "title": "Persistent device identifiers (IMEI, IMSI, SIM serial)",
+   "check": {
+    "type": "android_ads_combo",
+    "pattern": "getImei\\(|getMeid\\(|getSubscriberId\\(|getSimSerialNumber\\(",
+    "what": "code reads IMEI, MEID, IMSI or SIM serial number"
+   },
+   "fix": "Google Play's SDK requirements and User Data policy: persistent device identifiers (IMEI, IMSI, SIM serial) may not be linked to other personal and sensitive user data or resettable identifiers, except for SIM-linked telephony and enterprise device-owner management, and those uses must be prominently disclosed. Use an app-scoped identifier instead.",
+   "source": "https://support.google.com/googleplay/android-developer/answer/13323374",
+   "verified": "2026-11-27"
   }
  ]
 }

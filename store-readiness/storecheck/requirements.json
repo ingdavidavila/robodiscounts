@@ -1343,9 +1343,15 @@
    "store": "google",
    "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
    "title": "Ads policy",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "play.ads_location_only",
+    "play.ads_lockscreen",
+    "play.ads_overlay",
+    "play.ads_persistent_ids",
+    "play.aaid_opt_out"
+   ],
+   "reason": "checks the statically visible Ads-policy conflicts (location only for ads, lock-screen ads, overlay ads, advertising-ID handling); ad content, interstitial timing, deceptive ads and Families ads need review of the running app"
   },
   {
    "id": "google.families",
@@ -1363,9 +1369,11 @@
    "store": "google",
    "source": "https://support.google.com/googleplay/android-developer/answer/10144311",
    "title": "Use of SDKs in apps (Play SDK Index)",
-   "class": "unmapped",
-   "rules": [],
-   "reason": ""
+   "class": "partial",
+   "rules": [
+    "play.persistent_device_ids"
+   ],
+   "reason": "checks persistent-identifier use; whether an SDK sells or over-collects data, or is malicious, needs the Play SDK Index and the vendor's disclosures"
   },
   {
    "id": "google.mobile_unwanted_software",
