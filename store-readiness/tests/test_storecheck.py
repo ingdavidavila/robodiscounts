@@ -531,12 +531,12 @@ class VerifiedSdkMappings(unittest.TestCase):
 
     def test_sdk_notes_show_verification_status_once_per_sdk(self):
         from storecheck import privacy
-        d, _ = self.draft("  firebase_crashlytics: 1\n  stripe_android: 1\n  flutter_stripe: 1\n")
+        d, _ = self.draft("  firebase_crashlytics: 1\n  appsflyer_sdk: 1\n")
         names = [n["name"] for n in d["sdk_notes"]]
         self.assertEqual(names.count("Firebase Crashlytics"), 1)
         md = privacy.to_markdown(d)
         self.assertIn("mapping verified 2026-11-25", md)
-        self.assertIn("mapping NOT verified", md)               # Stripe
+        self.assertIn("mapping NOT verified", md)               # AppsFlyer: vendor site blocks automated reading
         self.assertIn("[mapping unverified]", md)
 
     def test_disabled_collection_flag_downgrades_to_possible(self):

@@ -1,6 +1,6 @@
 {
  "verified": false,
- "note": "Apple and Google type/purpose names verified 2026-11-24 against the official pages. SDK mappings: 11 of 26 signal groups verified on 2026-11-25 against each vendor's own disclosure page (Firebase, AdMob, Sentry, Facebook, Adjust, Mixpanel, OneSignal, RevenueCat). Stripe, AppsFlyer, Branch, Amplitude, Segment, PostHog, Google/Apple sign-in and the platform-API signals are not verified.",
+ "note": "Apple and Google type/purpose names verified 2026-11-24 against the official pages. SDK mappings: 18 of 26 signal groups verified on 2026-11-25 and 2026-11-28 against each vendor's own disclosure page or the stores' own definitions (Firebase, AdMob, Sentry, Facebook, Adjust, Mixpanel, OneSignal, RevenueCat, Stripe (Apple page and 3DS2 page), and the device-ID, location, camera, audio, contacts and health API rows). Not verified: AppsFlyer and Branch, Amplitude, Segment and PostHog (the vendors' sites block automated reading), Google and Apple sign-in, other push and in-app purchase libraries, and the installed-apps and calendar API rows (Apple has no matching type, so that mapping is an inference).",
  "data_types": {
   "precise_location": {
    "google_category": "Location",
@@ -470,16 +470,35 @@
    "kind": "sdk",
    "transmits": true,
    "data": [
-    "payment_info",
-    "purchase_history"
+    {
+     "key": "payment_info",
+     "usage_dependent": true
+    },
+    {
+     "key": "email",
+     "usage_dependent": true
+    },
+    {
+     "key": "user_id",
+     "usage_dependent": true
+    },
+    "app_interactions",
+    {
+     "key": "device_id",
+     "usage_dependent": true
+    }
    ],
    "purposes": [
-    "App functionality"
+    "App functionality",
+    "Analytics"
    ],
    "tracking": false,
-   "hint": "Check whether the store treats SDK-handled card data as your collection. Not verified: Stripe's help pages need JavaScript and could not be read.",
-   "verified": "",
-   "sources": []
+   "hint": "Stripe's mobile SDK privacy page says it always collects usage data (product interaction) for analytics and fraud prevention, linked to the end user's identity and not used for tracking. Payment info, contact info and user ID need disclosing only if your app collects them or uses customer IDs. During 3D Secure 2 the SDKs also send an app-specific device ID (identifierForVendor / ANDROID_ID), device model, OS version, language, time zone and screen size; they do not collect the advertising ID or location. Stripe did not publish a Google Play page; the Play rows follow the same types.",
+   "verified": "2026-11-28 (Apple page and 3DS2 device page; no Google Play page published)",
+   "sources": [
+    "https://support.stripe.com/questions/stripe-mobile-sdk-privacy-details",
+    "https://support.stripe.com/questions/3d-secure-2-device-information"
+   ]
   },
   {
    "id": "revenuecat",
@@ -578,9 +597,12 @@
     "Analytics"
    ],
    "tracking": false,
-   "hint": "",
-   "verified": "",
-   "sources": []
+   "hint": "Both stores define 'collect' as transmitting data off the device, so this row counts only if the data leaves it.",
+   "verified": "2026-11-28 (data type definitions and 'collect' definition on both store pages)",
+   "sources": [
+    "https://developer.apple.com/app-store/app-privacy-details/",
+    "https://support.google.com/googleplay/android-developer/answer/10787469"
+   ]
   },
   {
    "id": "location_api",
@@ -595,9 +617,12 @@
     "App functionality"
    ],
    "tracking": false,
-   "hint": "Confirm precise vs approximate; the permission list may narrow this.",
-   "verified": "",
-   "sources": []
+   "hint": "Confirm precise vs approximate; the permission list may narrow this. Both stores define 'collect' as transmitting data off the device, so this row counts only if the data leaves it.",
+   "verified": "2026-11-28 (data type definitions and 'collect' definition on both store pages)",
+   "sources": [
+    "https://developer.apple.com/app-store/app-privacy-details/",
+    "https://support.google.com/googleplay/android-developer/answer/10787469"
+   ]
   },
   {
    "id": "camera_api",
@@ -612,9 +637,12 @@
     "App functionality"
    ],
    "tracking": false,
-   "hint": "",
-   "verified": "",
-   "sources": []
+   "hint": "Both stores define 'collect' as transmitting data off the device, so this row counts only if the data leaves it. Video capture adds the Videos type.",
+   "verified": "2026-11-28 (data type definitions and 'collect' definition on both store pages)",
+   "sources": [
+    "https://developer.apple.com/app-store/app-privacy-details/",
+    "https://support.google.com/googleplay/android-developer/answer/10787469"
+   ]
   },
   {
    "id": "audio_api",
@@ -629,9 +657,12 @@
     "App functionality"
    ],
    "tracking": false,
-   "hint": "",
-   "verified": "",
-   "sources": []
+   "hint": "Both stores define 'collect' as transmitting data off the device, so this row counts only if the data leaves it.",
+   "verified": "2026-11-28 (data type definitions and 'collect' definition on both store pages)",
+   "sources": [
+    "https://developer.apple.com/app-store/app-privacy-details/",
+    "https://support.google.com/googleplay/android-developer/answer/10787469"
+   ]
   },
   {
    "id": "contacts_api",
@@ -646,9 +677,12 @@
     "App functionality"
    ],
    "tracking": false,
-   "hint": "",
-   "verified": "",
-   "sources": []
+   "hint": "Both stores define 'collect' as transmitting data off the device, so this row counts only if the data leaves it.",
+   "verified": "2026-11-28 (data type definitions and 'collect' definition on both store pages)",
+   "sources": [
+    "https://developer.apple.com/app-store/app-privacy-details/",
+    "https://support.google.com/googleplay/android-developer/answer/10787469"
+   ]
   },
   {
    "id": "health_api",
@@ -664,9 +698,12 @@
     "App functionality"
    ],
    "tracking": false,
-   "hint": "",
-   "verified": "",
-   "sources": []
+   "hint": "Both stores define 'collect' as transmitting data off the device, so this row counts only if the data leaves it.",
+   "verified": "2026-11-28 (data type definitions and 'collect' definition on both store pages)",
+   "sources": [
+    "https://developer.apple.com/app-store/app-privacy-details/",
+    "https://support.google.com/googleplay/android-developer/answer/10787469"
+   ]
   },
   {
    "id": "calendar_api",

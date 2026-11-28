@@ -171,3 +171,26 @@ class DeploymentTargetTests(unittest.TestCase):
 
     def test_watch_target_does_not_inherit_the_iphone_default(self):
         self.assertEqual(self.ids("SDKROOT = watchos;"), [])
+
+
+class VerifiedMappingTests(unittest.TestCase):
+    def signal(self, sid):
+        import json
+        d = json.loads((Path(__file__).parent.parent / "storecheck" / "privacy_data.json").read_text(encoding="utf-8"))
+        return next(s for s in d["signals"] if s["id"] == sid)
+
+    def test_stripe_follows_its_own_privacy_page(self):
+        s = self.signal("stripe")
+        keys = {x if isinstance(x, str) else x["key"] for x in s["data"]}
+        self.assertNotIn("purchase_history", keys)               # Stripe's page does not list it
+        self.assertIn("app_interactions", keys)                    # always collected for analytics and fraud prevention
+        usage = {x["key"] for x in s["data"] if isinstance(x, dict) and x.get("usage_dependent")}
+        self.assertTrue({"payment_info", "email", "user_id"} <= usage)   # only if the app collects them
+        self.assertTrue(s["verified"] and s["sources"])
+
+    def test_platform_api_rows_cite_both_store_pages(self):
+        for sid in ("device_ids", "location_api", "camera_api", "audio_api", "contacts_api", "health_api"):
+            s = self.signal(sid)
+            self.assertTrue(s["verified"], sid)
+            self.assertEqual(len(s["sources"]), 2, sid)
+            self.assertIn("off the device", s["hint"], sid)
