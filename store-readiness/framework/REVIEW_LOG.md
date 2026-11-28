@@ -70,3 +70,7 @@ Overall 80.9%. Framework re-evaluation: First run: corpus caught an ad-SDK false
 ## 2026-11-27T06:53Z @ b4bf2e2: Perf: substring prefilter for literal-alternation patterns and cached file searches (scans were creeping to 11-12 s as rules were added; slowest now 7 s). Verified behavior unchanged: 127 tests and the real corpus labels.
 
 Overall 81.7%. Framework re-evaluation: Rule growth is linear in scan time because each rule re-reads all text. The prefilter buys headroom; a single-pass multi-pattern index is the structural fix if D8 slips again.
+
+## 2026-11-28T19:03Z @ c8e71c6: D6: CI passes on ubuntu, macOS and Windows (Python 3.10, 3.13) at c8e71c6 after fixing Windows-only bugs (screenshot finding used backslashes; tests read default encoding and wrote patches in text mode); recorded all three OSes as observed with the run URL
+
+Overall 83.0%. Framework re-evaluation: Windows had been failing for four pushes unnoticed because I treated CI as unrun. Lesson for the framework: check the CI result after every push, not just locally. D6 measures 'observed passing', so it should read the CI result instead of a hand-edited list; follow-up.

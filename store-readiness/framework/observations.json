@@ -1,6 +1,9 @@
 {
  "os_observed": [
-  "linux"
+  "linux",
+  "macos",
+  "windows"
  ],
- "note": "Operating systems on which the full test suite has been seen passing. Update only from a real run."
+ "note": "Operating systems on which the full test suite has been seen passing. Update only from a real run.",
+ "os_evidence": "GitHub Actions run 12 on c8e71c6 (https://github.com/ingdavidavila/robodiscounts/actions/runs/45955115075): full test suite and synthetic scorecard passed on ubuntu, macos and windows, Python 3.10 and 3.13. Windows had failed on runs 8-11 (path separator, test encodings); fixed in c8e71c6."
 }
